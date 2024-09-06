@@ -3,7 +3,7 @@ title: Emanations
 description: Add emanations to any character
 author: desain
 image: https://raw.githubusercontent.com/desain/owlbear-emanation/main/docs/header.jpg
-icon: https://colored-rings.owlbear.rodeo/logo.png
+icon: https://github.com/desain/owlbear-emanation/blob/main/public/logo.png
 tags:
   - tool
   - combat
