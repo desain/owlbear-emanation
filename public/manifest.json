@@ -1,0 +1,10 @@
+{
+  "name": "Emanations",
+  "version": "0.0.1",
+  "manifest_version": 1,
+  "author": "desain",
+  "homepage_url": "https://github.com/desain/owlbear-emanation",
+  "icon": "/logo.png",
+  "background_url": "/background.html",
+  "description": "Add emanations to any character"
+}
