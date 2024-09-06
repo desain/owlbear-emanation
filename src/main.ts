@@ -1,4 +1,4 @@
-import OBR, { Shape, Image, Item, Math2, isImage } from "@owlbear-rodeo/sdk";
+import OBR, { Shape, Image, } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 import {
   buildEmanation,
