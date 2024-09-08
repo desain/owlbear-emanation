@@ -1,4 +1,4 @@
-import OBR, { isImage, Item, Math2, Shape } from "@owlbear-rodeo/sdk";
+import OBR, { isImage, Math2, Shape } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 
 import icon from "./status.svg";
@@ -31,32 +31,53 @@ OBR.onReady(() => {
     },
   });
 
-  OBR.scene.items.onChange(fixEmanationSizes);
-});
-
-async function fixEmanationSizes(items: Item[]) {
-  const dpi = await OBR.scene.grid.getDpi();
-  const multiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
-
-  await OBR.scene.items.updateItems<Shape>(isEmanation, (emanations) => {
-    for (const emanation of emanations) {
+  OBR.scene.items.onChange(async (items) => {
+    const gridDpi = await OBR.scene.grid.getDpi();
+    const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
+    const gridMeasurement = await OBR.scene.grid.getMeasurement();
+    await OBR.scene.items.updateItems<Shape>(isEmanation, (emanations) => emanations.forEach((emanation) => {
       const metadata = emanation.metadata[getPluginId("metadata")] as EmanationMetadata;
       const source = emanation.attachedTo;
       if (!source) {
-        continue;
+        return;
       }
       const sourceItem = items.find((item) => item.id === source);
       if (!sourceItem || !isImage(sourceItem)) {
-        continue;
+        return;
       }
       const newScale = sourceItem.scale;
       if (!Math2.compare(newScale, metadata.sourceScale, 0.01)) {
         metadata.sourceScale = newScale;
-        const { diameter, position } = getEmanationParams(sourceItem, dpi, multiplier, metadata.size);
-        emanation.width = diameter;
-        emanation.height = diameter;
+        const { width, height, position, shapeType, rotation } = getEmanationParams(sourceItem, gridDpi, gridMultiplier, gridMeasurement, metadata.size);
+        emanation.width = width;
+        emanation.height = height;
         emanation.position = position;
+        emanation.shapeType = shapeType;
+        emanation.rotation = rotation;
       }
-    }
+    }));
   });
-}
+  OBR.scene.grid.onChange(async (grid) => {
+    const gridDpi = grid.dpi;
+    const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
+    const gridMeasurement = grid.measurement;
+    const items = await OBR.scene.items.getItems();
+    await OBR.scene.items.updateItems<Shape>(isEmanation, (emanations) => emanations.forEach((emanation) => {
+      const metadata = emanation.metadata[getPluginId("metadata")] as EmanationMetadata;
+      const source = emanation.attachedTo;
+      if (!source) {
+        return;
+      }
+      const sourceItem = items.find((item) => item.id === source);
+      if (!sourceItem || !isImage(sourceItem)) {
+        return;
+      }
+      const { width, height, position, shapeType, rotation } = getEmanationParams(sourceItem, gridDpi, gridMultiplier, gridMeasurement, metadata.size);
+      emanation.width = width;
+      emanation.height = height;
+      emanation.position = position;
+      emanation.shapeType = shapeType;
+      emanation.rotation = rotation;
+    }));
+  });
+});

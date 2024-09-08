@@ -1,7 +1,8 @@
-import OBR, { Shape, Image, } from "@owlbear-rodeo/sdk";
+import OBR, { Shape, Image, buildShape, GridMeasurement, } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 import {
-  buildEmanation,
+  EmanationMetadata,
+  getEmanationParams,
   isEmanation,
 } from "./helpers";
 import "./style.css";
@@ -80,20 +81,61 @@ async function createEmanation(size: number, color: string) {
   if (!selection) {
     return;
   }
-  const dpi = await OBR.scene.grid.getDpi();
-  const multiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
+  const gridDpi = await OBR.scene.grid.getDpi();
+  const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
+  const measurementType = await OBR.scene.grid.getMeasurement();
 
   // Get all selected items
   const items = await OBR.scene.items.getItems<Image>(selection);
   const circlesToAdd = items.map((item) => buildEmanation(
     item,
     color,
-    dpi,
-    multiplier,
+    gridDpi,
+    gridMultiplier,
+    measurementType,
     size,
   ));
 
   if (circlesToAdd.length > 0) {
     await OBR.scene.items.addItems(circlesToAdd);
   }
+}
+
+/**
+ * Helper to build a circle shape with the proper size to match
+ * the input image's size
+ */
+export function buildEmanation(
+  item: Image,
+  color: string,
+  gridDpi: number,
+  gridMultiplier: number,
+  measurementType: GridMeasurement,
+  size: number,
+): Shape {
+  const { width, height, position, rotation, shapeType } = getEmanationParams(item, gridDpi, gridMultiplier, measurementType, size);
+  const metadata: EmanationMetadata = { sourceScale: item.scale, size };
+
+  const circle = buildShape()
+    .width(width)
+    .height(height)
+    .position(position)
+    .fillOpacity(0)
+    .strokeColor(color)
+    .strokeOpacity(1)
+    .strokeWidth(10)
+    // .strokeDash([10, 20, 30, 40])
+    .shapeType(shapeType)
+    .attachedTo(item.id)
+    .disableAttachmentBehavior(['SCALE'])
+    .locked(true)
+    .name("Emanation")
+    .metadata({ [getPluginId("metadata")]: metadata })
+    .layer("ATTACHMENT")
+    .disableHit(true)
+    .visible(item.visible)
+    .rotation(rotation)
+    .build();
+
+  return circle;
 }

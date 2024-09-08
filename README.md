@@ -12,7 +12,7 @@ The extension can be installed from the [store page](https://extensions.owlbear.
 
 This project is a simple Typescript app.
 
-The background script `background.ts` communicates with Owlbear Rodeo to create a context menu item. When that item is clicked a popup is shown with the `main.ts` site rendered.
+The background script `background.ts` communicates with Owlbear Rodeo to create a context menu item. When that item is clicked a popup is shown with the `contextmenu.ts` site rendered.
 
 ## Building
 

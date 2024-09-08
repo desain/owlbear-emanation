@@ -1,4 +1,4 @@
-import { Image, Item, Vector2, buildShape } from "@owlbear-rodeo/sdk";
+import { GridMeasurement, Image, Item, Math2, ShapeType, Vector2, buildShape } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 
 export function isPlainObject(
@@ -19,54 +19,43 @@ export function isEmanation(item: Item): boolean {
   return isPlainObject(metadata) && metadata.hasOwnProperty('sourceScale');
 }
 
-export function getEmanationParams(item: Image, dpi: number, multiplier: number, size: number) {
-  const dpiScale = dpi / item.grid.dpi;
-  const width = (size / multiplier) * dpi * 2 + item.image.width * dpiScale * item.scale.x;
-  const height = (size / multiplier) * dpi * 2 + item.image.height * dpiScale * item.scale.y;
-  const diameter = Math.min(width, height);
-  const offsetX = (item.grid.offset.x / item.image.width) * width;
-  const offsetY = (item.grid.offset.y / item.image.height) * height;
+export function getEmanationParams(item: Image, gridDpi: number, gridMultiplier: number, measurementType: GridMeasurement, size: number) {
+  const dpiScale = gridDpi / item.grid.dpi;
+  const absoluteSize = size / gridMultiplier * gridDpi;
+  const absoluteItemWidth = item.image.width * dpiScale * item.scale.x;
+  const absoluteItemHeight = item.image.height * dpiScale * item.scale.y;
+
+
+  let originOffset: Vector2;
+  let shapeType: ShapeType;
+  let rotation: number = 0;
+  let width;
+  let height;
+  if (measurementType === 'EUCLIDEAN') {
+    shapeType = 'CIRCLE';
+    width = absoluteSize * 2 + absoluteItemWidth;
+    height = absoluteSize * 2 + absoluteItemHeight;
+    originOffset = { x: 0, y: 0 }; // circle origin is the center
+  } else if (measurementType === 'CHEBYSHEV') {
+    shapeType = 'RECTANGLE';
+    width = absoluteSize * 2 + absoluteItemWidth;
+    height = absoluteSize * 2 + absoluteItemHeight;
+    originOffset = { x: -width / 2, y: -height / 2 }; // rectangle origin is top left
+  } else if (measurementType === 'MANHATTAN') {
+    shapeType = 'RECTANGLE';
+    const centerToCorner = absoluteItemHeight / 2 + absoluteSize;
+    const sideLength = Math2.magnitude({ x: centerToCorner, y: centerToCorner });
+    width = sideLength;
+    height = sideLength;
+    rotation = 45;
+    originOffset = { x: 0, y: -centerToCorner };
+  } else {
+    throw `emanation doesn't support measurement type '${measurementType}`;
+  }
+  // const offset = {
+  //   x: (item.grid.offset.x / item.image.width) * -width,
+  //   y: (item.grid.offset.y / item.image.height) * -height,
+  // }
   // Apply image offset and offset circle position so the origin is the top left
-  const position = {
-    x: item.position.x - offsetX + width / 2,
-    y: item.position.y - offsetY + height / 2,
-  };
-  return { diameter, position };
-}
-
-/**
- * Helper to build a circle shape with the proper size to match
- * the input image's size
- */
-export function buildEmanation(
-  item: Image,
-  color: string,
-  dpi: number,
-  multiplier: number,
-  size: number,
-) {
-  const { diameter, position } = getEmanationParams(item, dpi, multiplier, size);
-  const metadata: EmanationMetadata = { sourceScale: item.scale, size };
-
-  const circle = buildShape()
-    .width(diameter)
-    .height(diameter)
-    .position(position)
-    .fillOpacity(0)
-    .strokeColor(color)
-    .strokeOpacity(1)
-    .strokeWidth(10)
-    // .strokeDash([10, 20, 30, 40])
-    .shapeType("CIRCLE")
-    .attachedTo(item.id)
-    .disableAttachmentBehavior(['SCALE'])
-    .locked(true)
-    .name("Emanation")
-    .metadata({ [getPluginId("metadata")]: metadata })
-    .layer("ATTACHMENT")
-    .disableHit(true)
-    .visible(item.visible)
-    .build();
-
-  return circle;
+  return { width, height, shapeType, rotation, position: Math2.add(item.position, originOffset) };
 }
