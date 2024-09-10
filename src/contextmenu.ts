@@ -1,8 +1,7 @@
-import OBR, { Shape, Image, buildShape, GridMeasurement, } from "@owlbear-rodeo/sdk";
+import OBR, { Shape, Image, } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 import {
-  EmanationMetadata,
-  getEmanationParams,
+  buildEmanation,
   isEmanation,
 } from "./helpers";
 import "./style.css";
@@ -48,12 +47,10 @@ OBR.onReady(async () => {
     const size = parseFloat(sizeInput.value)
     const color = colorInput.value;
     if (size > 0) {
-        createEmanation(size, color);
+        createEmanations(size, color);
     }
   });
-  document.getElementById('remove-emanations')?.addEventListener('click', () => {
-    removeEmanations();
-  });
+  document.getElementById('remove-emanations')?.addEventListener('click', () => removeEmanations());
 });
 
 async function removeEmanations() {
@@ -76,7 +73,7 @@ async function removeEmanations() {
   }
 }
 
-async function createEmanation(size: number, color: string) {
+async function createEmanations(size: number, color: string) {
   const selection = await OBR.player.getSelection();
   if (!selection) {
     return;
@@ -84,58 +81,21 @@ async function createEmanation(size: number, color: string) {
   const gridDpi = await OBR.scene.grid.getDpi();
   const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
   const measurementType = await OBR.scene.grid.getMeasurement();
+  const gridType = await OBR.scene.grid.getType();
 
   // Get all selected items
   const items = await OBR.scene.items.getItems<Image>(selection);
-  const circlesToAdd = items.map((item) => buildEmanation(
+  const toAdd = items.map((item) => buildEmanation(
     item,
     color,
+    size,
     gridDpi,
     gridMultiplier,
     measurementType,
-    size,
+    gridType,
   ));
 
-  if (circlesToAdd.length > 0) {
-    await OBR.scene.items.addItems(circlesToAdd);
+  if (toAdd.length > 0) {
+    await OBR.scene.items.addItems(toAdd);
   }
-}
-
-/**
- * Helper to build a circle shape with the proper size to match
- * the input image's size
- */
-export function buildEmanation(
-  item: Image,
-  color: string,
-  gridDpi: number,
-  gridMultiplier: number,
-  measurementType: GridMeasurement,
-  size: number,
-): Shape {
-  const { width, height, position, rotation, shapeType } = getEmanationParams(item, gridDpi, gridMultiplier, measurementType, size);
-  const metadata: EmanationMetadata = { sourceScale: item.scale, size };
-
-  const circle = buildShape()
-    .width(width)
-    .height(height)
-    .position(position)
-    .fillOpacity(0)
-    .strokeColor(color)
-    .strokeOpacity(1)
-    .strokeWidth(10)
-    // .strokeDash([10, 20, 30, 40])
-    .shapeType(shapeType)
-    .attachedTo(item.id)
-    .disableAttachmentBehavior(['SCALE'])
-    .locked(true)
-    .name("Emanation")
-    .metadata({ [getPluginId("metadata")]: metadata })
-    .layer("ATTACHMENT")
-    .disableHit(true)
-    .visible(item.visible)
-    .rotation(rotation)
-    .build();
-
-  return circle;
 }
