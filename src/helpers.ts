@@ -1,5 +1,10 @@
 import { Curve, GridMeasurement, GridType, Image, Item, Math2, Shape, ShapeType, Vector2, buildCurve, buildShape } from "@owlbear-rodeo/sdk";
-import { getPluginId } from "./getPluginId";
+
+/** Get the reverse domain name id for this plugin at a given path */
+export function getPluginId(path: string) {
+  return `com.desain.emanation/${path}`;
+}
+
 
 export function isPlainObject(
   item: unknown

@@ -1,7 +1,7 @@
-import OBR, { Shape, Image, } from "@owlbear-rodeo/sdk";
-import { getPluginId } from "./getPluginId";
+import OBR, { Image, } from "@owlbear-rodeo/sdk";
 import {
   buildEmanation,
+  getPluginId,
   isEmanation,
 } from "./helpers";
 import "./style.css";
@@ -12,20 +12,21 @@ import "./style.css";
  */
 
 interface PlayerMetadata {
-  emanationColor?: string;
+  color?: string;
+  size?: number;
 }
 
 OBR.onReady(async () => {
   const playerMetadata = await OBR.player.getMetadata();
   const playerEmanationMetadata = playerMetadata[getPluginId("metadata")] as PlayerMetadata | undefined;
-  const defaultEmanationColor = playerEmanationMetadata?.emanationColor || await OBR.player.getColor();
+  const defaultEmanationColor = playerEmanationMetadata?.color || await OBR.player.getColor();
 
   const scale = await OBR.scene.grid.getScale();
   // Setup the document with an emanation size input and create button
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="emanations">
       <input id="emanation-color" type="color" value="${defaultEmanationColor}"/>
-      <input id="emanation-size" type="number" value="0" min="0" step="${scale.parsed.multiplier}"/>
+      <input id="emanation-size" type="number" value="${playerEmanationMetadata?.size || 0}" min="0" step="${scale.parsed.multiplier}"/>
       <span id="emanation-unit">${scale.parsed.unit}.</span>
       <button id="create-emanation">Create</button>
       <br/>
@@ -33,19 +34,18 @@ OBR.onReady(async () => {
     </div>
   `;
 
+  let color: string;
   const colorInput = <HTMLInputElement>document.getElementById('emanation-color');
   const sizeInput = <HTMLInputElement>document.getElementById('emanation-size');
 
   // Attach listeners
-  colorInput.addEventListener('change', () => {
-    const newPlayerEmanationMetadata: PlayerMetadata = { emanationColor: colorInput.value };
-    OBR.player.setMetadata({ [getPluginId("metadata")]: newPlayerEmanationMetadata });
-  });
-  document.getElementById('create-emanation')?.addEventListener('click', () => {
-    const size = parseFloat(sizeInput.value)
+  document.getElementById('create-emanation')?.addEventListener('click', async () => {
     const color = colorInput.value;
+    const size = parseFloat(sizeInput.value)
     if (size > 0) {
-        createEmanations(size, color);
+      const newPlayerMetadata: PlayerMetadata = { color, size };
+      await OBR.player.setMetadata({ [getPluginId("metadata")]: newPlayerMetadata });
+      await createEmanations(size, color);
     }
   });
   document.getElementById('remove-emanations')?.addEventListener('click', () => removeEmanations());
@@ -57,17 +57,11 @@ async function removeEmanations() {
     return;
   }
   // Get all emanations in the scene
-  const emanations = await OBR.scene.items.getItems<Shape>(isEmanation);
+  const emanations = await OBR.scene.items.getItems(isEmanation);
+  const emanationsToDelete = emanations.filter((emanation) => emanation.attachedTo && selection.includes(emanation.attachedTo))
 
-  const circlesToDelete: string[] = [];
-  const items = await OBR.scene.items.getItems(selection);
-  for (const item of items) {
-    const itemEmanations = emanations.filter((emanation) => emanation.attachedTo === item.id);
-    circlesToDelete.push(...itemEmanations.map((emanation) => emanation.id));
-  }
-
-  if (circlesToDelete.length > 0) {
-    await OBR.scene.items.deleteItems(circlesToDelete);
+  if (emanationsToDelete.length > 0) {
+    await OBR.scene.items.deleteItems(emanationsToDelete.map((emanation) => emanation.id));
   }
 }
 

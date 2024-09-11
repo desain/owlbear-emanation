@@ -396,6 +396,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"await-lock@npm:^2.2.0":
+  version: 2.2.2
+  resolution: "await-lock@npm:2.2.2"
+  checksum: 10c0/bedf00dad44c6325a655bf3bd523ab9e1ce41023da6a8c379990c76ac1d942ac7e5301627ab84ba37917ab5247506ba429b7f6e4bf77074093f255571b9ad5ee
+  languageName: node
+  linkType: hard
+
 "balanced-match@npm:^1.0.0":
   version: 1.0.2
   resolution: "balanced-match@npm:1.0.2"
@@ -1022,6 +1029,7 @@ __metadata:
   resolution: "owlbear-emanation@workspace:."
   dependencies:
     "@owlbear-rodeo/sdk": "npm:^2.4.0"
+    await-lock: "npm:^2.2.0"
     typescript: "npm:^5.5"
     vite: "npm:^5.4.4"
   languageName: unknown
