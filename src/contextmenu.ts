@@ -85,7 +85,14 @@ async function createEmanations(size: number, color: string) {
   const items = await OBR.scene.items.getItems<Image>(selection);
   const toAdd = items.map((item) => buildEmanation(
     item,
-    color,
+    {
+      fillColor: color,
+      fillOpacity: 0,
+      strokeColor: color,
+      strokeOpacity: 1,
+      strokeWidth: 10,
+      strokeDash: [],
+    },
     size,
     gridDpi,
     gridMultiplier,
