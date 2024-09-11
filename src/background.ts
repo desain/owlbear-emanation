@@ -1,8 +1,8 @@
-import OBR, { isImage, Math2 } from "@owlbear-rodeo/sdk";
+import OBR, { isCurve, isImage, isShape, Item, Math2 } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 
 import icon from "./status.svg";
-import { isEmanation, EmanationMetadata, buildEmanation } from "./helpers";
+import { isEmanation, EmanationMetadata, buildEmanation, EmanationStyle } from "./helpers";
 
 /**
  * This file represents the background script run when the plugin loads.
@@ -42,16 +42,21 @@ OBR.onReady(() => {
         if (!sourceItem || !isImage(sourceItem)) {
           return null;
         }
-        return {id: emanation.id, metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, sourceItem};
+        return {
+          id: emanation.id,
+          style: getStyle(emanation),
+          metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, 
+          sourceItem,
+        };
       })
       .filter(x => x !== null)
       .filter(({metadata, sourceItem}) => {
         const newScale = sourceItem.scale;
         return !Math2.compare(newScale, metadata.sourceScale, 0.01);
       });
-    const replacements = emanationsToUpdate.map(({metadata, sourceItem}) => buildEmanation(
+    const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
       sourceItem,
-      metadata.color,
+      style,
       metadata.size,
       gridDpi,
       gridMultiplier,
@@ -75,12 +80,17 @@ OBR.onReady(() => {
         if (!sourceItem || !isImage(sourceItem)) {
           return null;
         }
-        return {id: emanation.id, metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, sourceItem};
+        return {
+          id: emanation.id,
+          style: getStyle(emanation),
+          metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata,
+          sourceItem
+        };
       })
       .filter((x) => x !== null);
-    const replacements = emanationsToUpdate.map(({metadata, sourceItem}) => buildEmanation(
+    const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
       sourceItem,
-      metadata.color,
+      style,
       metadata.size,
       gridDpi,
       gridMultiplier,
@@ -91,3 +101,14 @@ OBR.onReady(() => {
     await OBR.scene.items.addItems(replacements);
   });
 });
+
+function getStyle(emanation: Item): EmanationStyle {
+  if (isCurve(emanation)) {
+    return emanation.style;
+  } else if (isShape(emanation)) {
+    return emanation.style;
+  } else {
+    const metadata = emanation.metadata[getPluginId("metadata")] as EmanationMetadata;
+    return metadata.style;
+  }
+}
