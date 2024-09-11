@@ -1,4 +1,4 @@
-import OBR, { isImage, Math2, Shape } from "@owlbear-rodeo/sdk";
+import OBR, { isImage, Math2 } from "@owlbear-rodeo/sdk";
 import { getPluginId } from "./getPluginId";
 
 import icon from "./status.svg";
@@ -44,7 +44,7 @@ OBR.onReady(() => {
         }
         return {id: emanation.id, metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, sourceItem};
       })
-      .filter((x) => x !== null)
+      .filter(x => x !== null)
       .filter(({metadata, sourceItem}) => {
         const newScale = sourceItem.scale;
         return !Math2.compare(newScale, metadata.sourceScale, 0.01);

@@ -24,9 +24,7 @@ OBR.onReady(async () => {
   // Setup the document with an emanation size input and create button
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="emanations">
-      <label for="emanation-color">Color:</label>
       <input id="emanation-color" type="color" value="${defaultEmanationColor}"/>
-      <br/>
       <input id="emanation-size" type="number" value="0" min="0" step="${scale.parsed.multiplier}"/>
       <span id="emanation-unit">${scale.parsed.unit}.</span>
       <button id="create-emanation">Create</button>
