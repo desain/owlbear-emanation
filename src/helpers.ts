@@ -65,7 +65,11 @@ export function buildEmanation(
   } else if (measurementType === 'MANHATTAN') {
     const halfWidth = absoluteItemWidth/2;
     const halfHeight = absoluteItemHeight/2;
-    emanation = buildManhattanEmanation(item.position, absoluteSize, halfWidth, halfHeight);
+    emanation = buildManhattanEmanation(item.position, absoluteSize, halfWidth, halfHeight); // TODO Better shape
+  } else if (measurementType === 'ALTERNATING') {
+    const halfWidth = absoluteItemWidth/2;
+    const halfHeight = absoluteItemHeight/2;
+    emanation = buildManhattanEmanation(item.position, absoluteSize, halfWidth, halfHeight); // TODO better shape
   } else {
     if (measurementType !== 'EUCLIDEAN') {
       console.warn(`emanation doesn't support measurement type '${measurementType} on grid ${gridType}, defaulting to Euclidean`);

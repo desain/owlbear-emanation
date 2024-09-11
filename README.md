@@ -1,6 +1,13 @@
 # Emanations
 
-Add emanations to any character
+Add emanations to any character. Emanations will automatically resize after tokens are scaled, and will display the correct shape for the current grid measurement type.
+
+## To do
+- Display a list of active emanations in the context menu, with 'remove' buttons
+- Better styling for context menu
+- Better drawing for alternating and manhattan (actually exclude diagonal squares from manhattan, and fix alternating)
+- Hexagonal emanations
+- Save most recent size for each player
 
 ![Interface](./docs/header.jpg)
 
