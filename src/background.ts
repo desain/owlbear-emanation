@@ -32,10 +32,6 @@ OBR.onReady(() => {
   });
 
   OBR.scene.items.onChange(async (items) => {
-    const gridDpi = await OBR.scene.grid.getDpi();
-    const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
-    const gridMeasurement = await OBR.scene.grid.getMeasurement();
-    const gridType = await OBR.scene.grid.getType();
     const emanationsToUpdate = items.filter(isEmanation)
       .map((emanation) => {
         const sourceItem = items.find((item) => item.id === emanation.attachedTo);
@@ -54,6 +50,13 @@ OBR.onReady(() => {
         const newScale = sourceItem.scale;
         return !Math2.compare(newScale, metadata.sourceScale, 0.01);
       });
+    if (emanationsToUpdate.length === 0) {
+      return;
+    }
+    const gridDpi = await OBR.scene.grid.getDpi();
+    const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
+    const gridMeasurement = await OBR.scene.grid.getMeasurement();
+    const gridType = await OBR.scene.grid.getType();
     const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
       sourceItem,
       style,
@@ -68,12 +71,7 @@ OBR.onReady(() => {
   });
   
   OBR.scene.grid.onChange(async (grid) => {
-    const gridDpi = grid.dpi;
-    const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
-    const gridMeasurement = grid.measurement;
-    const gridType = grid.type;
     const items = await OBR.scene.items.getItems();
-
     const emanationsToUpdate = items.filter(isEmanation)
       .map((emanation) => {
         const sourceItem = items.find((item) => item.id === emanation.attachedTo);
@@ -88,6 +86,13 @@ OBR.onReady(() => {
         };
       })
       .filter((x) => x !== null);
+    if (emanationsToUpdate.length === 0) {
+      return;
+    }
+    const gridDpi = grid.dpi;
+    const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
+    const gridMeasurement = grid.measurement;
+    const gridType = grid.type;
     const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
       sourceItem,
       style,
