@@ -52,7 +52,8 @@ export function buildEmanation(
   gridType: GridType,
 ): Item {
   const dpiScale = gridDpi / item.grid.dpi;
-  const absoluteSize = size / gridMultiplier * gridDpi;
+  const numSquares = size / gridMultiplier;
+  const absoluteSize = numSquares * gridDpi;
   const absoluteItemWidth = item.image.width * dpiScale * item.scale.x;
   const absoluteItemHeight = item.image.height * dpiScale * item.scale.y;
   const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
@@ -72,9 +73,8 @@ export function buildEmanation(
     const halfHeight = absoluteItemHeight/2;
     emanation = buildManhattanEmanation(item.position, absoluteSize, halfWidth, halfHeight); // TODO Better shape
   } else if (measurementType === 'ALTERNATING') {
-    const halfWidth = absoluteItemWidth/2;
-    const halfHeight = absoluteItemHeight/2;
-    emanation = buildManhattanEmanation(item.position, absoluteSize, halfWidth, halfHeight); // TODO better shape
+    const octantPoints = alternatingOctant(numSquares);
+    emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
   } else {
     if (measurementType !== 'EUCLIDEAN') {
       console.warn(`emanation doesn't support measurement type '${measurementType} on grid ${gridType}, defaulting to Euclidean`);
@@ -137,4 +137,54 @@ function buildShapeEmanation(widthHeight: number, position: Vector2, shapeType: 
     .position(position)
     .shapeType(shapeType)
     .build();
+}
+
+function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerOffset: number, position: Vector2): Curve {
+  if (octantPoints.length === 0) {
+    throw "Need at least one octant point";
+  }
+  const scaledPoints = octantPoints.map((point) => Math2.multiply(point, scaleFactor));
+  const shiftedOctantPoints = scaledPoints.map((point) => Math2.add(point, { x: cornerOffset, y: cornerOffset }));
+  const quadrantPoints = [
+    ...shiftedOctantPoints,
+    ...shiftedOctantPoints.reverse().slice(1).map(({x, y}) => ({x: y, y: x})),
+  ];
+  const emanationPoints = [
+    ...quadrantPoints,
+    ...quadrantPoints.map(({x, y}) => ({x: -y, y: x})),
+    ...quadrantPoints.map(({x, y}) => ({x: -x, y: -y})),
+    ...quadrantPoints.map(({x, y}) => ({x: y, y: -x})),
+  ]
+  const positionedEmanationPoints = emanationPoints.map((point) => Math2.add(point, position));
+  return buildCurve()
+    .points(positionedEmanationPoints)
+    .closed(true)
+    .tension(0)
+    .build();
+}
+
+function alternatingOctant(radius: number): Vector2[] {
+  const points = [];
+  let x = radius;
+  let y = 0;
+  let alternateDiagonal = true;
+
+  while (true) {
+    ++y;
+    points.push({ x, y });
+    if (x === y) {
+      break;
+    }
+
+    if (alternateDiagonal) {
+      --x;
+      points.push({ x, y });
+      if (x === y) {
+        break;
+      }
+    }
+    alternateDiagonal = !alternateDiagonal;
+  }
+
+  return points;
 }

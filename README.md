@@ -7,7 +7,8 @@ Add emanations to any character. Emanations will automatically resize after toke
 - Better styling for context menu
 - Better drawing for alternating and manhattan (actually exclude diagonal squares from manhattan, and fix alternating)
 - Hexagonal emanations
-- Save most recent size for each player
+- Square mode vs accurate mode for chebyshev, alternating
+- Better names
 
 ![Interface](./docs/header.jpg)
 
