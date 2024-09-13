@@ -3,16 +3,16 @@
 Add emanations to any character. Emanations will automatically resize after tokens are scaled, and will display the correct shape for the current grid measurement type.
 
 ## To do
-- Display a list of active emanations in the context menu, with 'remove' buttons
-- Better styling for context menu
+- Better styling for context menu and action
 - Hexagonal emanations
-- Figure out multiple redraw calls
 
 ![Interface](./docs/header.jpg)
 
 ## Installing
 
-The extension can be installed from the [store page](https://extensions.owlbear.rodeo/owlbear-emanation).
+The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.
+
+[//]: # ([store page](https://extensions.owlbear.rodeo/owlbear-emanation))
 
 ## How it Works
 

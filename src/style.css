@@ -8,7 +8,26 @@ body {
     color: white;
 }
 
-#emanation-unit {
+.emanation-row {
+    display: flex;
+}
+
+.emanation-unit {
     font-size: 0.95em;
     font-style: italic;
+}
+
+#emanation-size {
+    max-width: 3em;
+}
+
+.remove-emanation, #create-emanation {
+    margin-left: auto;
+}
+
+.extant-emanation-color {
+    min-height: 1em;
+    min-width: 3em;
+    box-sizing: border-box;
+    border: 1px solid white;
 }
