@@ -3,9 +3,10 @@ import AwaitLock from "await-lock";
 import { buildEmanation } from "./builders";
 
 export type EmanationMetadata = {
-  sourceScale: Vector2;
+  sourceScale: Vector2,
   size: number,
   style: EmanationStyle,
+  originalPosition: Vector2,
 }
 
 export interface EmanationStyle {
@@ -18,11 +19,11 @@ export interface EmanationStyle {
 }
 
 export type SceneEmanationMetadata = {
-    gridMode: boolean;
-    gridDpi: number;
-    gridMultiplier: number;
-    gridMeasurement: GridMeasurement;
-    gridType: GridType;
+    gridMode: boolean,
+    gridDpi: number,
+    gridMultiplier: number,
+    gridMeasurement: GridMeasurement,
+    gridType: GridType,
 }
 
 /** Get the reverse domain name id for this plugin at a given path */
@@ -75,9 +76,17 @@ export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetada
 }
 
 const emanationReplaceLock = new AwaitLock();
-export async function updateEmanations(items: Item[] | null, updateFilter: (_: {metadata: EmanationMetadata, sourceItem: Item}) => boolean) {
+export async function updateEmanations(
+  items: Item[] | null,
+  updateFilter: (_: {
+    sceneEmanationMetadata: SceneEmanationMetadata,
+    metadata: EmanationMetadata,
+    sourceItem: Item
+  }) => boolean
+) {
   await emanationReplaceLock.acquireAsync();
   try {
+    const sceneEmanationMetadata = await getSceneEmanationMetadata();
     const allItems = items ?? await OBR.scene.items.getItems();
     const emanationsToUpdate = allItems.filter(isEmanation)
       .map((emanation) => {
@@ -90,6 +99,7 @@ export async function updateEmanations(items: Item[] | null, updateFilter: (_: {
           style: getStyle(emanation),
           metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, 
           sourceItem,
+          sceneEmanationMetadata,
         };
       })
       .filter(x => x !== null)
@@ -99,7 +109,6 @@ export async function updateEmanations(items: Item[] | null, updateFilter: (_: {
       return;
     }
 
-    const sceneEmanationMetadata = await getSceneEmanationMetadata();
     const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
       sourceItem,
       style,

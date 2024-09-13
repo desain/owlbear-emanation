@@ -1,5 +1,6 @@
 import OBR, { Item, Math2, Vector2, buildCurve, ShapeType, buildShape, Image } from "@owlbear-rodeo/sdk";
 import { EmanationStyle, EmanationMetadata, getPluginId, SceneEmanationMetadata } from "./helpers";
+import { getHexGridUtils, HexGridType, HexGridUtils } from "./hexUtils";
 
 interface Emanation extends Item {
   style: EmanationStyle;
@@ -11,40 +12,6 @@ function clockwiseAroundOrigin(point: Vector2, degrees: number) {
 
 function isCloseEnoughToInteger(n: number) {
   return Number.isInteger(parseFloat(n.toFixed(1)));
-}
-
-type HexGridUtils = {
-  absoluteSideLength: number,
-  originToClosestCenter: number,
-  mainAxisSpacing: number,
-  crossAxisSpacing: number,
-  /**
-   * Degrees to rotate a shape. 0 if pointy top, 30 if flat top
-   */
-  baseRotationDegrees: number,
-  /**
-   * Axis where hexagons touch sides
-   */
-  getMainAxisPosition: (point: Vector2) => number,
-  /**
-   * Axis along which hexes are staggered
-   */
-  getCrossAxisPosition: (point: Vector2) => number,
-  getEmanationRadius: (numHexes: number, absoluteItemSize: number) => number,
-}
-
-function getHexGridUtils(hexSize: number, flatTop: boolean): HexGridUtils {
-  const absoluteSideLength = hexSize / Math.sqrt(3);
-  return {
-    absoluteSideLength,
-    originToClosestCenter: absoluteSideLength / 2, // sin(30) * side = 1/2 * side
-    mainAxisSpacing: hexSize,
-    crossAxisSpacing: absoluteSideLength * 3 / 2,
-    baseRotationDegrees: flatTop ? 30 : 0,
-    getMainAxisPosition:  flatTop ? ((point: Vector2) => point.y) : ((point: Vector2) => point.x),
-    getCrossAxisPosition: flatTop ? ((point: Vector2) => point.x) : ((point: Vector2) => point.y),
-    getEmanationRadius: (numHexes: number, absoluteItemSize: number) => numHexes + Math.floor(absoluteItemSize / hexSize / 2)
-  };
 }
   
   /**
@@ -69,7 +36,7 @@ function getHexGridUtils(hexSize: number, flatTop: boolean): HexGridUtils {
     const numSquares = size / gridMultiplier;
     const absoluteSize = numSquares * gridDpi;
     const absoluteItemSize = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) * dpiScale;
-    const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
+    const metadata: EmanationMetadata = { sourceScale: item.scale, originalPosition: item.position, size, style };
   
     let emanation: Emanation;
     if (gridMeasurement === 'CHEBYSHEV' && gridType === 'SQUARE') {
@@ -80,13 +47,12 @@ function getHexGridUtils(hexSize: number, flatTop: boolean): HexGridUtils {
           'RECTANGLE',
         );
     } else if (gridMeasurement === 'CHEBYSHEV' && (gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL')) {
-        const flatTop = gridType === 'HEX_HORIZONTAL';
         if (gridMode) {
-          emanation = buildHexagonGridEmanation(item.position, numSquares, gridDpi, absoluteItemSize, flatTop)
+          emanation = buildHexagonGridEmanation(item.position, numSquares, gridDpi, absoluteItemSize, gridType)
         } else {
           const edgeToEdge = 2 * numSquares * gridDpi + absoluteItemSize;
           emanation = buildShapeEmanation(edgeToEdge * 2 / Math.sqrt(3), item.position, 'HEXAGON');
-          if (flatTop) {
+          if (gridType === 'HEX_HORIZONTAL') {
             emanation.rotation = 30;
           }
         }
@@ -124,7 +90,7 @@ function getHexGridUtils(hexSize: number, flatTop: boolean): HexGridUtils {
   
     emanation.locked = true;
     emanation.name = `${item.name} ${size} emanation`;
-    emanation.metadata = { [getPluginId("metadata")]: metadata };
+    emanation.metadata = { ...emanation.metadata, [getPluginId("metadata")]: metadata };
     emanation.attachedTo = item.id;
     emanation.layer = 'DRAWING';
     emanation.disableHit = true;
@@ -168,8 +134,8 @@ function getHexGridUtils(hexSize: number, flatTop: boolean): HexGridUtils {
       .build();
   }
 
-  function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize: number, absoluteItemSize: number, flatTop: boolean) {
-    const utils = getHexGridUtils(hexSize, flatTop);
+  function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize: number, absoluteItemSize: number, gridType: HexGridType) {
+    const utils = getHexGridUtils(hexSize, gridType);
     const {
       originToClosestCenter,
       getCrossAxisPosition,
@@ -259,7 +225,6 @@ function getHexGridUtils(hexSize: number, flatTop: boolean): HexGridUtils {
       .build();
 
   }
-
   
   /**
    * Build basic shape.
