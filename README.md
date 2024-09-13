@@ -6,7 +6,8 @@ Add emanations to any character. Emanations will automatically resize after toke
 - Display a list of active emanations in the context menu, with 'remove' buttons
 - Better styling for context menu
 - Hexagonal emanations
-- Toggle for square vs non square mode
+- Move emanations to drawing layer
+- Figure out multiple redraw calls
 
 ![Interface](./docs/header.jpg)
 

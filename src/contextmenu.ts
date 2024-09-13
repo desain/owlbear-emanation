@@ -1,10 +1,11 @@
 import OBR, { Image, } from "@owlbear-rodeo/sdk";
 import {
-  buildEmanation,
   getPluginId,
+  getSceneEmanationMetadata,
   isEmanation,
 } from "./helpers";
 import "./style.css";
+import { buildEmanation } from "./builders";
 
 /**
  * This file represents the HTML of the popover that is shown once
@@ -17,16 +18,15 @@ interface PlayerMetadata {
 }
 
 OBR.onReady(async () => {
-  const playerMetadata = await OBR.player.getMetadata();
-  const playerEmanationMetadata = playerMetadata[getPluginId("metadata")] as PlayerMetadata | undefined;
-  const defaultEmanationColor = playerEmanationMetadata?.color || await OBR.player.getColor();
+  const playerEmanationMetadata = (await OBR.player.getMetadata())[getPluginId('metadata')] as PlayerMetadata | undefined;
+  const defaultEmanationColor = playerEmanationMetadata?.color ?? await OBR.player.getColor();
 
   const scale = await OBR.scene.grid.getScale();
   // Setup the document with an emanation size input and create button
-  document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
+  document.getElementById('app')!.innerHTML = `
     <div class="emanations">
-      <input id="emanation-color" type="color" value="${defaultEmanationColor}"/>
-      <input id="emanation-size" type="number" value="${playerEmanationMetadata?.size || 0}" min="0" step="${scale.parsed.multiplier}"/>
+      <input id="emanation-color" name="emanation-color" type="color" value="${defaultEmanationColor}"/>
+      <input id="emanation-size" name="emanation-size" type="number" value="${playerEmanationMetadata?.size ?? 0}" min="0" step="${scale.parsed.multiplier}"/>
       <span id="emanation-unit">${scale.parsed.unit}.</span>
       <button id="create-emanation">Create</button>
       <br/>
@@ -69,12 +69,7 @@ async function createEmanations(size: number, color: string) {
   if (!selection) {
     return;
   }
-  const gridDpi = await OBR.scene.grid.getDpi();
-  const gridMultiplier = (await OBR.scene.grid.getScale()).parsed.multiplier;
-  const measurementType = await OBR.scene.grid.getMeasurement();
-  const gridType = await OBR.scene.grid.getType();
-
-  // Get all selected items
+  const sceneEmanationMetadata = await getSceneEmanationMetadata();
   const items = await OBR.scene.items.getItems<Image>(selection);
   const toAdd = items.map((item) => buildEmanation(
     item,
@@ -87,11 +82,7 @@ async function createEmanations(size: number, color: string) {
       strokeDash: [],
     },
     size,
-    gridDpi,
-    gridMultiplier,
-    measurementType,
-    gridType,
-    true,
+    sceneEmanationMetadata,
   ));
 
   if (toAdd.length > 0) {
