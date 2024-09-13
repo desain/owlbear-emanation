@@ -139,7 +139,7 @@ async function createEmanations(size: number, color: string) {
     item,
     {
       fillColor: color,
-      fillOpacity: 0,
+      fillOpacity: 0.1,
       strokeColor: color,
       strokeOpacity: 1,
       strokeWidth: 10,

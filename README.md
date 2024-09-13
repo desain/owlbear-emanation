@@ -5,6 +5,7 @@ Add emanations to any character. Emanations will automatically resize after toke
 ## To do
 - Better styling for context menu and action
 - Hexagonal emanations
+- Fix wrong shape on load
 
 ![Interface](./docs/header.jpg)
 
