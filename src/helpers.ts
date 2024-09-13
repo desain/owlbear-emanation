@@ -5,6 +5,12 @@ export function getPluginId(path: string) {
   return `com.desain.emanation/${path}`;
 }
 
+/**
+ * The mode of emanation to use.
+ * Square mode outlines the squares whose centers are included in the emanation.
+ * Precise mode outlines the exact shape of the emanation.
+ */
+export declare type EmanationMode = 'SQUARE' | 'PRECISE';
 
 export function isPlainObject(
   item: unknown
@@ -39,8 +45,14 @@ interface Emanation extends Item {
 }
 
 /**
- * Helper to build a circle shape with the proper size to match
- * the input image's size
+ * Helper to build an emanation item.
+ * @param item the source item that the emanation radiates from.
+ * @param style the emanation style drawing params.
+ * @param size the size of the emanation in grid units. E.g size=10ft on a 5-foot grid creates a 2-square emanation.
+ * @param gridDpi the dpi of the grid.
+ * @param gridMultiplier the multiplier for the grid size.
+ * @param measurementType the type of measurement used by the current grid.
+ * @param gridType the shape of the current grid.
  */
 export function buildEmanation(
   item: Image,
@@ -50,6 +62,7 @@ export function buildEmanation(
   gridMultiplier: number,
   measurementType: GridMeasurement,
   gridType: GridType,
+  mode: EmanationMode,
 ): Item {
   const dpiScale = gridDpi / item.grid.dpi;
   const numSquares = size / gridMultiplier;
@@ -69,11 +82,14 @@ export function buildEmanation(
       'RECTANGLE',
     );
   } else if (measurementType === 'MANHATTAN') {
-    const halfWidth = absoluteItemWidth/2;
-    const halfHeight = absoluteItemHeight/2;
-    emanation = buildManhattanEmanation(item.position, absoluteSize, halfWidth, halfHeight); // TODO Better shape
+    if (mode === 'SQUARE') {
+      const octantPoints = buildManhattanSquareOctant(numSquares);
+      emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
+    } else {
+      emanation = buildManhattanPreciseEmanation(item.position, absoluteSize, absoluteItemWidth / 2, absoluteItemHeight / 2);
+    }
   } else if (measurementType === 'ALTERNATING') {
-    const octantPoints = alternatingOctant(numSquares);
+    const octantPoints = buildAlternatingSquareOctant(numSquares);
     emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
   } else {
     if (measurementType !== 'EUCLIDEAN') {
@@ -110,7 +126,7 @@ export function buildEmanation(
   return emanation;
 }
 
-function buildManhattanEmanation(position: Vector2, absoluteSize: number, halfWidth: number, halfHeight: number): Curve {
+function buildManhattanPreciseEmanation(position: Vector2, absoluteSize: number, halfWidth: number, halfHeight: number): Curve {
   return buildCurve()
     .points([
       Math2.add(position, { x: halfWidth + absoluteSize, y: +halfHeight }), // right bottom
@@ -163,7 +179,7 @@ function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerO
     .build();
 }
 
-function alternatingOctant(radius: number): Vector2[] {
+function buildAlternatingSquareOctant(radius: number): Vector2[] {
   const points = [];
   let x = radius;
   let y = 0;
@@ -184,6 +200,28 @@ function alternatingOctant(radius: number): Vector2[] {
       }
     }
     alternateDiagonal = !alternateDiagonal;
+  }
+
+  return points;
+}
+
+function buildManhattanSquareOctant(radius: number): Vector2[] {
+  const points = [];
+  let x = radius;
+  let y = 0;
+  let moveX = true;
+
+  points.push({x, y});
+
+  while (x !== y) {
+    if (moveX) {
+      x--;
+    } else {
+      y++;
+    }
+    moveX = !moveX;
+
+    points.push({ x, y });
   }
 
   return points;
