@@ -34,7 +34,10 @@ async function renderContextMenu() {
       .map(({emanation, metadata: {size}}) => {
         return `
           <div class="emanation-row">
-            <div class="extant-emanation-color" style="background-color: ${getStyle(emanation).strokeColor};"></div>
+            <div class="extant-emanation-color"
+                 data-color="${getStyle(emanation).strokeColor}"
+                 style="background-color: ${getStyle(emanation).strokeColor};"
+            ></div>
             <span class="extant-emanation-size">${size}</span>
             <span class="emanation-unit">${unit}.</span>
             <button class="remove-emanation" data-id="${emanation.id}">Remove</button>
@@ -70,15 +73,18 @@ async function renderContextMenu() {
 
   // Attach listeners
   colorInput.addEventListener('change', () => {
+    console.log('updateColor');
     color = colorInput.value;
     const newMetadata: PlayerMetadata = { color, size };
     OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata })
   });
+
   sizeInput.addEventListener('change', () => {
     size = parseFloat(sizeInput.value);
     const newMetadata: PlayerMetadata = { color, size };
     OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata })
   });
+
   document.getElementById('create-emanation')?.addEventListener('click', async () => {
     color = colorInput.value;
     size = parseFloat(sizeInput.value);
@@ -88,7 +94,15 @@ async function renderContextMenu() {
       await createEmanations(size, color);
     }
   });
-  document.querySelectorAll<HTMLButtonElement>('button.remove-emanation').forEach((button) => {
+
+  document.querySelectorAll('.extant-emanation-color').forEach((div) => {
+    div.addEventListener('click', async (event) => {
+      colorInput.value = (event.target as HTMLElement).dataset.color ?? color;
+      colorInput.dispatchEvent(new Event('change'));
+    });
+  });
+
+  document.querySelectorAll('button.remove-emanation').forEach((button) => {
     button.addEventListener('click', async (event) => {
       const emanationId = (event.target as HTMLButtonElement).dataset.id;
         if (emanationId) {

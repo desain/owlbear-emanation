@@ -1,4 +1,4 @@
-import { Item, Math2, Vector2, Curve, buildCurve, ShapeType, Shape, buildShape, Image } from "@owlbear-rodeo/sdk";
+import OBR, { Item, Math2, Vector2, Curve, buildCurve, ShapeType, Shape, buildShape, Image } from "@owlbear-rodeo/sdk";
 import { EmanationStyle, EmanationMetadata, getPluginId, SceneEmanationMetadata } from "./helpers";
 
 interface Emanation extends Item {
@@ -21,17 +21,17 @@ interface Emanation extends Item {
     item: Image,
     style: EmanationStyle,
     size: number,
-    sceneEmanationMetadata: SceneEmanationMetadata,
+    {gridDpi, gridMeasurement, gridMultiplier, gridType, squareMode}: SceneEmanationMetadata,
   ): Item {
-    const dpiScale = sceneEmanationMetadata.gridDpi / item.grid.dpi;
-    const numSquares = size / sceneEmanationMetadata.gridMultiplier;
-    const absoluteSize = numSquares * sceneEmanationMetadata.gridDpi;
+    const dpiScale = gridDpi / item.grid.dpi;
+    const numSquares = size / gridMultiplier;
+    const absoluteSize = numSquares * gridDpi;
     const absoluteItemWidth = item.image.width * dpiScale * item.scale.x;
     const absoluteItemHeight = item.image.height * dpiScale * item.scale.y;
     const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
   
     let emanation: Emanation;
-    if (sceneEmanationMetadata.gridMeasurement === 'CHEBYSHEV' && sceneEmanationMetadata.gridType === 'SQUARE') {
+    if (gridMeasurement === 'CHEBYSHEV' && gridType === 'SQUARE') {
       const width = absoluteSize * 2 + absoluteItemWidth;
       const height = absoluteSize * 2 + absoluteItemHeight;
       const originOffset = { x: -width / 2, y: -height / 2 }; // rectangle origin is top left
@@ -40,21 +40,24 @@ interface Emanation extends Item {
         Math2.add(item.position, originOffset),
         'RECTANGLE',
       );
-    } else if (sceneEmanationMetadata.gridMeasurement === 'MANHATTAN') {
-      if (sceneEmanationMetadata.squareMode) {
+    } else if (gridMeasurement === 'MANHATTAN') {
+      if (squareMode) {
         const octantPoints = buildManhattanSquareOctant(numSquares);
-        emanation = octantToEmanation(octantPoints, sceneEmanationMetadata.gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
+        emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
       } else {
         emanation = buildManhattanPreciseEmanation(item.position, absoluteSize, absoluteItemWidth / 2, absoluteItemHeight / 2);
       }
-    } else if (sceneEmanationMetadata.gridMeasurement === 'ALTERNATING') {
-      let octantPoints = sceneEmanationMetadata.squareMode
+    } else if (gridMeasurement === 'ALTERNATING') {
+      let octantPoints = squareMode
         ? buildAlternatingSquareOctant(numSquares)
         : buildAlternatingPreciseOctant(numSquares);
-      emanation = octantToEmanation(octantPoints, sceneEmanationMetadata.gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
+      emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
     } else {
-      if (sceneEmanationMetadata.gridMeasurement !== 'EUCLIDEAN') {
-        console.warn(`emanation doesn't support measurement type '${sceneEmanationMetadata.gridMeasurement} on grid ${sceneEmanationMetadata.gridType}, defaulting to Euclidean`);
+      if (gridMeasurement !== 'EUCLIDEAN') {
+        OBR.notification.show(
+          `Emanation doesn't support measurement type ${gridMeasurement} on grid ${gridType}, defaulting to Euclidean`,
+          'WARNING'
+        );
       }
       emanation = buildShapeEmanation(
         absoluteSize * 2 + Math.max(absoluteItemHeight, absoluteItemWidth),
