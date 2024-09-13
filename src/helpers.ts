@@ -65,11 +65,11 @@ export function isEmanation(item: Item): boolean {
 
 export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetadata>) {
   const currentMetadata = await getSceneEmanationMetadata();
-  const needUpdateEmanation = (Object.keys(metadata) as (keyof SceneEmanationMetadata)[])
+  const metadataChanged = (Object.keys(metadata) as (keyof SceneEmanationMetadata)[])
     .some((key: keyof SceneEmanationMetadata) => metadata[key] !== currentMetadata[key]);
-  const newMetadata: SceneEmanationMetadata = { ...currentMetadata, ...metadata };
-  await OBR.scene.setMetadata({ [getPluginId('metadata')]: newMetadata });
-  if (needUpdateEmanation) {
+  if (metadataChanged) {
+    const newMetadata: SceneEmanationMetadata = { ...currentMetadata, ...metadata };
+    await OBR.scene.setMetadata({ [getPluginId('metadata')]: newMetadata });
     await updateEmanations(null, () => true);
   }
 }
