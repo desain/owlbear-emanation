@@ -73,7 +73,7 @@ interface Emanation extends Item {
     emanation.name = `${item.name} ${size} emanation`;
     emanation.metadata = { [getPluginId("metadata")]: metadata };
     emanation.attachedTo = item.id;
-    emanation.layer = 'ATTACHMENT';
+    emanation.layer = 'DRAWING';
     emanation.disableHit = true;
     emanation.visible = item.visible;
   
