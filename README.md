@@ -5,9 +5,7 @@ Add emanations to any character. Emanations will automatically resize after toke
 ## To do
 - Display a list of active emanations in the context menu, with 'remove' buttons
 - Better styling for context menu
-- Better drawing for alternating and manhattan (actually exclude diagonal squares from manhattan, and fix alternating)
 - Hexagonal emanations
-- Better names
 
 ![Interface](./docs/header.jpg)
 
