@@ -38,7 +38,7 @@ function isPlainObject(
   );
 }
 
-function getStyle(emanation: Item): EmanationStyle {
+export function getStyle(emanation: Item): EmanationStyle {
   if (isCurve(emanation) || isShape(emanation)) {
     return emanation.style;
   } else {
@@ -76,7 +76,6 @@ export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetada
 
 const emanationReplaceLock = new AwaitLock();
 export async function updateEmanations(items: Item[] | null, updateFilter: (_: {metadata: EmanationMetadata, sourceItem: Item}) => boolean) {
-  console.log("updateEmanations");
   await emanationReplaceLock.acquireAsync();
   try {
     const allItems = items ?? await OBR.scene.items.getItems();
