@@ -104,7 +104,7 @@ export function buildEmanation(
   // Apply image offset and offset circle position so the origin is the top left
 
   emanation.locked = true;
-  emanation.name = 'Emanation';
+  emanation.name = `${item.name} ${size} emanation`;
   emanation.metadata = { [getPluginId("metadata")]: metadata };
   emanation.attachedTo = item.id;
   emanation.layer = 'ATTACHMENT';
