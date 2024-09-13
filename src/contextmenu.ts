@@ -92,7 +92,7 @@ async function createEmanations(size: number, color: string) {
     gridMultiplier,
     measurementType,
     gridType,
-    'SQUARE',
+    true,
   ));
 
   if (toAdd.length > 0) {

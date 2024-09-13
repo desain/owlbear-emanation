@@ -5,14 +5,7 @@ export function getPluginId(path: string) {
   return `com.desain.emanation/${path}`;
 }
 
-/**
- * The mode of emanation to use.
- * Square mode outlines the squares whose centers are included in the emanation.
- * Precise mode outlines the exact shape of the emanation.
- */
-export declare type EmanationMode = 'SQUARE' | 'PRECISE';
-
-export function isPlainObject(
+function isPlainObject(
   item: unknown
 ): item is Record<keyof any, unknown> {
   return (
@@ -53,6 +46,8 @@ interface Emanation extends Item {
  * @param gridMultiplier the multiplier for the grid size.
  * @param measurementType the type of measurement used by the current grid.
  * @param gridType the shape of the current grid.
+ * @param squareMode whether to use the square mode for the emanation. Square mode outlines the squares whose centers are included in the emanation.
+ *                   Non-square mode outlines the exact shape of the emanation.
  */
 export function buildEmanation(
   item: Image,
@@ -62,7 +57,7 @@ export function buildEmanation(
   gridMultiplier: number,
   measurementType: GridMeasurement,
   gridType: GridType,
-  mode: EmanationMode,
+  squareMode: boolean,
 ): Item {
   const dpiScale = gridDpi / item.grid.dpi;
   const numSquares = size / gridMultiplier;
@@ -82,14 +77,14 @@ export function buildEmanation(
       'RECTANGLE',
     );
   } else if (measurementType === 'MANHATTAN') {
-    if (mode === 'SQUARE') {
+    if (squareMode) {
       const octantPoints = buildManhattanSquareOctant(numSquares);
       emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
     } else {
       emanation = buildManhattanPreciseEmanation(item.position, absoluteSize, absoluteItemWidth / 2, absoluteItemHeight / 2);
     }
   } else if (measurementType === 'ALTERNATING') {
-    const octantPoints = buildAlternatingSquareOctant(numSquares);
+    let octantPoints = squareMode ? buildAlternatingSquareOctant(numSquares) : buildAlternatingPreciseOctant(numSquares);
     emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
   } else {
     if (measurementType !== 'EUCLIDEAN') {
@@ -112,7 +107,7 @@ export function buildEmanation(
   emanation.name = 'Emanation';
   emanation.metadata = { [getPluginId("metadata")]: metadata };
   emanation.attachedTo = item.id;
-  emanation.layer = "ATTACHMENT";
+  emanation.layer = 'ATTACHMENT';
   emanation.disableHit = true;
   emanation.visible = item.visible;
 
@@ -126,6 +121,14 @@ export function buildEmanation(
   return emanation;
 }
 
+/**
+ * Build emanation shape for manhattan emanation in non-square mode.
+ * @param position Position of center item.
+ * @param absoluteSize Radius of emanation in absolute space.
+ * @param halfWidth Half the width of the center item in absolute space.
+ * @param halfHeight Half the height of the center item in absolute space.
+ * @returns Emanation item.
+ */
 function buildManhattanPreciseEmanation(position: Vector2, absoluteSize: number, halfWidth: number, halfHeight: number): Curve {
   return buildCurve()
     .points([
@@ -146,6 +149,13 @@ function buildManhattanPreciseEmanation(position: Vector2, absoluteSize: number,
     .build();
 }
 
+/**
+ * Build basic shape.
+ * @param widthHeight Width and height of shape.
+ * @param position Position of shape.
+ * @param shapeType Type of shape.
+ * @returns Shape item.
+ */
 function buildShapeEmanation(widthHeight: number, position: Vector2, shapeType: ShapeType): Shape {
   return buildShape()
     .width(widthHeight)
@@ -155,6 +165,15 @@ function buildShapeEmanation(widthHeight: number, position: Vector2, shapeType: 
     .build();
 }
 
+/**
+ * Create a full emanation curve from the set of points in the first octant.
+ * @param octantPoints Points in the first octant, centered on (0,0). Not scaled, so one unit in octant space corresponds to one grid
+ *                     square. Last point must have x=y.
+ * @param scaleFactor Scaling factor between one unit in octant space and one grid unit.
+ * @param cornerOffset Octant will place its (0,0) point at (cornerOffset, cornerOffset).
+ * @param position Origin of the emanation.
+ * @returns Emanation shape (unstyled).
+ */
 function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerOffset: number, position: Vector2): Curve {
   if (octantPoints.length === 0) {
     throw "Need at least one octant point";
@@ -179,6 +198,11 @@ function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerO
     .build();
 }
 
+/**
+ * Build first octant of alternating emanation in square mode.
+ * @param radius Number of squares to extend out.
+ * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
+ */
 function buildAlternatingSquareOctant(radius: number): Vector2[] {
   const points = [];
   let x = radius;
@@ -205,6 +229,24 @@ function buildAlternatingSquareOctant(radius: number): Vector2[] {
   return points;
 }
 
+/**
+ * Build first octant of alternating emanation in non-square mode.
+ * @param radius Number of squares to extend out.
+ * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
+ */
+function buildAlternatingPreciseOctant(radius: number): Vector2[] {
+  const midpoint = radius / 1.5;
+  return [
+    { x: radius, y: 0 },
+    { x: midpoint, y: midpoint },
+  ];
+}
+
+/**
+ * Build first octant of manhattan emanation in square mode.
+ * @param radius Number of squares to extend out.
+ * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
+ */
 function buildManhattanSquareOctant(radius: number): Vector2[] {
   const points = [];
   let x = radius;
