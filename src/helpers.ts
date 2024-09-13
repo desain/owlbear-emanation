@@ -18,7 +18,7 @@ export interface EmanationStyle {
 }
 
 export type SceneEmanationMetadata = {
-    squareMode: boolean;
+    gridMode: boolean;
     gridDpi: number;
     gridMultiplier: number;
     gridMeasurement: GridMeasurement;
@@ -50,7 +50,7 @@ export function getStyle(emanation: Item): EmanationStyle {
 export async function getSceneEmanationMetadata() {
   return (await OBR.scene.getMetadata())[getPluginId('metadata')] as SceneEmanationMetadata | undefined
     ?? {
-      squareMode: true,
+      gridMode: true,
       gridDpi: await OBR.scene.grid.getDpi(),
       gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
       gridMeasurement: await OBR.scene.grid.getMeasurement(),

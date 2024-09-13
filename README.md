@@ -6,6 +6,7 @@ Add emanations to any character. Emanations will automatically resize after toke
 - Better styling for context menu and action
 - Hexagonal emanations
 - Fix wrong shape on load
+- Only one notification on unsupported (when change, get builder. If builder changed badly, message)
 
 ![Interface](./docs/header.jpg)
 
