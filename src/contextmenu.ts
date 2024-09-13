@@ -34,10 +34,10 @@ async function renderContextMenu() {
       .map(({emanation, metadata: {size}}) => {
         return `
           <div class="emanation-row">
-            <div class="extant-emanation-color"
+            <button class="extant-emanation-color"
                  data-color="${getStyle(emanation).strokeColor}"
                  style="background-color: ${getStyle(emanation).strokeColor};"
-            ></div>
+            ></button>
             <span class="extant-emanation-size">${size}</span>
             <span class="emanation-unit">${unit}.</span>
             <button class="remove-emanation" data-id="${emanation.id}">Remove</button>
@@ -73,7 +73,6 @@ async function renderContextMenu() {
 
   // Attach listeners
   colorInput.addEventListener('change', () => {
-    console.log('updateColor');
     color = colorInput.value;
     const newMetadata: PlayerMetadata = { color, size };
     OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata })
