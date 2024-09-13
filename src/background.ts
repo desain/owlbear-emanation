@@ -87,7 +87,7 @@ async function updateEmanations(emanationReplaceLock: AwaitLock, items: Item[] |
         gridMultiplier,
         gridMeasurement,
         gridType,
-        'SQUARE',
+        true,
       ));
       await OBR.scene.items.deleteItems(emanationsToUpdate.map(({id}) => id));
       await OBR.scene.items.addItems(replacements);
