@@ -1,9 +1,51 @@
-import OBR, { Item, Math2, Vector2, Curve, buildCurve, ShapeType, Shape, buildShape, Image } from "@owlbear-rodeo/sdk";
+import OBR, { Item, Math2, Vector2, buildCurve, ShapeType, buildShape, Image } from "@owlbear-rodeo/sdk";
 import { EmanationStyle, EmanationMetadata, getPluginId, SceneEmanationMetadata } from "./helpers";
 
 interface Emanation extends Item {
-    style: EmanationStyle;
-  }
+  style: EmanationStyle;
+}
+
+function clockwiseAroundOrigin(point: Vector2, degrees: number) {
+  return Math2.rotate(point, {x: 0, y: 0}, degrees);
+}
+
+function isCloseEnoughToInteger(n: number) {
+  return Number.isInteger(parseFloat(n.toFixed(1)));
+}
+
+type HexGridUtils = {
+  absoluteSideLength: number,
+  originToClosestCenter: number,
+  mainAxisSpacing: number,
+  crossAxisSpacing: number,
+  /**
+   * Degrees to rotate a shape. 0 if pointy top, 30 if flat top
+   */
+  baseRotationDegrees: number,
+  /**
+   * Axis where hexagons touch sides
+   */
+  getMainAxisPosition: (point: Vector2) => number,
+  /**
+   * Axis along which hexes are staggered
+   */
+  getCrossAxisPosition: (point: Vector2) => number,
+  getEmanationRadius: (numHexes: number, absoluteItemSize: number) => number,
+}
+
+function getHexGridUtils(hexSize: number, flatTop: boolean): HexGridUtils {
+  const absoluteSideLength = hexSize / Math.sqrt(3);
+  return {
+    absoluteSideLength,
+    originToClosestCenter: absoluteSideLength / 2, // sin(30) * side = 1/2 * side
+    mainAxisSpacing: hexSize,
+    crossAxisSpacing: absoluteSideLength * 3 / 2,
+    baseRotationDegrees: flatTop ? 30 : 0,
+    getMainAxisPosition:  flatTop ? ((point: Vector2) => point.y) : ((point: Vector2) => point.x),
+    getCrossAxisPosition: flatTop ? ((point: Vector2) => point.x) : ((point: Vector2) => point.y),
+    getEmanationRadius: (numHexes: number, absoluteItemSize: number) => numHexes + Math.floor(absoluteItemSize / hexSize / 2)
+  };
+}
   
   /**
    * Helper to build an emanation item.
@@ -14,44 +56,52 @@ interface Emanation extends Item {
    * @param gridMultiplier the multiplier for the grid size.
    * @param measurementType the type of measurement used by the current grid.
    * @param gridType the shape of the current grid.
-   * @param squareMode whether to use the square mode for the emanation. Square mode outlines the squares whose centers are included in the emanation.
+   * @param gridMode whether to use the square mode for the emanation. Square mode outlines the squares whose centers are included in the emanation.
    *                   Non-square mode outlines the exact shape of the emanation.
    */
   export function buildEmanation(
     item: Image,
     style: EmanationStyle,
     size: number,
-    {gridDpi, gridMeasurement, gridMultiplier, gridType, squareMode}: SceneEmanationMetadata,
+    {gridDpi, gridMeasurement, gridMultiplier, gridType, gridMode}: SceneEmanationMetadata,
   ): Item {
     const dpiScale = gridDpi / item.grid.dpi;
     const numSquares = size / gridMultiplier;
     const absoluteSize = numSquares * gridDpi;
-    const absoluteItemWidth = item.image.width * dpiScale * item.scale.x;
-    const absoluteItemHeight = item.image.height * dpiScale * item.scale.y;
+    const absoluteItemSize = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) * dpiScale;
     const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
   
     let emanation: Emanation;
     if (gridMeasurement === 'CHEBYSHEV' && gridType === 'SQUARE') {
-      const width = absoluteSize * 2 + absoluteItemWidth;
-      const height = absoluteSize * 2 + absoluteItemHeight;
-      const originOffset = { x: -width / 2, y: -height / 2 }; // rectangle origin is top left
-      emanation = buildShapeEmanation(
-        absoluteSize * 2 + Math.max(absoluteItemHeight, absoluteItemWidth),
-        Math2.add(item.position, originOffset),
-        'RECTANGLE',
-      );
+        const originOffset = { x: -absoluteSize - absoluteItemSize / 2, y: -absoluteSize - absoluteItemSize / 2 }; // rectangle origin is top left
+        emanation = buildShapeEmanation(
+          absoluteSize * 2 + absoluteItemSize,
+          Math2.add(item.position, originOffset),
+          'RECTANGLE',
+        );
+    } else if (gridMeasurement === 'CHEBYSHEV' && (gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL')) {
+        const flatTop = gridType === 'HEX_HORIZONTAL';
+        if (gridMode) {
+          emanation = buildHexagonGridEmanation(item.position, numSquares, gridDpi, absoluteItemSize, flatTop)
+        } else {
+          const edgeToEdge = 2 * numSquares * gridDpi + absoluteItemSize;
+          emanation = buildShapeEmanation(edgeToEdge * 2 / Math.sqrt(3), item.position, 'HEXAGON');
+          if (flatTop) {
+            emanation.rotation = 30;
+          }
+        }
     } else if (gridMeasurement === 'MANHATTAN') {
-      if (squareMode) {
+      if (gridMode) {
         const octantPoints = buildManhattanSquareOctant(numSquares);
-        emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
+        emanation = octantToEmanation(octantPoints, gridDpi, absoluteItemSize / 2, item.position);
       } else {
-        emanation = buildManhattanPreciseEmanation(item.position, absoluteSize, absoluteItemWidth / 2, absoluteItemHeight / 2);
+        emanation = buildManhattanPreciseEmanation(item.position, absoluteSize, absoluteItemSize / 2, absoluteItemSize / 2);
       }
     } else if (gridMeasurement === 'ALTERNATING') {
-      let octantPoints = squareMode
+      let octantPoints = gridMode
         ? buildAlternatingSquareOctant(numSquares)
         : buildAlternatingPreciseOctant(numSquares);
-      emanation = octantToEmanation(octantPoints, gridDpi, Math.max(absoluteItemHeight, absoluteItemWidth) / 2, item.position);
+      emanation = octantToEmanation(octantPoints, gridDpi, absoluteItemSize / 2, item.position);
     } else {
       if (gridMeasurement !== 'EUCLIDEAN') {
         OBR.notification.show(
@@ -60,7 +110,7 @@ interface Emanation extends Item {
         );
       }
       emanation = buildShapeEmanation(
-        absoluteSize * 2 + Math.max(absoluteItemHeight, absoluteItemWidth),
+        absoluteSize * 2 + absoluteItemSize,
         item.position,
         'CIRCLE',
       );
@@ -98,7 +148,7 @@ interface Emanation extends Item {
    * @param halfHeight Half the height of the center item in absolute space.
    * @returns Emanation item.
    */
-  function buildManhattanPreciseEmanation(position: Vector2, absoluteSize: number, halfWidth: number, halfHeight: number): Curve {
+  function buildManhattanPreciseEmanation(position: Vector2, absoluteSize: number, halfWidth: number, halfHeight: number) {
     return buildCurve()
       .points([
         Math2.add(position, { x: halfWidth + absoluteSize, y: +halfHeight }), // right bottom
@@ -117,6 +167,99 @@ interface Emanation extends Item {
       .tension(0)
       .build();
   }
+
+  function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize: number, absoluteItemSize: number, flatTop: boolean) {
+    const utils = getHexGridUtils(hexSize, flatTop);
+    const {
+      originToClosestCenter,
+      getCrossAxisPosition,
+      crossAxisSpacing,
+    } = utils;
+
+    const radius = utils.getEmanationRadius(numHexes, absoluteItemSize);
+    const crossAxisMultiple = (getCrossAxisPosition(position) + originToClosestCenter) / crossAxisSpacing;
+    const onHexCenter = isCloseEnoughToInteger(crossAxisMultiple);
+    if (onHexCenter) {
+      return buildHexagonEmanationFromHexCenter(position, radius, utils);
+    } else {
+      return buildHexagonEmanationFromIntersection(position, radius, utils);
+    }
+  }
+
+  function buildHexagonEmanationFromIntersection(position: Vector2, radius: number, utils: HexGridUtils) {
+    const isReversed = isCloseEnoughToInteger(utils.getCrossAxisPosition(position) / utils.crossAxisSpacing)
+
+    const rightHexOffset = { x: utils.mainAxisSpacing, y: 0 };
+    const downLeftHexOffset = clockwiseAroundOrigin(rightHexOffset, 120);
+    const pointyBottomToBottomRightOffset = clockwiseAroundOrigin({x: utils.absoluteSideLength, y: 0}, -30);
+
+    const startPoint = Math2.multiply(downLeftHexOffset, radius);
+
+    const points = [];
+
+    for (let i = 0; i < radius; i++) {
+      const bottomPoint = Math2.add(startPoint, Math2.multiply(rightHexOffset, i));
+      points.push(bottomPoint);
+      points.push(Math2.add(bottomPoint, pointyBottomToBottomRightOffset));
+    }
+
+    const secondStart = Math2.add(startPoint, Math2.multiply(rightHexOffset, radius));
+    for (let i = 0; i < radius; i++) {
+      const bottomPoint = Math2.subtract(secondStart, Math2.multiply(downLeftHexOffset, i));
+      points.push(bottomPoint);
+      points.push(Math2.add(bottomPoint, pointyBottomToBottomRightOffset));
+    }
+
+
+    const baseRotation = utils.baseRotationDegrees + (isReversed ? 180 : 0);
+    return buildCurve()
+      .points([
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation)),
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 120)),
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 240)),
+      ].map((point) => Math2.add(point, position)))
+      .closed(true)
+      .tension(0)
+      .build();
+  }
+
+  function buildHexagonEmanationFromHexCenter(position: Vector2, radius: number, utils: HexGridUtils) {
+    const rightHexOffset = { x: utils.mainAxisSpacing, y: 0 };
+    const pointyBottomOffset = { x: 0, y: utils.absoluteSideLength }
+    const pointyBottomRightOffset = clockwiseAroundOrigin(pointyBottomOffset, -60);
+
+    const downLeftHexCenter = clockwiseAroundOrigin(
+      Math2.multiply(rightHexOffset, radius),
+      120
+    );
+    const points = [];
+
+    for (let i = 0; i < radius; i++) {
+      const hexCenter = Math2.add(downLeftHexCenter, Math2.multiply(rightHexOffset, i));
+      points.push(Math2.add(hexCenter, pointyBottomOffset));
+      points.push(Math2.add(hexCenter, pointyBottomRightOffset));
+    }
+    points.push(Math2.add(
+      Math2.add(downLeftHexCenter, Math2.multiply(rightHexOffset, radius)),
+      pointyBottomOffset
+    ));
+
+    const baseRotation = utils.baseRotationDegrees;
+    return buildCurve()
+      .points([
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation)),
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 60)),
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 120)),
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 180)),
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 240)),
+        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 300)),
+      ].map((point) => Math2.add(point, position)))
+      .closed(true)
+      .tension(0)
+      .build();
+
+  }
+
   
   /**
    * Build basic shape.
@@ -125,7 +268,7 @@ interface Emanation extends Item {
    * @param shapeType Type of shape.
    * @returns Shape item.
    */
-  function buildShapeEmanation(widthHeight: number, position: Vector2, shapeType: ShapeType): Shape {
+  function buildShapeEmanation(widthHeight: number, position: Vector2, shapeType: ShapeType) {
     return buildShape()
       .width(widthHeight)
       .height(widthHeight)
@@ -143,7 +286,7 @@ interface Emanation extends Item {
    * @param position Origin of the emanation.
    * @returns Emanation shape (unstyled).
    */
-  function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerOffset: number, position: Vector2): Curve {
+  function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerOffset: number, position: Vector2) {
     if (octantPoints.length === 0) {
       throw "Need at least one octant point";
     }
@@ -172,7 +315,7 @@ interface Emanation extends Item {
    * @param radius Number of squares to extend out.
    * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
    */
-  function buildAlternatingSquareOctant(radius: number): Vector2[] {
+  function buildAlternatingSquareOctant(radius: number) {
     const points = [];
     let x = radius;
     let y = 0;
@@ -203,7 +346,7 @@ interface Emanation extends Item {
    * @param radius Number of squares to extend out.
    * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
    */
-  function buildAlternatingPreciseOctant(radius: number): Vector2[] {
+  function buildAlternatingPreciseOctant(radius: number) {
     const midpoint = radius / 1.5;
     return [
       { x: radius, y: 0 },
@@ -216,7 +359,7 @@ interface Emanation extends Item {
    * @param radius Number of squares to extend out.
    * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
    */
-  function buildManhattanSquareOctant(radius: number): Vector2[] {
+  function buildManhattanSquareOctant(radius: number) {
     const points = [];
     let x = radius;
     let y = 0;
