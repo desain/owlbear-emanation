@@ -26,7 +26,7 @@ OBR.onReady(() => {
       },
     ],
     embed: {
-      url: "/",
+      url: "/contextmenu.html",
       // height: 88,
     },
   });

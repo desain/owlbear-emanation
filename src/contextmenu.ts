@@ -34,7 +34,6 @@ OBR.onReady(async () => {
     </div>
   `;
 
-  let color: string;
   const colorInput = <HTMLInputElement>document.getElementById('emanation-color');
   const sizeInput = <HTMLInputElement>document.getElementById('emanation-size');
 
