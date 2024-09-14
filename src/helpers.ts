@@ -1,5 +1,4 @@
 import OBR, { GridMeasurement, GridType, isCurve, isImage, isShape, Item, Vector2 } from "@owlbear-rodeo/sdk";
-import AwaitLock from "await-lock";
 import { buildEmanation } from "./builders";
 
 export type EmanationMetadata = {

@@ -8,6 +8,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "contextmenu.html"),
         background: resolve(__dirname, "background.html"),
+        action: resolve(__dirname, "action.html"),
       },
     },
   },
