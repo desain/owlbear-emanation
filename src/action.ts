@@ -1,12 +1,18 @@
+import "./style.css";
 import OBR from "@owlbear-rodeo/sdk";
 import { getPluginId, SceneEmanationMetadata, updateSceneMetadata } from "./helpers";
 
-OBR.onReady(() => {
-    OBR.scene.onReadyChange((ready) => {
-        if (ready) {
-            setupSettings();
-        }
-    });
+OBR.onReady(async () => {
+    const ready = await OBR.scene.isReady();
+    if (ready) {
+        await setupSettings();
+    } else {
+        OBR.scene.onReadyChange(async (ready) => {
+            if (ready) {
+                await setupSettings();
+            }
+        });
+    }
 });
 
 async function setupSettings() {
@@ -14,10 +20,10 @@ async function setupSettings() {
     const gridModeChecked = (sceneEmanationMetadata?.gridMode ?? true) ? 'checked' : '';
 
     document.getElementById('app')!.innerHTML = `
-        <label for="square-mode">Square Mode</label>
-        <input type="checkbox" id="square-mode" name="square-mode" ${gridModeChecked} />
+        <label for="grid-mode">Grid Mode</label>
+        <input type="checkbox" id="grid-mode" name="grid-mode" ${gridModeChecked} />
     `
-    const gridModeCheckbox = <HTMLInputElement>document.getElementById('square-mode');
+    const gridModeCheckbox = <HTMLInputElement>document.getElementById('grid-mode');
     gridModeCheckbox?.addEventListener('change', () => {
         const gridMode = gridModeCheckbox.checked;
         updateSceneMetadata({ gridMode });

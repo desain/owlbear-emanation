@@ -1,3 +1,4 @@
+import "./style.css";
 import OBR, { Image, } from "@owlbear-rodeo/sdk";
 import {
   EmanationMetadata,
@@ -6,7 +7,6 @@ import {
   getStyle,
   isEmanation,
 } from "./helpers";
-import "./style.css";
 import { buildEmanation } from "./builders";
 
 /**
@@ -38,9 +38,8 @@ async function renderContextMenu() {
                  data-color="${getStyle(emanation).strokeColor}"
                  style="background-color: ${getStyle(emanation).strokeColor};"
             ></button>
-            <span class="extant-emanation-size">${size}</span>
-            <span class="emanation-unit">${unit}.</span>
-            <button class="remove-emanation" data-id="${emanation.id}">Remove</button>
+            <span class="extant-emanation-size">${size}${unit}.</span>
+            <button class="action remove-emanation" data-id="${emanation.id}">- Remove</button>
           </div>`
       })
     : ['<p>(Selection is more than 1 item)</p>']
@@ -62,10 +61,10 @@ async function renderContextMenu() {
              min="0"
              step="${multiplier}"/>
       <span class="emanation-unit">${unit}.</span>
-      <button id="create-emanation">Create</button>
+      <button class="action" id="create-emanation">+ Create</button>
     </div>
     ${extantEmanations.join('')}
-    <button id="remove-emanations" ${extantEmanations.length === 0 ? 'disabled' : ''}>Remove All</button>
+    <button class="action" id="remove-emanations" ${extantEmanations.length === 0 ? 'disabled' : ''}>- Remove All</button>
   `;
 
   const colorInput = <HTMLInputElement>document.getElementById('emanation-color');
