@@ -70,51 +70,41 @@ export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetada
   if (metadataChanged) {
     const newMetadata: SceneEmanationMetadata = { ...currentMetadata, ...metadata };
     await OBR.scene.setMetadata({ [getPluginId('metadata')]: newMetadata });
-    await updateEmanations(null, () => true);
+    await updateEmanations(() => true);
   }
 }
 
-const emanationReplaceLock = new AwaitLock();
-export async function updateEmanations(
-  items: Item[] | null,
-  updateFilter: (_: {
-    metadata: EmanationMetadata,
-    sourceItem: Item
-  }) => boolean
-) {
-  await emanationReplaceLock.acquireAsync();
-  try {
-    const allItems = items ?? await OBR.scene.items.getItems();
-    const emanationsToUpdate = allItems.filter(isEmanation)
-      .map((emanation) => {
-        const sourceItem = allItems.find((item) => item.id === emanation.attachedTo);
-        if (!sourceItem || !isImage(sourceItem)) {
-          return null;
-        }
-        return {
-          id: emanation.id,
-          style: getStyle(emanation),
-          metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, 
-          sourceItem,
-        };
-      })
-      .filter(x => x !== null)
-      .filter(updateFilter);
+export async function updateEmanations(updateFilter: (_: {metadata: EmanationMetadata, sourceItem: Item}) => boolean) {
+  const allItems = await OBR.scene.items.getItems();
+  const emanationsToUpdate = allItems.filter(isEmanation)
+    .map((emanation) => {
+      const sourceItem = allItems.find((item) => item.id === emanation.attachedTo);
+      if (!sourceItem || !isImage(sourceItem)) {
+        console.warn(`Can't find source item ${emanation.attachedTo}`)
+        return null;
+      }
+      return {
+        id: emanation.id,
+        style: getStyle(emanation),
+        metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, 
+        sourceItem,
+      };
+    })
+    .filter(x => x !== null)
+    .filter(updateFilter);
 
-    if (emanationsToUpdate.length === 0) {
-      return;
-    }
-    
-    const sceneEmanationMetadata = await getSceneEmanationMetadata();
-    const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
-      sourceItem,
-      style,
-      metadata.size,
-      sceneEmanationMetadata,
-    ));
-    await OBR.scene.items.deleteItems(emanationsToUpdate.map(({id}) => id));
-    await OBR.scene.items.addItems(replacements);
-  } finally {
-    emanationReplaceLock.release();
+  if (emanationsToUpdate.length === 0) {
+    return;
   }
+
+  const sceneEmanationMetadata = await getSceneEmanationMetadata();
+  const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
+    sourceItem,
+    style,
+    metadata.size,
+    sceneEmanationMetadata,
+  ));
+  const toDelete = emanationsToUpdate.map(({id}) => id);
+  await OBR.scene.items.deleteItems(toDelete);
+  await OBR.scene.items.addItems(replacements);
 }
