@@ -4,9 +4,9 @@ Add emanations to any character. Emanations will automatically resize after toke
 
 ## To do
 - Better styling for context menu and action
-- Hexagonal emanations
 - Fix wrong shape on load
 - Only one notification on unsupported (when change, get builder. If builder changed badly, message)
+- Don't refresh hex when builder will be the same
 
 ![Interface](./docs/header.jpg)
 

@@ -2,7 +2,6 @@ import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import icon from "./status.svg";
 import { getPluginId, updateEmanations, updateSceneMetadata } from "./helpers";
-import { isHexGrid } from "./hexUtils";
 
 /**
  * This file represents the background script run when the plugin loads.
@@ -36,9 +35,8 @@ OBR.onReady(() => {
   }
 
   OBR.scene.items.onChange((items) => {
-    updateEmanations(items, ({metadata, sourceItem, sceneEmanationMetadata}) => {
+    updateEmanations(items, ({metadata, sourceItem}) => {
       return !vectorsAreCloseEnough(sourceItem.scale, metadata.sourceScale)
-             || (isHexGrid(sceneEmanationMetadata.gridType) && !vectorsAreCloseEnough(sourceItem.position, metadata.originalPosition));
     });
   });
   

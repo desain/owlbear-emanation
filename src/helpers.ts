@@ -6,7 +6,6 @@ export type EmanationMetadata = {
   sourceScale: Vector2,
   size: number,
   style: EmanationStyle,
-  originalPosition: Vector2,
 }
 
 export interface EmanationStyle {
@@ -79,14 +78,12 @@ const emanationReplaceLock = new AwaitLock();
 export async function updateEmanations(
   items: Item[] | null,
   updateFilter: (_: {
-    sceneEmanationMetadata: SceneEmanationMetadata,
     metadata: EmanationMetadata,
     sourceItem: Item
   }) => boolean
 ) {
   await emanationReplaceLock.acquireAsync();
   try {
-    const sceneEmanationMetadata = await getSceneEmanationMetadata();
     const allItems = items ?? await OBR.scene.items.getItems();
     const emanationsToUpdate = allItems.filter(isEmanation)
       .map((emanation) => {
@@ -99,7 +96,6 @@ export async function updateEmanations(
           style: getStyle(emanation),
           metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, 
           sourceItem,
-          sceneEmanationMetadata,
         };
       })
       .filter(x => x !== null)
@@ -108,7 +104,8 @@ export async function updateEmanations(
     if (emanationsToUpdate.length === 0) {
       return;
     }
-
+    
+    const sceneEmanationMetadata = await getSceneEmanationMetadata();
     const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
       sourceItem,
       style,
