@@ -1,11 +1,13 @@
 # Emanations
 
-Add emanations to any character. Emanations will automatically resize after tokens are scaled, and will display the correct shape for the current grid measurement type.
-
-## To do
-- Only one notification on unsupported (when change, get builder. If builder changed badly, message)
+Add emanations to any character.
 
 ![Interface](./docs/header.jpg)
+
+## Features
+- Emanations will display the correct shape for the current grid type and grid measurement type.
+- Emanations will automatically resize after tokens are scaled.
+- Manage any number of emanations with any color.
 
 ## Installing
 
@@ -18,6 +20,8 @@ The extension can be installed from https://owlbear-emanation.pages.dev/manifest
 This project is a simple Typescript app.
 
 The background script `background.ts` communicates with Owlbear Rodeo to create a context menu item. When that item is clicked a popup is shown with the `contextmenu.ts` site rendered.
+
+The `action.html` page is rendered as an action item, which controls global settings for emanations.
 
 ## Building
 
@@ -34,6 +38,9 @@ To run in a development mode run:
 To make a production build run:
 
 `yarn build`
+
+## To do
+- Light and dark mode
 
 ## License
 
