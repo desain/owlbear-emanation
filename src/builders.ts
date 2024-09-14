@@ -9,10 +9,6 @@ interface Emanation extends Item {
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
   return Math2.rotate(point, {x: 0, y: 0}, degrees);
 }
-
-function isCloseEnoughToInteger(n: number) {
-  return Number.isInteger(parseFloat(n.toFixed(1)));
-}
   
   /**
    * Helper to build an emanation item.
@@ -36,7 +32,7 @@ function isCloseEnoughToInteger(n: number) {
     const numSquares = size / gridMultiplier;
     const absoluteSize = numSquares * gridDpi;
     const absoluteItemSize = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) * dpiScale;
-    const metadata: EmanationMetadata = { sourceScale: item.scale, originalPosition: item.position, size, style };
+    const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
   
     let emanation: Emanation;
     if (gridMeasurement === 'CHEBYSHEV' && gridType === 'SQUARE') {
@@ -48,7 +44,7 @@ function isCloseEnoughToInteger(n: number) {
         );
     } else if (gridMeasurement === 'CHEBYSHEV' && (gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL')) {
         if (gridMode) {
-          emanation = buildHexagonGridEmanation(item.position, numSquares, gridDpi, absoluteItemSize, gridType)
+          emanation = buildHexagonGridEmanation(item.position, Math.round(numSquares), gridDpi, absoluteItemSize, gridType)
         } else {
           const edgeToEdge = 2 * numSquares * gridDpi + absoluteItemSize;
           emanation = buildShapeEmanation(edgeToEdge * 2 / Math.sqrt(3), item.position, 'HEXAGON');
@@ -81,12 +77,6 @@ function isCloseEnoughToInteger(n: number) {
         'CIRCLE',
       );
     }
-  
-    // const offset = {
-    //   x: (item.grid.offset.x / item.image.width) * -width,
-    //   y: (item.grid.offset.y / item.image.height) * -height,
-    // }
-    // Apply image offset and offset circle position so the origin is the top left
   
     emanation.locked = true;
     emanation.name = `${item.name} ${size} emanation`;
@@ -136,57 +126,9 @@ function isCloseEnoughToInteger(n: number) {
 
   function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize: number, absoluteItemSize: number, gridType: HexGridType) {
     const utils = getHexGridUtils(hexSize, gridType);
-    const {
-      originToClosestCenter,
-      getCrossAxisPosition,
-      crossAxisSpacing,
-    } = utils;
 
     const radius = utils.getEmanationRadius(numHexes, absoluteItemSize);
-    const crossAxisMultiple = (getCrossAxisPosition(position) + originToClosestCenter) / crossAxisSpacing;
-    const onHexCenter = isCloseEnoughToInteger(crossAxisMultiple);
-    if (onHexCenter) {
       return buildHexagonEmanationFromHexCenter(position, radius, utils);
-    } else {
-      return buildHexagonEmanationFromIntersection(position, radius, utils);
-    }
-  }
-
-  function buildHexagonEmanationFromIntersection(position: Vector2, radius: number, utils: HexGridUtils) {
-    const isReversed = isCloseEnoughToInteger(utils.getCrossAxisPosition(position) / utils.crossAxisSpacing)
-
-    const rightHexOffset = { x: utils.mainAxisSpacing, y: 0 };
-    const downLeftHexOffset = clockwiseAroundOrigin(rightHexOffset, 120);
-    const pointyBottomToBottomRightOffset = clockwiseAroundOrigin({x: utils.absoluteSideLength, y: 0}, -30);
-
-    const startPoint = Math2.multiply(downLeftHexOffset, radius);
-
-    const points = [];
-
-    for (let i = 0; i < radius; i++) {
-      const bottomPoint = Math2.add(startPoint, Math2.multiply(rightHexOffset, i));
-      points.push(bottomPoint);
-      points.push(Math2.add(bottomPoint, pointyBottomToBottomRightOffset));
-    }
-
-    const secondStart = Math2.add(startPoint, Math2.multiply(rightHexOffset, radius));
-    for (let i = 0; i < radius; i++) {
-      const bottomPoint = Math2.subtract(secondStart, Math2.multiply(downLeftHexOffset, i));
-      points.push(bottomPoint);
-      points.push(Math2.add(bottomPoint, pointyBottomToBottomRightOffset));
-    }
-
-
-    const baseRotation = utils.baseRotationDegrees + (isReversed ? 180 : 0);
-    return buildCurve()
-      .points([
-        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation)),
-        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 120)),
-        ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 240)),
-      ].map((point) => Math2.add(point, position)))
-      .closed(true)
-      .tension(0)
-      .build();
   }
 
   function buildHexagonEmanationFromHexCenter(position: Vector2, radius: number, utils: HexGridUtils) {
