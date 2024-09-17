@@ -19,18 +19,18 @@ body {
     align-items: stretch;
 }
 
-#emanation-color {
+input.emanation-color {
     background: transparent;
     border: none;
     padding: 0;
     block-size: auto;
     cursor: pointer;
 }
-#emanation-color:hover {
+input.emanation-color:hover {
     transform: scale(1.1);
 }
 
-input#emanation-size {
+.emanation-size {
     max-inline-size: 3em;
     background-color: transparent;
     color: inherit;
@@ -39,10 +39,10 @@ input#emanation-size {
     border-top-left-radius: 16px;
     border-bottom-left-radius: 16px;
 }
-#emanation-size:hover {
+.emanation-size:hover {
     border-color: white;
 }
-#emanation-size:focus-visible {
+.emanation-size:focus-visible {
     outline-color: rgb(187, 153, 255);
     outline-style: solid;
     border-color: transparent;
@@ -58,26 +58,11 @@ input#emanation-size {
     border-bottom-right-radius: 16px;
 }
 
-.remove-emanation, #create-emanation {
+.emanation-row .action {
     margin-left: auto;
 }
 
-.extant-emanation-color {
-    min-width: 50px;
-    border: none;
-    padding: 0;
-    margin-right: 10px;
-}
-/* .extant-emanation-color:hover {
-    transform: scale(0.9);
-} */
-
-.extant-emanation-size {
-    display: flex;
-    align-items: center;
-}
-
-button.action {
+.action {
     border: 1px solid rgba(255, 255, 255, 0.23);
     background: transparent;
     color: inherit;
@@ -88,6 +73,6 @@ button.action {
     padding: 5px 15px;
     min-width: 100px;
 }
-button.action:hover {
+.action:hover {
     background-color: rgba(255, 255, 255, 0.08)
 }

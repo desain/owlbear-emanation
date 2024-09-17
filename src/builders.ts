@@ -2,7 +2,7 @@ import OBR, { Item, Math2, Vector2, buildCurve, ShapeType, buildShape, Image } f
 import { EmanationStyle, EmanationMetadata, getPluginId, SceneEmanationMetadata } from "./helpers";
 import { getHexGridUtils, HexGridType, HexGridUtils } from "./hexUtils";
 
-interface Emanation extends Item {
+export interface Emanation extends Item {
   style: EmanationStyle;
 }
 

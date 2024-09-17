@@ -41,6 +41,8 @@ To make a production build run:
 
 ## To do
 - Light and dark mode
+- Update emanations when image alignment changes
+- Debounce rebuilds
 
 ## License
 

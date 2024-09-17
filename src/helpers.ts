@@ -1,5 +1,10 @@
-import OBR, { GridMeasurement, GridType, isCurve, isImage, isShape, Item, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { Curve, GridMeasurement, GridType, isCurve, isImage, isShape, Item, Path, Shape, Vector2 } from "@owlbear-rodeo/sdk";
 import { buildEmanation } from "./builders";
+
+// export interface Emanation extends Item {
+//   style: EmanationStyle;
+// }
+export type Emanation = Shape | Curve | Path;
 
 export type EmanationMetadata = {
   sourceScale: Vector2,
@@ -69,11 +74,11 @@ export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetada
   if (metadataChanged) {
     const newMetadata: SceneEmanationMetadata = { ...currentMetadata, ...metadata };
     await OBR.scene.setMetadata({ [getPluginId('metadata')]: newMetadata });
-    await updateEmanations(() => true);
+    await rebuildEmanations(() => true);
   }
 }
 
-export async function updateEmanations(updateFilter: (_: {metadata: EmanationMetadata, sourceItem: Item}) => boolean) {
+export async function rebuildEmanations(updateFilter: (_: {metadata: EmanationMetadata, sourceItem: Item, id: string}) => boolean) {
   const allItems = await OBR.scene.items.getItems();
   const emanationsToUpdate = allItems.filter(isEmanation)
     .map((emanation) => {
