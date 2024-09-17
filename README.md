@@ -43,6 +43,8 @@ To make a production build run:
 - Light and dark mode
 - Update emanations when image alignment changes
 - Debounce rebuilds
+- Refocus size after rebuild
+- Allow setting default opacity in settings
 
 ## License
 

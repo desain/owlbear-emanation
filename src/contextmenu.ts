@@ -45,7 +45,7 @@ function emanationRow(id: string | null, color: string, size: number, multiplier
       <input type="number"
              class="${extantClass} ${EMANATION_SIZE}"
              value="${size}"
-             min="0"
+             min="${multiplier}"
              data-id="${id}"
              step="${multiplier}"
              />
@@ -59,7 +59,7 @@ async function renderContextMenu() {
   const {parsed: {unit, multiplier}} = await OBR.scene.grid.getScale();
 
   const selection = await OBR.player.getSelection();
-  const extantEmanations = selection?.length == 1
+  const extantEmanations = selection?.length === 1
     ? (await OBR.scene.items.getItems(isEmanation))
       .filter((emanation) => emanation.attachedTo == selection[0])
       .map((emanation) => ({emanation, metadata: emanation.metadata[getPluginId('metadata')] as EmanationMetadata}))

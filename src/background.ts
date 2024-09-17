@@ -9,7 +9,11 @@ import AwaitLock from "await-lock";
  * It creates the context menu item for the emanation.
  */
 
-OBR.onReady(() => {
+function vectorsAreCloseEnough(a: Vector2, b: Vector2) {
+  return Math2.compare(a, b, 0.01);
+}
+
+OBR.onReady(async () => {
   OBR.contextMenu.create({
     id: getPluginId("menu"),
     icons: [
@@ -31,12 +35,15 @@ OBR.onReady(() => {
     },
   });
 
-  function vectorsAreCloseEnough(a: Vector2, b: Vector2) {
-    return Math2.compare(a, b, 0.01);
+  // Only install global listeners for one instance
+  if (await OBR.player.getRole() === 'GM') {
+    const emanationReplaceLock = new AwaitLock();
+    installItemHandler(emanationReplaceLock);
+    installGridHandler(emanationReplaceLock);
   }
+});
 
-  const emanationReplaceLock = new AwaitLock();
-
+function installItemHandler(emanationReplaceLock: AwaitLock) {
   OBR.scene.items.onChange(async () => {
     await emanationReplaceLock.acquireAsync();
     try {
@@ -47,7 +54,9 @@ OBR.onReady(() => {
       emanationReplaceLock.release();
     }
   });
-  
+}
+
+function installGridHandler(emanationReplaceLock: AwaitLock) {
   OBR.scene.grid.onChange(async (grid) => {
     await emanationReplaceLock.acquireAsync();
     try {
@@ -61,4 +70,4 @@ OBR.onReady(() => {
       emanationReplaceLock.release();
     }
   });
-});
+}
