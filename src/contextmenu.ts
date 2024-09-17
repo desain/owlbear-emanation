@@ -1,11 +1,13 @@
 import "./style.css";
 import OBR, { Image, } from "@owlbear-rodeo/sdk";
 import {
+  Emanation,
   EmanationMetadata,
   getPluginId,
   getSceneEmanationMetadata,
   getStyle,
   isEmanation,
+  rebuildEmanations,
 } from "./helpers";
 import { buildEmanation } from "./builders";
 
@@ -21,6 +23,37 @@ interface PlayerMetadata {
 
 OBR.onReady(renderContextMenu);
 
+const NEW_EMANATION = 'new-emanation';
+const EXTANT_EMANATION = 'extant-emanation';
+const EMANATION_COLOR = 'emanation-color';
+const EMANATION_SIZE = 'emanation-size';
+const CREATE_EMANATION = 'create-emanation';
+const REMOVE_EMANATION = 'remove-emanation';
+
+function emanationRow(id: string | null, color: string, size: number, multiplier: number, unit: string) {
+  const isNew = id === null;
+  const buttonText = isNew ? '+ Create' : '- Remove';
+  const buttonClass = isNew ? CREATE_EMANATION : REMOVE_EMANATION;
+  const extantClass = isNew ? NEW_EMANATION : EXTANT_EMANATION;
+
+  return `<div class="emanation-row">
+      <input type="color"
+             class="${extantClass} ${EMANATION_COLOR}"
+             data-id="${id}"
+             value="${color}"
+             />
+      <input type="number"
+             class="${extantClass} ${EMANATION_SIZE}"
+             value="${size}"
+             min="0"
+             data-id="${id}"
+             step="${multiplier}"
+             />
+      <span class="emanation-unit">${unit}.</span>
+      <button class="crud action ${buttonClass}" data-id="${id}">${buttonText}</button>
+    </div>`;
+}
+
 async function renderContextMenu() {
   const playerEmanationMetadata = (await OBR.player.getMetadata())[getPluginId('metadata')] as PlayerMetadata | undefined;
   const {parsed: {unit, multiplier}} = await OBR.scene.grid.getScale();
@@ -31,17 +64,8 @@ async function renderContextMenu() {
       .filter((emanation) => emanation.attachedTo == selection[0])
       .map((emanation) => ({emanation, metadata: emanation.metadata[getPluginId('metadata')] as EmanationMetadata}))
       .sort(({metadata: {size: sizeA}}, {metadata: {size: sizeB}}) => sizeA - sizeB)
-      .map(({emanation, metadata: {size}}) => {
-        return `
-          <div class="emanation-row">
-            <button class="extant-emanation-color"
-                 data-color="${getStyle(emanation).strokeColor}"
-                 style="background-color: ${getStyle(emanation).strokeColor};"
-            ></button>
-            <span class="extant-emanation-size">${size}${unit}.</span>
-            <button class="action remove-emanation" data-id="${emanation.id}">- Remove</button>
-          </div>`
-      })
+      .map(({emanation, metadata: {size}}) => emanationRow(
+        emanation.id, getStyle(emanation).strokeColor, size, multiplier, unit))
     : ['<p>(Selection is more than 1 item)</p>']
 
   let size = playerEmanationMetadata?.size ?? multiplier;
@@ -49,66 +73,64 @@ async function renderContextMenu() {
 
   // Setup the document with an emanation size input and create button
   document.getElementById('app')!.innerHTML = `
-    <div class="emanation-row">
-      <input id="emanation-color"
-             name="emanation-color"
-             type="color"
-             value="${color}"/>
-      <input id="emanation-size"
-             name="emanation-size"
-             type="number"
-             value="${size}"
-             min="0"
-             step="${multiplier}"/>
-      <span class="emanation-unit">${unit}.</span>
-      <button class="action" id="create-emanation">+ Create</button>
-    </div>
+    ${emanationRow(null, color, size, multiplier, unit)}
     ${extantEmanations.join('')}
     <button class="action" id="remove-emanations" ${extantEmanations.length === 0 ? 'disabled' : ''}>- Remove All</button>
   `;
 
-  const colorInput = <HTMLInputElement>document.getElementById('emanation-color');
-  const sizeInput = <HTMLInputElement>document.getElementById('emanation-size');
-
   // Attach listeners
-  colorInput.addEventListener('change', () => {
-    color = colorInput.value;
+  document.querySelectorAll<HTMLButtonElement>(`.${NEW_EMANATION}.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', async () => {
+    color = colorButton.value;
     const newMetadata: PlayerMetadata = { color, size };
-    OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata })
-  });
+    await OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata });
+  }));
 
-  sizeInput.addEventListener('change', () => {
+  document.querySelectorAll<HTMLInputElement>(`.${NEW_EMANATION}.${EMANATION_SIZE}`).forEach((sizeInput) => sizeInput.addEventListener('change', async () => {
     size = parseFloat(sizeInput.value);
     const newMetadata: PlayerMetadata = { color, size };
-    OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata })
-  });
+    OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata });
+  }));
 
-  document.getElementById('create-emanation')?.addEventListener('click', async () => {
-    color = colorInput.value;
-    size = parseFloat(sizeInput.value);
+  document.querySelectorAll<HTMLButtonElement>(`.${EXTANT_EMANATION}.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', async () => {
+    const id = colorButton.dataset.id!!;
+    await OBR.scene.items.updateItems<Emanation>([id], (emanations) => emanations.forEach((emanation) => {
+      emanation.style.strokeColor = colorButton.value;
+      emanation.style.fillColor = colorButton.value;
+      const metadata = emanation.metadata[getPluginId('metadata')] as EmanationMetadata;
+      metadata.style.strokeColor = colorButton.value;
+      metadata.style.fillColor = colorButton.value;
+    }));
+  }));
+
+  document.querySelectorAll<HTMLInputElement>(`.${EXTANT_EMANATION}.${EMANATION_SIZE}`).forEach((sizeInput) => sizeInput.addEventListener('change', async () => {
+    const id = sizeInput.dataset.id!!;
+    const size = parseFloat(sizeInput.value);
+    await OBR.scene.items.updateItems<Emanation>([id], (emanations) => emanations.forEach((emanation) => {
+      const metadata = emanation.metadata[getPluginId('metadata')] as EmanationMetadata;
+      metadata.size = size;
+    }));
+    await rebuildEmanations(({id: otherId}) => otherId === id);
+    await renderContextMenu();
+  }));
+
+  document.querySelectorAll(`.${CREATE_EMANATION}`).forEach((button) => button.addEventListener('click', async () => {
     if (size > 0) {
       const newPlayerMetadata: PlayerMetadata = { color, size };
       await OBR.player.setMetadata({ [getPluginId("metadata")]: newPlayerMetadata });
       await createEmanations(size, color);
+    } else {
+      await OBR.notification.show('Emanation size must be greater than 0', 'WARNING');
     }
-  });
+  }));
 
-  document.querySelectorAll('.extant-emanation-color').forEach((div) => {
-    div.addEventListener('click', async (event) => {
-      colorInput.value = (event.target as HTMLElement).dataset.color ?? color;
-      colorInput.dispatchEvent(new Event('change'));
-    });
-  });
+  document.querySelectorAll(`.${REMOVE_EMANATION}`).forEach((button) => button.addEventListener('click', async (event) => {
+    const emanationId = (event.target as HTMLButtonElement).dataset.id;
+    if (emanationId) {
+      await OBR.scene.items.deleteItems([emanationId]);
+      await renderContextMenu();
+    }
+  }));;
 
-  document.querySelectorAll('button.remove-emanation').forEach((button) => {
-    button.addEventListener('click', async (event) => {
-      const emanationId = (event.target as HTMLButtonElement).dataset.id;
-        if (emanationId) {
-          await OBR.scene.items.deleteItems([emanationId]);
-          await renderContextMenu();
-        }
-    });
-  });
   document.getElementById('remove-emanations')?.addEventListener('click', () => removeAllEmanations());
 }
 

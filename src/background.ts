@@ -1,7 +1,7 @@
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import icon from "./status.svg";
-import { getPluginId, updateEmanations, updateSceneMetadata } from "./helpers";
+import { getPluginId, rebuildEmanations, updateSceneMetadata } from "./helpers";
 import AwaitLock from "await-lock";
 
 /**
@@ -40,7 +40,7 @@ OBR.onReady(() => {
   OBR.scene.items.onChange(async () => {
     await emanationReplaceLock.acquireAsync();
     try {
-      await updateEmanations(({metadata, sourceItem}) => {
+      await rebuildEmanations(({metadata, sourceItem}) => {
         return !vectorsAreCloseEnough(sourceItem.scale, metadata.sourceScale)
       });
     } finally {
