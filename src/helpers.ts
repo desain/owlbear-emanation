@@ -29,6 +29,12 @@ export type SceneEmanationMetadata = {
     gridType: GridType,
 }
 
+export interface PlayerMetadata {
+  color: string;
+  size: number;
+  defaultOpacity: number;
+}
+
 /** Get the reverse domain name id for this plugin at a given path */
 export function getPluginId(path: string) {
   return `com.desain.emanation/${path}`;
@@ -51,7 +57,7 @@ export function getStyle(emanation: Item): EmanationStyle {
   }
 }
 
-export async function getSceneEmanationMetadata() {
+export async function getSceneEmanationMetadata(): Promise<SceneEmanationMetadata> {
   return (await OBR.scene.getMetadata())[getPluginId('metadata')] as SceneEmanationMetadata | undefined
     ?? {
       gridMode: true,
@@ -76,6 +82,19 @@ export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetada
     await OBR.scene.setMetadata({ [getPluginId('metadata')]: newMetadata });
     await rebuildEmanations(() => true);
   }
+}
+
+export async function updatePlayerMetadata(metadata: Partial<PlayerMetadata>): Promise<PlayerMetadata> {
+  const currentMetadata = (await OBR.player.getMetadata())[getPluginId('metadata')] as PlayerMetadata | undefined
+    ?? {
+      size: 0,
+      color: await OBR.player.getColor(),
+      defaultOpacity: 0.1,
+    };
+  const newMetadata = { ...currentMetadata, ...metadata };
+  await OBR.player.setMetadata({ [getPluginId('metadata')]: newMetadata });
+  return newMetadata;
+  // Don't need to rebuild here
 }
 
 export async function rebuildEmanations(updateFilter: (_: {metadata: EmanationMetadata, sourceItem: Item, id: string}) => boolean) {
