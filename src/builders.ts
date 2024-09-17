@@ -1,10 +1,6 @@
 import OBR, { Item, Math2, Vector2, buildCurve, ShapeType, buildShape, Image } from "@owlbear-rodeo/sdk";
-import { EmanationStyle, EmanationMetadata, getPluginId, SceneEmanationMetadata } from "./helpers";
+import { EmanationStyle, EmanationMetadata, getPluginId, SceneEmanationMetadata, Emanation } from "./helpers";
 import { getHexGridUtils, HexGridType, HexGridUtils } from "./hexUtils";
-
-export interface Emanation extends Item {
-  style: EmanationStyle;
-}
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
   return Math2.rotate(point, {x: 0, y: 0}, degrees);
@@ -47,8 +43,8 @@ function clockwiseAroundOrigin(point: Vector2, degrees: number) {
           emanation = buildHexagonGridEmanation(item.position, Math.round(numSquares), gridDpi, absoluteItemSize, gridType)
         } else {
           const edgeToEdge = 2 * numSquares * gridDpi + absoluteItemSize;
-          emanation = buildShapeEmanation(edgeToEdge * 2 / Math.sqrt(3), item.position, 'HEXAGON');
-          if (gridType === 'HEX_HORIZONTAL') {
+          emanation = buildShapeEmanation(edgeToEdge, item.position, 'HEXAGON');
+          if (gridType === 'HEX_VERTICAL') {
             emanation.rotation = 30;
           }
         }
@@ -126,9 +122,8 @@ function clockwiseAroundOrigin(point: Vector2, degrees: number) {
 
   function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize: number, absoluteItemSize: number, gridType: HexGridType) {
     const utils = getHexGridUtils(hexSize, gridType);
-
     const radius = utils.getEmanationRadius(numHexes, absoluteItemSize);
-      return buildHexagonEmanationFromHexCenter(position, radius, utils);
+    return buildHexagonEmanationFromHexCenter(position, radius, utils);
   }
 
   function buildHexagonEmanationFromHexCenter(position: Vector2, radius: number, utils: HexGridUtils) {
