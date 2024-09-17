@@ -44,7 +44,6 @@ To make a production build run:
 - Update emanations when image alignment changes
 - Debounce rebuilds
 - Refocus size after rebuild
-- Allow setting default opacity in settings
 
 ## License
 

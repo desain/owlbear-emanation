@@ -8,6 +8,8 @@ import {
   getStyle,
   isEmanation,
   rebuildEmanations,
+  PlayerMetadata,
+  updatePlayerMetadata,
 } from "./helpers";
 import { buildEmanation } from "./builders";
 
@@ -15,11 +17,6 @@ import { buildEmanation } from "./builders";
  * This file represents the HTML of the popover that is shown once
  * the emanations context menu item is clicked.
  */
-
-interface PlayerMetadata {
-  color?: string;
-  size?: number;
-}
 
 OBR.onReady(renderContextMenu);
 
@@ -81,14 +78,12 @@ async function renderContextMenu() {
   // Attach listeners
   document.querySelectorAll<HTMLButtonElement>(`.${NEW_EMANATION}.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', async () => {
     color = colorButton.value;
-    const newMetadata: PlayerMetadata = { color, size };
-    await OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata });
+    await updatePlayerMetadata({color});
   }));
 
   document.querySelectorAll<HTMLInputElement>(`.${NEW_EMANATION}.${EMANATION_SIZE}`).forEach((sizeInput) => sizeInput.addEventListener('change', async () => {
     size = parseFloat(sizeInput.value);
-    const newMetadata: PlayerMetadata = { color, size };
-    OBR.player.setMetadata({ [getPluginId("metadata")]: newMetadata });
+    await updatePlayerMetadata({size});
   }));
 
   document.querySelectorAll<HTMLButtonElement>(`.${EXTANT_EMANATION}.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', async () => {
@@ -115,9 +110,8 @@ async function renderContextMenu() {
 
   document.querySelectorAll(`.${CREATE_EMANATION}`).forEach((button) => button.addEventListener('click', async () => {
     if (size > 0) {
-      const newPlayerMetadata: PlayerMetadata = { color, size };
-      await OBR.player.setMetadata({ [getPluginId("metadata")]: newPlayerMetadata });
-      await createEmanations(size, color);
+      const newPlayerMetadata: PlayerMetadata = await updatePlayerMetadata({size, color});
+      await createEmanations(newPlayerMetadata);
     } else {
       await OBR.notification.show('Emanation size must be greater than 0', 'WARNING');
     }
@@ -149,7 +143,7 @@ async function removeAllEmanations() {
   }
 }
 
-async function createEmanations(size: number, color: string) {
+async function createEmanations({size, color, defaultOpacity}: PlayerMetadata) {
   const selection = await OBR.player.getSelection();
   if (!selection) {
     return;
@@ -160,7 +154,7 @@ async function createEmanations(size: number, color: string) {
     item,
     {
       fillColor: color,
-      fillOpacity: 0.1,
+      fillOpacity: defaultOpacity,
       strokeColor: color,
       strokeOpacity: 1,
       strokeWidth: 10,
