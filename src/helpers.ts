@@ -5,8 +5,8 @@ import { buildEmanation } from "./builders";
 //   style: EmanationStyle;
 // }
 
-type Circle = Shape & { shapeType: 'CIRCLE'; }
-export type Emanation = Shape | Curve;
+export type Circle = Shape & { shapeType: 'CIRCLE'; }
+export type Emanation = Circle | Curve;
 
 export type EmanationMetadata = {
   sourceScale: Vector2,
