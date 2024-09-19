@@ -1,6 +1,6 @@
-import OBR, { Item, Math2, Vector2, buildCurve, ShapeType, buildShape, Image } from "@owlbear-rodeo/sdk";
-import { EmanationStyle, EmanationMetadata, getPluginId, SceneEmanationMetadata, Emanation } from "./helpers";
-import { getHexGridUtils, HexGridType, HexGridUtils } from "./hexUtils";
+import OBR, { buildCurve, buildShape, Image, Item, Math2, ShapeType, Vector2 } from "@owlbear-rodeo/sdk";
+import { Emanation, EmanationMetadata, EmanationStyle, getPluginId, SceneEmanationMetadata } from "./helpers";
+import { getHexGridUtils, HexGridType } from "./hexUtils";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
   return Math2.rotate(point, { x: 0, y: 0 }, degrees);
@@ -25,8 +25,8 @@ export function buildEmanation(
   { gridDpi, gridMeasurement, gridMultiplier, gridType, gridMode }: SceneEmanationMetadata,
 ): Item {
   const dpiScale = gridDpi / item.grid.dpi;
-  const numSquares = size / gridMultiplier;
-  const absoluteSize = numSquares * gridDpi;
+  const numUnits = size / gridMultiplier;
+  const absoluteSize = numUnits * gridDpi;
   const absoluteItemSize = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) * dpiScale;
   const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
 
@@ -40,9 +40,9 @@ export function buildEmanation(
     );
   } else if (gridMeasurement === 'CHEBYSHEV' && (gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL')) {
     if (gridMode) {
-      emanation = buildHexagonGridEmanation(item.position, Math.round(numSquares), gridDpi, absoluteItemSize, gridType)
+      emanation = buildHexagonGridEmanation(item.position, Math.round(numUnits), gridDpi, absoluteItemSize, gridType)
     } else {
-      const edgeToEdge = 2 * numSquares * gridDpi + absoluteItemSize;
+      const edgeToEdge = 2 * numUnits * gridDpi + absoluteItemSize;
       emanation = buildShapeEmanation(edgeToEdge, item.position, 'HEXAGON');
       if (gridType === 'HEX_VERTICAL') {
         emanation.rotation = 30;
@@ -50,15 +50,15 @@ export function buildEmanation(
     }
   } else if (gridMeasurement === 'MANHATTAN') {
     if (gridMode) {
-      const octantPoints = buildManhattanSquareOctant(numSquares);
+      const octantPoints = buildManhattanSquareOctant(numUnits);
       emanation = octantToEmanation(octantPoints, gridDpi, absoluteItemSize / 2, item.position);
     } else {
       emanation = buildManhattanPreciseEmanation(item.position, absoluteSize, absoluteItemSize / 2, absoluteItemSize / 2);
     }
   } else if (gridMeasurement === 'ALTERNATING') {
     let octantPoints = gridMode
-      ? buildAlternatingSquareOctant(numSquares)
-      : buildAlternatingPreciseOctant(numSquares);
+      ? buildAlternatingSquareOctant(numUnits)
+      : buildAlternatingPreciseOctant(numUnits);
     emanation = octantToEmanation(octantPoints, gridDpi, absoluteItemSize / 2, item.position);
   } else {
     if (gridMeasurement !== 'EUCLIDEAN') {
@@ -98,22 +98,19 @@ export function buildEmanation(
  * @param absoluteSize Radius of emanation in absolute space.
  * @param halfWidth Half the width of the center item in absolute space.
  * @param halfHeight Half the height of the center item in absolute space.
- * @returns Emanation item.
+ * @returns Emanation item with points in clockwise order.
  */
 function buildManhattanPreciseEmanation(position: Vector2, absoluteSize: number, halfWidth: number, halfHeight: number) {
   return buildCurve()
     .points([
-      { x: halfWidth + absoluteSize, y: +halfHeight }, // right bottom
       { x: halfWidth + absoluteSize, y: -halfHeight }, // right top
-
-      { x: +halfWidth, y: -halfHeight - absoluteSize }, // top right
-      { x: -halfWidth, y: -halfHeight - absoluteSize }, // top left
-
-      { x: -halfWidth - absoluteSize, y: -halfHeight }, // left top
-      { x: -halfWidth - absoluteSize, y: +halfHeight }, // left bottom
-
-      { x: -halfWidth, y: halfHeight + absoluteSize }, // bottom left
+      { x: halfWidth + absoluteSize, y: +halfHeight }, // right bottom
       { x: +halfWidth, y: halfHeight + absoluteSize }, // bottom right
+      { x: -halfWidth, y: halfHeight + absoluteSize }, // bottom left
+      { x: -halfWidth - absoluteSize, y: +halfHeight }, // left bottom
+      { x: -halfWidth - absoluteSize, y: -halfHeight }, // left top
+      { x: -halfWidth, y: -halfHeight - absoluteSize }, // top left
+      { x: +halfWidth, y: -halfHeight - absoluteSize }, // top right
     ])
     .position(position)
     .closed(true)
@@ -124,45 +121,39 @@ function buildManhattanPreciseEmanation(position: Vector2, absoluteSize: number,
 function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize: number, absoluteItemSize: number, gridType: HexGridType) {
   const utils = getHexGridUtils(hexSize, gridType);
   const radius = utils.getEmanationRadius(numHexes, absoluteItemSize);
-  return buildHexagonEmanationFromHexCenter(position, radius, utils);
-}
-
-function buildHexagonEmanationFromHexCenter(position: Vector2, radius: number, utils: HexGridUtils) {
   const rightHexOffset = { x: utils.mainAxisSpacing, y: 0 };
-  const pointyBottomOffset = { x: 0, y: utils.absoluteSideLength }
-  const pointyBottomRightOffset = clockwiseAroundOrigin(pointyBottomOffset, -60);
 
-  const downLeftHexCenter = clockwiseAroundOrigin(
+  const topLeftHexOffset = clockwiseAroundOrigin(
     Math2.multiply(rightHexOffset, radius),
-    120
+    240,
   );
-  const points = [];
 
+  const pointyTopOffset = { x: 0, y: -utils.absoluteSideLength };
+  const topLeftPointyTop = Math2.add(topLeftHexOffset, pointyTopOffset);
+  const topLeftPointyRight = Math2.add(topLeftHexOffset, clockwiseAroundOrigin(pointyTopOffset, 60));
+
+  const points = [];
   for (let i = 0; i < radius; i++) {
-    const hexCenter = Math2.add(downLeftHexCenter, Math2.multiply(rightHexOffset, i));
-    points.push(Math2.add(hexCenter, pointyBottomOffset));
-    points.push(Math2.add(hexCenter, pointyBottomRightOffset));
+    const acrossOffset = Math2.multiply(rightHexOffset, i);
+    points.push(Math2.add(topLeftPointyTop, acrossOffset));
+    points.push(Math2.add(topLeftPointyRight, acrossOffset));
   }
-  points.push(Math2.add(
-    Math2.add(downLeftHexCenter, Math2.multiply(rightHexOffset, radius)),
-    pointyBottomOffset
-  ));
+  points.push(Math2.add(topLeftPointyTop, Math2.multiply(rightHexOffset, radius)));
 
   const baseRotation = utils.baseRotationDegrees;
   return buildCurve()
     .points([
       ...points.map((point) => clockwiseAroundOrigin(point, baseRotation)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 60)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 120)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 180)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 240)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation - 300)),
+      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 60)),
+      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 120)),
+      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 180)),
+      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 240)),
+      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 300)),
     ])
     .position(position)
     .closed(true)
     .tension(0)
     .build();
-
 }
 
 /**
@@ -183,8 +174,9 @@ function buildShapeEmanation(widthHeight: number, position: Vector2, shapeType: 
 
 /**
  * Create a full emanation curve from the set of points in the first octant.
- * @param octantPoints Points in the first octant, centered on (0,0). Not scaled, so one unit in octant space corresponds to one grid
- *                     square. Last point must have x=y.
+ * @param octantPoints Points in the first octant going clockwise, centered on (0,0). Not scaled,
+ *                     so one unit in octant space corresponds to one grid square. Last point must
+ *                     have x=y.
  * @param scaleFactor Scaling factor between one unit in octant space and one grid unit.
  * @param cornerOffset Octant will place its (0,0) point at (cornerOffset, cornerOffset).
  * @param position Origin of the emanation.
@@ -206,7 +198,7 @@ function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerO
       ...quadrantPoints.map(({ x, y }) => ({ x: -y, y: x })),
       ...quadrantPoints.map(({ x, y }) => ({ x: -x, y: -y })),
       ...quadrantPoints.map(({ x, y }) => ({ x: y, y: -x })),
-    ].reverse())
+    ])
     .position(position)
     .closed(true)
     .tension(0)
