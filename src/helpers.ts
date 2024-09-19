@@ -1,10 +1,12 @@
-import OBR, { Curve, GridMeasurement, GridType, isCurve, isImage, isShape, Item, Path, Shape, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { Curve, GridMeasurement, GridType, isCurve, isImage, isShape, Item, Shape, Vector2 } from "@owlbear-rodeo/sdk";
 import { buildEmanation } from "./builders";
 
 // export interface Emanation extends Item {
 //   style: EmanationStyle;
 // }
-export type Emanation = Shape | Curve | Path;
+
+type Circle = Shape & { shapeType: 'CIRCLE'; }
+export type Emanation = Shape | Curve;
 
 export type EmanationMetadata = {
   sourceScale: Vector2,
