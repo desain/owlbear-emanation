@@ -44,6 +44,7 @@ To make a production build run:
 - Update emanations when image alignment changes
 - Debounce rebuilds
 - Refocus size after rebuild
+- Clockwise polygons
 
 ## License
 

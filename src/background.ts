@@ -14,6 +14,69 @@ function vectorsAreCloseEnough(a: Vector2, b: Vector2) {
 }
 
 OBR.onReady(async () => {
+  if (await OBR.scene.isReady()) {
+    console.log("Scene is ready");
+    await install();
+  } else {
+    console.log("Scene not ready, waiting for ready change");
+    OBR.scene.onReadyChange(async (ready) => {
+      if (ready) {
+        console.log("Scene is now ready");
+        await install();
+      }
+    });
+  }
+});
+
+async function install() {
+  console.log("Installing emanations");
+  createContextMenu();
+
+  // Only install global listeners that can change items for one instance
+  if (await OBR.player.getRole() === 'GM') {
+    const emanationReplaceLock = new AwaitLock();
+    const uninstallItemHandler = installItemHandler(emanationReplaceLock);
+    const uninstallGridHandler = installGridHandler(emanationReplaceLock);
+    const uninstallReadyHandler = OBR.scene.onReadyChange((ready) => {
+      if (!ready) {
+        uninstallItemHandler();
+        uninstallGridHandler();
+        uninstallReadyHandler();
+      }
+    });
+  }
+}
+
+function installItemHandler(emanationReplaceLock: AwaitLock) {
+  return OBR.scene.items.onChange(async () => {
+    await emanationReplaceLock.acquireAsync();
+    try {
+      await rebuildEmanations(({ metadata, sourceItem }) => {
+        return !vectorsAreCloseEnough(sourceItem.scale, metadata.sourceScale)
+      });
+    } finally {
+      emanationReplaceLock.release();
+    }
+  });
+}
+
+function installGridHandler(emanationReplaceLock: AwaitLock) {
+  return OBR.scene.grid.onChange(async (grid) => {
+    await emanationReplaceLock.acquireAsync();
+    try {
+      await updateSceneMetadata({
+        gridDpi: grid.dpi,
+        gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
+        gridMeasurement: grid.measurement,
+        gridType: grid.type,
+      });
+    } finally {
+      emanationReplaceLock.release();
+    }
+  });
+}
+
+function createContextMenu() {
   OBR.contextMenu.create({
     id: getPluginId("menu"),
     icons: [
@@ -33,41 +96,5 @@ OBR.onReady(async () => {
       url: "/contextmenu.html",
       // height: 88,
     },
-  });
-
-  // Only install global listeners for one instance
-  if (await OBR.player.getRole() === 'GM') {
-    const emanationReplaceLock = new AwaitLock();
-    installItemHandler(emanationReplaceLock);
-    installGridHandler(emanationReplaceLock);
-  }
-});
-
-function installItemHandler(emanationReplaceLock: AwaitLock) {
-  OBR.scene.items.onChange(async () => {
-    await emanationReplaceLock.acquireAsync();
-    try {
-      await rebuildEmanations(({metadata, sourceItem}) => {
-        return !vectorsAreCloseEnough(sourceItem.scale, metadata.sourceScale)
-      });
-    } finally {
-      emanationReplaceLock.release();
-    }
-  });
-}
-
-function installGridHandler(emanationReplaceLock: AwaitLock) {
-  OBR.scene.grid.onChange(async (grid) => {
-    await emanationReplaceLock.acquireAsync();
-    try {
-      await updateSceneMetadata({
-        gridDpi: grid.dpi,
-        gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
-        gridMeasurement: grid.measurement,
-        gridType: grid.type,
-      });
-    } finally {
-      emanationReplaceLock.release();
-    }
   });
 }
