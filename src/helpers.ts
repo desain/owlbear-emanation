@@ -22,11 +22,11 @@ export interface EmanationStyle {
 }
 
 export type SceneEmanationMetadata = {
-    gridMode: boolean,
-    gridDpi: number,
-    gridMultiplier: number,
-    gridMeasurement: GridMeasurement,
-    gridType: GridType,
+  gridMode: boolean,
+  gridDpi: number,
+  gridMultiplier: number,
+  gridMeasurement: GridMeasurement,
+  gridType: GridType,
 }
 
 export interface PlayerMetadata {
@@ -60,15 +60,15 @@ export function getStyle(emanation: Item): EmanationStyle {
 export async function getSceneEmanationMetadata(): Promise<SceneEmanationMetadata> {
   return (await OBR.scene.getMetadata())[getPluginId('metadata')] as SceneEmanationMetadata | undefined
     ?? {
-      gridMode: true,
-      gridDpi: await OBR.scene.grid.getDpi(),
-      gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
-      gridMeasurement: await OBR.scene.grid.getMeasurement(),
-      gridType: await OBR.scene.grid.getType(),
-    };
+    gridMode: true,
+    gridDpi: await OBR.scene.grid.getDpi(),
+    gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
+    gridMeasurement: await OBR.scene.grid.getMeasurement(),
+    gridType: await OBR.scene.grid.getType(),
+  };
 }
 
-export function isEmanation(item: Item): boolean {
+export function isEmanation(item: Item): item is Emanation {
   const metadata = item.metadata[getPluginId("metadata")] as EmanationMetadata;
   return isPlainObject(metadata) && metadata.hasOwnProperty('sourceScale');
 }
@@ -87,17 +87,17 @@ export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetada
 export async function updatePlayerMetadata(metadata: Partial<PlayerMetadata>): Promise<PlayerMetadata> {
   const currentMetadata = (await OBR.player.getMetadata())[getPluginId('metadata')] as PlayerMetadata | undefined
     ?? {
-      size: 0,
-      color: await OBR.player.getColor(),
-      defaultOpacity: 0.1,
-    };
+    size: 0,
+    color: await OBR.player.getColor(),
+    defaultOpacity: 0.1,
+  };
   const newMetadata = { ...currentMetadata, ...metadata };
   await OBR.player.setMetadata({ [getPluginId('metadata')]: newMetadata });
   return newMetadata;
   // Don't need to rebuild here
 }
 
-export async function rebuildEmanations(updateFilter: (_: {metadata: EmanationMetadata, sourceItem: Item, id: string}) => boolean) {
+export async function rebuildEmanations(updateFilter: (_: { metadata: EmanationMetadata, sourceItem: Item, id: string }) => boolean) {
   const allItems = await OBR.scene.items.getItems();
   const emanationsToUpdate = allItems.filter(isEmanation)
     .map((emanation) => {
@@ -109,7 +109,7 @@ export async function rebuildEmanations(updateFilter: (_: {metadata: EmanationMe
       return {
         id: emanation.id,
         style: getStyle(emanation),
-        metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata, 
+        metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata,
         sourceItem,
       };
     })
@@ -121,13 +121,13 @@ export async function rebuildEmanations(updateFilter: (_: {metadata: EmanationMe
   }
 
   const sceneEmanationMetadata = await getSceneEmanationMetadata();
-  const replacements = emanationsToUpdate.map(({style, metadata, sourceItem}) => buildEmanation(
+  const replacements = emanationsToUpdate.map(({ style, metadata, sourceItem }) => buildEmanation(
     sourceItem,
     style,
     metadata.size,
     sceneEmanationMetadata,
   ));
-  const toDelete = emanationsToUpdate.map(({id}) => id);
+  const toDelete = emanationsToUpdate.map(({ id }) => id);
   await OBR.scene.items.deleteItems(toDelete);
   await OBR.scene.items.addItems(replacements);
 }
