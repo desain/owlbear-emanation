@@ -1,5 +1,5 @@
-import OBR, { buildCurve, buildShape, Image, Item, Math2, ShapeType, Vector2 } from "@owlbear-rodeo/sdk";
-import { Emanation, EmanationMetadata, EmanationStyle, getPluginId, SceneEmanationMetadata } from "./helpers";
+import OBR, { buildCurve, buildShape, Image, Item, Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import { Circle, Emanation, EmanationMetadata, EmanationStyle, getPluginId, SceneEmanationMetadata } from "./helpers";
 import { getHexGridUtils, HexGridType } from "./hexUtils";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
@@ -32,21 +32,18 @@ export function buildEmanation(
 
   let emanation: Emanation;
   if (gridMeasurement === 'CHEBYSHEV' && gridType === 'SQUARE') {
-    const originOffset = { x: -absoluteSize - absoluteItemSize / 2, y: -absoluteSize - absoluteItemSize / 2 }; // rectangle origin is top left
-    emanation = buildShapeEmanation(
-      absoluteSize * 2 + absoluteItemSize,
-      Math2.add(item.position, originOffset),
-      'RECTANGLE',
-    );
+    emanation = buildChebyshevSquareEmanation(item.position, numUnits, gridDpi, absoluteItemSize);
   } else if (gridMeasurement === 'CHEBYSHEV' && (gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL')) {
     if (gridMode) {
-      emanation = buildHexagonGridEmanation(item.position, Math.round(numUnits), gridDpi, absoluteItemSize, gridType)
+      emanation = buildHexagonGridEmanation(item.position, Math.round(numUnits), gridDpi, absoluteItemSize, gridType);
     } else {
-      const edgeToEdge = 2 * numUnits * gridDpi + absoluteItemSize;
-      emanation = buildShapeEmanation(edgeToEdge, item.position, 'HEXAGON');
-      if (gridType === 'HEX_VERTICAL') {
-        emanation.rotation = 30;
-      }
+      emanation = buildHexagonGridEmanation(item.position, 0, gridDpi, 0, gridType);
+      const cornerToCorner = 2 * numUnits * gridDpi + absoluteItemSize;
+      const cornerToCornerNow = 2 * gridDpi / Math.sqrt(3);
+      emanation.points = emanation.points.map((point) => clockwiseAroundOrigin(Math2.multiply(point, cornerToCorner / cornerToCornerNow), 30));
+    }
+    if (gridType === 'HEX_HORIZONTAL') {
+      emanation.rotation = 30;
     }
   } else if (gridMeasurement === 'MANHATTAN') {
     if (gridMode) {
@@ -67,11 +64,7 @@ export function buildEmanation(
         'WARNING'
       );
     }
-    emanation = buildShapeEmanation(
-      absoluteSize * 2 + absoluteItemSize,
-      item.position,
-      'CIRCLE',
-    );
+    emanation = buildCircleEmanation(item.position, absoluteSize * 2 + absoluteItemSize);
   }
 
   emanation.locked = true;
@@ -90,6 +83,21 @@ export function buildEmanation(
   emanation.style.strokeDash = style.strokeDash;
 
   return emanation;
+}
+
+function buildChebyshevSquareEmanation(position: Vector2, numUnits: number, unitSize: number, absoluteItemSize: number) {
+  const size = numUnits * unitSize + absoluteItemSize / 2;
+  return buildCurve()
+    .points([
+      { x: -size, y: -size },
+      { x: +size, y: -size },
+      { x: +size, y: +size },
+      { x: -size, y: +size },
+    ])
+    .position(position)
+    .closed(true)
+    .tension(0)
+    .build();
 }
 
 /**
@@ -140,15 +148,14 @@ function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize:
   }
   points.push(Math2.add(topLeftPointyTop, Math2.multiply(rightHexOffset, radius)));
 
-  const baseRotation = utils.baseRotationDegrees;
   return buildCurve()
     .points([
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 60)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 120)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 180)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 240)),
-      ...points.map((point) => clockwiseAroundOrigin(point, baseRotation + 300)),
+      ...points.map((point) => clockwiseAroundOrigin(point, 0)),
+      ...points.map((point) => clockwiseAroundOrigin(point, 60)),
+      ...points.map((point) => clockwiseAroundOrigin(point, 120)),
+      ...points.map((point) => clockwiseAroundOrigin(point, 180)),
+      ...points.map((point) => clockwiseAroundOrigin(point, 240)),
+      ...points.map((point) => clockwiseAroundOrigin(point, 300)),
     ])
     .position(position)
     .closed(true)
@@ -163,13 +170,13 @@ function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize:
  * @param shapeType Type of shape.
  * @returns Shape item.
  */
-function buildShapeEmanation(widthHeight: number, position: Vector2, shapeType: ShapeType) {
+function buildCircleEmanation(position: Vector2, diameter: number): Circle {
   return buildShape()
-    .width(widthHeight)
-    .height(widthHeight)
+    .width(diameter)
+    .height(diameter)
     .position(position)
-    .shapeType(shapeType)
-    .build();
+    .shapeType('CIRCLE')
+    .build() as Circle;
 }
 
 /**
