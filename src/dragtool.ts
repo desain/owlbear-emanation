@@ -24,21 +24,25 @@ type SequenceItemMetadata = {
      * Save player ID to remove sequence items when a player leaves.
      */
     playerId: string,
+    /**
+     * Which emanation the item is attached to, if it's attached to one (e.g it's a sweep).
+     */
+    emanationId?: string,
 }
 
 function isSequenceItem(item: Item): item is SequenceItem {
     return item.metadata[METADATA_KEY] !== undefined;
 }
 
-function belongsToSequence(activeSequenceId: string): (item: Item) => boolean {
-    return (item) => {
+function belongsToSequence(activeSequenceId: string): (item: Item) => item is SequenceItem {
+    return (item): item is SequenceItem => {
         const metadata = item.metadata[METADATA_KEY] as SequenceItemMetadata | undefined;
         return metadata?.sequenceId === activeSequenceId;
     }
 }
 
-function createItemMetadata(sequenceId: string): SequenceItemMetadata {
-    return { sequenceId, playerId: OBR.player.id };
+function createItemMetadata(sequenceId: string, emanationId: string | undefined = undefined): SequenceItemMetadata {
+    return { sequenceId, playerId: OBR.player.id, emanationId };
 }
 
 async function getEmanations(id: string): Promise<Emanation[]> {
@@ -55,13 +59,11 @@ class Sequence {
     private readonly postDelete: () => void;
     private readonly unsubscribeWatch: () => void;
     private targetLastPositions: [Vector2, Vector2];
-    private emanationToSweeps: Map<string, string>; // TODO put emanation id in sweep meta
 
     constructor(target: Item, postDelete: () => void) {
         this.id = crypto.randomUUID();
         this.targetId = target.id;
         this.targetLastPositions = [target.position, target.position];
-        this.emanationToSweeps = new Map();
         this.postDelete = postDelete;
         // If someone else moves our item, the sequence is invalid, so delete it
         this.unsubscribeWatch = OBR.scene.items.onChange((items) => {
@@ -100,35 +102,31 @@ class Sequence {
     }
 
     async getOrCreateSweeps(emanations: Emanation[]): Promise<Path[]> {
-        const sweeps = [];
+        const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequence(this.id)))
+            .filter(isPath) as (SequenceItem & Path)[];
+        const sweeps: Path[] = [];
         for (const emanation of emanations) {
-            let existingCommands: PathCommand[] = [];
-            const existingSweepId = this.emanationToSweeps.get(emanation.id);
-            if (existingSweepId) {
-                const [sweepPath] = (await OBR.scene.items.getItems([existingSweepId])).filter(isPath);
-                if (sweepPath) {
-                    existingCommands = sweepPath.commands;
-                    sweeps.push(sweepPath);
-                    continue;
-                }
+            const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY]?.emanationId === emanation.id);
+            if (existingSweep) {
+                sweeps.push(existingSweep);
+            } else {
+                const sweep = buildPath()
+                    .position({ x: 0, y: 0 })
+                    .commands([])
+                    .strokeWidth(emanation.style.strokeWidth)
+                    .strokeColor(emanation.style.strokeColor)
+                    .strokeDash(emanation.style.strokeDash)
+                    .strokeOpacity(0)
+                    .fillColor(emanation.style.fillColor)
+                    .fillOpacity(emanation.style.fillOpacity)
+                    .layer('DRAWING')
+                    .fillRule('nonzero')
+                    .disableHit(true)
+                    .locked(true)
+                    .metadata({ [METADATA_KEY]: createItemMetadata(this.id, emanation.id) })
+                    .build();
+                sweeps.push(sweep);
             }
-            const sweep = buildPath()
-                .position({ x: 0, y: 0 })
-                .commands(existingCommands)
-                .strokeWidth(emanation.style.strokeWidth)
-                .strokeColor(emanation.style.strokeColor)
-                .strokeDash(emanation.style.strokeDash)
-                .strokeOpacity(0)
-                .fillColor(emanation.style.fillColor)
-                .fillOpacity(emanation.style.fillOpacity)
-                .layer('DRAWING')
-                .fillRule('nonzero')
-                .disableHit(true)
-                .locked(true)
-                .metadata({ [METADATA_KEY]: createItemMetadata(this.id) })
-                .build();
-            this.emanationToSweeps.set(emanation.id, sweep.id);
-            sweeps.push(sweep);
         }
         return sweeps;
     }
