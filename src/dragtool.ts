@@ -1,4 +1,4 @@
-import OBR, { buildLabel, buildPath, buildRuler, GridScale, Image, InteractionManager, isImage, isPath, isRuler, Item, KeyFilter, Label, Math2, Metadata, Path, PathCommand, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { buildLabel, buildPath, buildRuler, buildShape, GridScale, Image, InteractionManager, isImage, isPath, isRuler, Item, KeyFilter, Label, Math2, Metadata, Path, PathCommand, Ruler, Shape, Vector2 } from "@owlbear-rodeo/sdk";
 import check from "./check.svg";
 import icon from "./dragtool.svg";
 import { Emanation, isEmanation } from "./helpers";
@@ -188,8 +188,10 @@ class DragState {
     private readonly baseDistance: number;
 
     static async createDrag(target: Item, pointerPosition: Vector2): Promise<DragState | null> {
-        const [measurement, emanations] = await Promise.all([
+        const [measurement, dpi, playerColor, emanations] = await Promise.all([
             OBR.scene.grid.getMeasurement(),
+            OBR.scene.grid.getDpi(),
+            OBR.player.getColor(),
             getEmanations(target.id)
         ]);
         const sweepers = emanations.map((emanation) => getSweeper(emanation));
@@ -200,7 +202,7 @@ class DragState {
             .startPosition(target.position)
             .endPosition(end)
             .variant('DASHED')
-            .layer('PROP')
+            .layer('DRAWING')
             .disableHit(true)
             .locked(true)
             .visible(target.visible)
@@ -218,6 +220,22 @@ class DragState {
             .visible(target.visible)
             .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
             .build();
+        const waypoint = buildShape()
+            .shapeType('CIRCLE')
+            .position(target.position)
+            .width(dpi / 4)
+            .height(dpi / 4)
+            .fillColor(playerColor)
+            .fillOpacity(1)
+            .strokeColor('gray')
+            .strokeOpacity(1)
+            .strokeWidth(dpi / 10)
+            .layer('DRAWING')
+            .disableHit(true)
+            .locked(true)
+            .visible(target.visible)
+            .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
+            .build();
         const baseCommands = sweeps.map((sweep) => sweep.commands);
 
         return new DragState(
@@ -226,7 +244,7 @@ class DragState {
             await getSequenceLength(target.id),
             // For some reason OBR wants existing items first in the interaction array, then newly created ones.
             // It doesn't display updates to the existing items if existing items are at the back.
-            await OBR.interaction.startItemInteraction([target, ...sweeps, ruler, label]),
+            await OBR.interaction.startItemInteraction([target, ...sweeps, ruler, label, waypoint]),
             baseCommands,
             sweepers,
             snappingSensitivity,
@@ -269,11 +287,16 @@ class DragState {
      * @returns object that labels items
      */
     private decomposeItems(items: Item[]) {
+        let idx = 0;
+        const target = items[idx++] as Image;
+
         const numSweeps = this.sweepers.length;
-        const sweeps = items.slice(0, numSweeps) as Path[];
-        const ruler = items[numSweeps] as Ruler;
-        const label = items[numSweeps + 1] as Label;
-        return { sweeps, ruler, label };
+        const sweeps = items.slice(idx, idx += numSweeps) as Path[];
+
+        const ruler = items[idx++] as Ruler;
+        const label = items[idx++] as Label;
+        const waypoint = items[idx++] as Shape;
+        return { target, sweeps, ruler, label, waypoint };
     }
 
     async update(pointerPosition: Vector2) {
@@ -284,9 +307,9 @@ class DragState {
         ]);
         const totalDistance = this.baseDistance + newDistance;
         const [update] = this.interaction;
-        const [target, ...sweepsRulerLabel] = update(([target, ...sweepsRulerLabel]) => {
+        const items = update((items) => {
             if (changedEnd) {
-                const { sweeps, ruler, label } = this.decomposeItems(sweepsRulerLabel);
+                const { target, sweeps, ruler, label } = this.decomposeItems(items);
                 label.text = { ...label.text, plainText: getMeasurementText(totalDistance, scale) };
                 label.position = this.end;
 
@@ -303,11 +326,11 @@ class DragState {
                 }
             }
         });
-        return { target, ...this.decomposeItems(sweepsRulerLabel) };
+        return this.decomposeItems(items);
     }
 
     async finish(pointerPosition: Vector2) {
-        const { target, ruler, label, sweeps } = await this.update(pointerPosition);
+        const { target, ruler, label, sweeps, waypoint } = await this.update(pointerPosition);
 
         const [_update, stop] = this.interaction;
         stop();
@@ -318,7 +341,7 @@ class DragState {
                     target.position = this.end; // Work around bug where positions aren't updated
                     target.metadata[METADATA_KEY] = createSequenceTargetMetadata();
                 }),
-                OBR.scene.items.addItems([ruler, label, ...sweeps]),
+                OBR.scene.items.addItems([ruler, label, waypoint, ...sweeps]),
             ]);
         }
     }
@@ -326,7 +349,8 @@ class DragState {
     cancel() {
         const [update, stop] = this.interaction;
         // Fix bug where token is not locally displayed at its initial position on cancel
-        update(([target, _sweepsRulerLabel]) => {
+        update((items) => {
+            const { target } = this.decomposeItems(items);
             target.position = this.start;
         });
         stop();

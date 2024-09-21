@@ -56,9 +56,7 @@ To make a production build run:
 ### Grabtool
 - Key to drop a point at current spot?
 - Allow measure on non token
-- Little circles
-- offset label more
-- check only visible when there ae segments
+- check only visible when there are segments
 
 ## License
 
