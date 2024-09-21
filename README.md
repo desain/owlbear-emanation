@@ -58,7 +58,6 @@ To make a production build run:
 - Allow measure on non token
 - Little circles
 - offset label more
-- double click finish
 - check only visible when there ae segments
 
 ## License
