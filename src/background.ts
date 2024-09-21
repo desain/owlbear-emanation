@@ -1,9 +1,10 @@
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { installTool } from "./dragtool";
+import { installTool } from "./dragtool/dragtool";
 import icon from "./emanations.svg";
-import { getPluginId, rebuildEmanations, updateSceneMetadata } from "./helpers";
+import { rebuildEmanations, updateSceneMetadata } from "./helpers";
+import { PLUGIN_ID } from "./types";
 
 /**
  * This file represents the background script run when the plugin loads.
@@ -78,7 +79,7 @@ function installGridHandler(emanationReplaceLock: AwaitLock) {
 
 function createContextMenu() {
   OBR.contextMenu.create({
-    id: getPluginId("menu"),
+    id: `${PLUGIN_ID}/menu`,
     icons: [
       {
         icon,
