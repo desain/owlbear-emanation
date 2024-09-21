@@ -58,17 +58,15 @@ class Sequence {
     readonly targetId: string;
     private readonly postDelete: () => void;
     private readonly unsubscribeWatch: () => void;
-    private targetLastPositions: [Vector2, Vector2];
 
     constructor(target: Item, postDelete: () => void) {
         this.id = crypto.randomUUID();
         this.targetId = target.id;
-        this.targetLastPositions = [target.position, target.position];
         this.postDelete = postDelete;
         // If someone else moves our item, the sequence is invalid, so delete it
         this.unsubscribeWatch = OBR.scene.items.onChange((items) => {
             items.filter((item) => item.id === this.targetId).forEach((item) => {
-                if (this.itemHasMoved(item)) {
+                if (this.itemMovedOutsideSequence(item, items)) {
                     // console.log("Item moved", item.position, this.targetLastPositions);
                     this.delete();
                 }
@@ -92,13 +90,17 @@ class Sequence {
         )).reduce((a, b) => a + b, 0);
     }
 
-    itemHasMoved(item: Item) {
-        return !Math2.compare(item.position, this.targetLastPositions[0], 0.01)
-            && !Math2.compare(item.position, this.targetLastPositions[1], 0.01);
-    }
-
-    updateTargetPosition(position: Vector2) {
-        this.targetLastPositions = [this.targetLastPositions[1], position];
+    itemMovedOutsideSequence(item: Item, items: Item[]) {
+        const rulers = items.filter(belongsToSequence(this.id))
+            .filter(isRuler) as (SequenceItem & Ruler)[]; // Typescript can't figure out that isRuler guarantees ruler here for some reason
+        const previousPositions: Vector2[] = rulers.flatMap((ruler) => [ruler.startPosition, ruler.endPosition]);
+        for (const position of previousPositions) {
+            if (Math2.compare(item.position, position, 0.01)) {
+                return false;
+            }
+        }
+        console.log("Item moved to", item.position, previousPositions);
+        return true;
     }
 
     async getOrCreateSweeps(emanations: Emanation[]): Promise<Path[]> {
@@ -175,7 +177,6 @@ class Sequence {
             baseCommands,
             sweepers,
             snappingSensitivity,
-            (finalPosition) => this.updateTargetPosition(finalPosition),
         );
     }
 }
@@ -188,7 +189,6 @@ class DragState {
     private readonly interaction: InteractionManager<Item[]>;
     private readonly snappingSensitivity: number;
     private readonly baseDistance: number;
-    private readonly reportFinalPosition: (finalPosition: Readonly<Vector2>) => void;
 
     constructor(
         start: Vector2,
@@ -198,7 +198,6 @@ class DragState {
         baseCommands: PathCommand[][],
         sweepers: Sweeper[],
         snappingSensitivity: number,
-        reportFinalPosition: (finalPosition: Vector2) => void,
     ) {
         this.start = start;
         this.baseDistance = baseDistance;
@@ -207,7 +206,6 @@ class DragState {
         this.baseCommands = baseCommands;
         this.sweepers = sweepers;
         this.end = end; // make compiler happy that we're assigning this
-        this.reportFinalPosition = reportFinalPosition;
         this.setEnd(end); // snap initial end
     }
 
@@ -222,11 +220,16 @@ class DragState {
         return oldEnd.x != this.end.x || oldEnd.y != this.end.y;
     }
 
-    private getSweepsRulerLabel(sweepsRulerLabel: Item[]) {
+    /**
+     * Break down the misc items in an interaction.
+     * @param items Misc items
+     * @returns object that labels items
+     */
+    private decomposeItems(items: Item[]) {
         const numSweeps = this.sweepers.length;
-        const sweeps = sweepsRulerLabel.slice(0, numSweeps) as Path[];
-        const ruler = sweepsRulerLabel[numSweeps] as Ruler;
-        const label = sweepsRulerLabel[numSweeps + 1] as Label;
+        const sweeps = items.slice(0, numSweeps) as Path[];
+        const ruler = items[numSweeps] as Ruler;
+        const label = items[numSweeps + 1] as Label;
         return { sweeps, ruler, label };
     }
 
@@ -240,7 +243,7 @@ class DragState {
         const [update] = this.interaction;
         const [target, ...sweepsRulerLabel] = update(([target, ...sweepsRulerLabel]) => {
             if (changedEnd) {
-                const { sweeps, ruler, label } = this.getSweepsRulerLabel(sweepsRulerLabel);
+                const { sweeps, ruler, label } = this.decomposeItems(sweepsRulerLabel);
                 label.text = { ...label.text, plainText: getMeasurementText(totalDistance, scale) };
                 label.position = this.end;
 
@@ -257,7 +260,7 @@ class DragState {
                 }
             }
         });
-        return { target, ...this.getSweepsRulerLabel(sweepsRulerLabel) };
+        return { target, ...this.decomposeItems(sweepsRulerLabel) };
     }
 
     async finish(pointerPosition: Vector2) {
@@ -269,7 +272,6 @@ class DragState {
         if (this.start.x != this.end.x || this.start.y != this.end.y) {
             await Promise.all([
                 OBR.scene.items.updateItems([target.id], ([target]) => {
-                    this.reportFinalPosition(this.end);
                     target.position = this.end;
                 }),
                 OBR.scene.items.addItems([ruler, label, ...sweeps]),
