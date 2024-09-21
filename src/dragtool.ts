@@ -1,7 +1,7 @@
 import OBR, { buildLabel, buildPath, buildRuler, GridScale, InteractionManager, isImage, isPath, isRuler, Item, Label, Math2, Path, PathCommand, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
-import { Emanation, isEmanation } from "./helpers";
+import check from "./check.svg";
 import icon from "./dragtool.svg";
-import check from "./check.svg"
+import { Emanation, isEmanation } from "./helpers";
 import { getSweeper, Sweeper } from "./sweepUtils";
 
 /** Get the reverse domain name id for this plugin at a given path */
@@ -251,7 +251,28 @@ export async function installTool() {
                 activeTools: [TOOL_ID],
             },
         }],
+        preventDrag: {
+            target: [
+                {
+                    key: 'type',
+                    operator: '!=',
+                    value: 'IMAGE',
+                    coordinator: '||'
+                },
+                {
+                    key: 'layer',
+                    operator: '!=',
+                    value: 'CHARACTER',
+                }
+            ],
+        },
         cursors: [
+            {
+                cursor: 'grabbing',
+                filter: {
+                    dragging: true,
+                }
+            },
             {
                 cursor: 'grab',
                 filter: {
@@ -269,7 +290,7 @@ export async function installTool() {
                 }
             },
             {
-                cursor: 'not-allowed',
+                cursor: 'move',
             },
         ],
         async onToolDragStart(_context, event) {
