@@ -1,9 +1,9 @@
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
-import icon from "./emanations.svg";
-import { getPluginId, rebuildEmanations, updateSceneMetadata } from "./helpers";
 import AwaitLock from "await-lock";
 import { installTool } from "./dragtool";
+import icon from "./emanations.svg";
+import { getPluginId, rebuildEmanations, updateSceneMetadata } from "./helpers";
 
 /**
  * This file represents the background script run when the plugin loads.
@@ -16,13 +16,10 @@ function vectorsAreCloseEnough(a: Vector2, b: Vector2) {
 
 OBR.onReady(async () => {
   if (await OBR.scene.isReady()) {
-    console.log("Scene is ready");
     await install();
   } else {
-    console.log("Scene not ready, waiting for ready change");
     OBR.scene.onReadyChange(async (ready) => {
       if (ready) {
-        console.log("Scene is now ready");
         await install();
       }
     });
@@ -30,7 +27,7 @@ OBR.onReady(async () => {
 });
 
 async function install() {
-  console.log("Installing emanations");
+  console.log("Emanations version 0.0.5");
   createContextMenu();
 
   // Only install global listeners that can change items for one instance
