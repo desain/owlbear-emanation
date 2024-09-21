@@ -1,6 +1,7 @@
 import OBR, { buildLabel, buildPath, buildRuler, GridScale, InteractionManager, isImage, isPath, isRuler, Item, Label, Math2, Path, PathCommand, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
 import { Emanation, isEmanation } from "./helpers";
-import icon from "./status.svg";
+import icon from "./dragtool.svg";
+import check from "./check.svg"
 import { getSweeper, Sweeper } from "./sweepUtils";
 
 /** Get the reverse domain name id for this plugin at a given path */
@@ -316,7 +317,7 @@ export async function installTool() {
     OBR.tool.createAction({
         id: getPluginId('tool-action-finish'),
         icons: [{
-            icon,
+            icon: check,
             label: "Finish Drag",
             filter: {
                 activeTools: [TOOL_ID],
