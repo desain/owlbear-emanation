@@ -8,41 +8,58 @@ const PLUGIN_ID = 'com.desain.dragtool';
 const TOOL_ID = `${PLUGIN_ID}/tool`;
 const METADATA_KEY = `${PLUGIN_ID}/metadata`;
 
-type SequenceItem = Item & {
-    metadata: Metadata & {
-        [METADATA_KEY]: SequenceItemMetadata,
-    },
-}
-
 type SequenceItemMetadata = {
-    /**
-     * Save sequence ID rather than target ID so if one person leaves a sequence, and another moves it with this tool,
-     * the first owner's sequence can remove itself without removing the second person's sequence
-     */
-    sequenceId: string,
-    /**
-     * Save player ID to remove sequence items when a player leaves.
-     */
-    playerId: string,
+    type: 'SEQUENCE_ITEM',
+    targetId: string,
     /**
      * Which emanation the item is attached to, if it's attached to one (e.g it's a sweep).
      */
     emanationId?: string,
 }
 
+type SequenceTargetMetadata = {
+    type: 'SEQUENCE_TARGET',
+    playerId: string,
+}
+
+type SequenceItem = Item & {
+    metadata: Metadata & {
+        [METADATA_KEY]: SequenceItemMetadata,
+    },
+}
+
+type SequenceTarget = Item & {
+    metadata: Metadata & {
+        [METADATA_KEY]: SequenceTargetMetadata,
+    },
+}
+
 function isSequenceItem(item: Item): item is SequenceItem {
-    return item.metadata[METADATA_KEY] !== undefined;
+    const metadata = item.metadata[METADATA_KEY];
+    return typeof metadata === 'object'
+        && metadata !== null
+        && 'type' in metadata
+        && metadata.type === 'SEQUENCE_ITEM';
 }
 
-function belongsToSequence(activeSequenceId: string): (item: Item) => item is SequenceItem {
-    return (item): item is SequenceItem => {
-        const metadata = item.metadata[METADATA_KEY] as SequenceItemMetadata | undefined;
-        return metadata?.sequenceId === activeSequenceId;
-    }
+function isSequenceTarget(item: Item): item is SequenceTarget {
+    const metadata = item.metadata[METADATA_KEY];
+    return typeof metadata === 'object'
+        && metadata !== null
+        && 'type' in metadata
+        && metadata.type === 'SEQUENCE_TARGET'
 }
 
-function createItemMetadata(sequenceId: string, emanationId: string | undefined = undefined): SequenceItemMetadata {
-    return { sequenceId, playerId: OBR.player.id, emanationId };
+function createSequenceItemMetadata(targetId: string, emanationId: string | undefined = undefined): SequenceItemMetadata {
+    return { type: 'SEQUENCE_ITEM', targetId, emanationId };
+}
+
+function createSequenceTargetMetadata(): SequenceTargetMetadata {
+    return { type: 'SEQUENCE_TARGET', playerId: OBR.player.id };
+}
+
+function belongsToSequenceForTarget(targetId: string): (item: Item) => item is SequenceItem {
+    return (item): item is SequenceItem => isSequenceItem(item) && item.metadata[METADATA_KEY].targetId === targetId;
 }
 
 async function getEmanations(id: string): Promise<Emanation[]> {
@@ -53,132 +70,74 @@ function getMeasurementText(numGridUnits: number, scale: GridScale) {
     return `${Math.round(numGridUnits * scale.parsed.multiplier).toString()}${scale.parsed.unit}`
 }
 
-class Sequence {
-    readonly id: string;
-    readonly targetId: string;
-    private readonly postDelete: () => void;
-    private readonly unsubscribeWatch: () => void;
-
-    constructor(target: Item, postDelete: () => void) {
-        this.id = crypto.randomUUID();
-        this.targetId = target.id;
-        this.postDelete = postDelete;
-        // If someone else moves our item, the sequence is invalid, so delete it
-        this.unsubscribeWatch = OBR.scene.items.onChange((items) => {
-            items.filter((item) => item.id === this.targetId).forEach((item) => {
-                if (this.itemMovedOutsideSequence(item, items)) {
-                    // console.log("Item moved", item.position, this.targetLastPositions);
-                    this.delete();
-                }
-            });
-        });
-    }
-
-    async delete() {
-        this.unsubscribeWatch();
-        const ids = (await OBR.scene.items.getItems(belongsToSequence(this.id)))
-            .map((item) => item.id);
-        await OBR.scene.items.deleteItems(ids);
-        this.postDelete();
-    }
-
-    private async getLength() {
-        return (await Promise.all(
-            (await OBR.scene.items.getItems(isRuler))
-                .filter(belongsToSequence(this.id))
-                .map((ruler) => OBR.scene.grid.getDistance(ruler.startPosition, ruler.endPosition))
-        )).reduce((a, b) => a + b, 0);
-    }
-
-    itemMovedOutsideSequence(item: Item, items: Item[]) {
-        const rulers = items.filter(belongsToSequence(this.id))
-            .filter(isRuler) as (SequenceItem & Ruler)[]; // Typescript can't figure out that isRuler guarantees ruler here for some reason
-        const previousPositions: Vector2[] = rulers.flatMap((ruler) => [ruler.startPosition, ruler.endPosition]);
-        for (const position of previousPositions) {
-            if (Math2.compare(item.position, position, 0.01)) {
-                return false;
-            }
+function itemMovedOutsideItsSequence(item: Item, items: Item[]): boolean {
+    const rulers = items.filter(belongsToSequenceForTarget(item.id))
+        .filter(isRuler) as (SequenceItem & Ruler)[]; // Typescript can't figure out that isRuler guarantees ruler here for some reason
+    const previousPositions: Vector2[] = rulers.flatMap((ruler) => [ruler.startPosition, ruler.endPosition]);
+    for (const position of previousPositions) {
+        if (Math2.compare(item.position, position, 0.01)) {
+            return false;
         }
-        console.log("Item moved to", item.position, previousPositions);
-        return true;
     }
+    return true;
+}
 
-    async getOrCreateSweeps(emanations: Emanation[]): Promise<Path[]> {
-        const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequence(this.id)))
-            .filter(isPath) as (SequenceItem & Path)[];
-        const sweeps: Path[] = [];
-        for (const emanation of emanations) {
-            const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY]?.emanationId === emanation.id);
-            if (existingSweep) {
-                sweeps.push(existingSweep);
-            } else {
-                const sweep = buildPath()
-                    .position({ x: 0, y: 0 })
-                    .commands([])
-                    .strokeWidth(emanation.style.strokeWidth)
-                    .strokeColor(emanation.style.strokeColor)
-                    .strokeDash(emanation.style.strokeDash)
-                    .strokeOpacity(0)
-                    .fillColor(emanation.style.fillColor)
-                    .fillOpacity(emanation.style.fillOpacity)
-                    .layer('DRAWING')
-                    .fillRule('nonzero')
-                    .disableHit(true)
-                    .locked(true)
-                    .metadata({ [METADATA_KEY]: createItemMetadata(this.id, emanation.id) })
-                    .build();
-                sweeps.push(sweep);
-            }
+async function deleteSequence(targetId: string) {
+    console.log('deleting', targetId);
+    const ids = (await OBR.scene.items.getItems(belongsToSequenceForTarget(targetId)))
+        .map((item) => item.id);
+    await OBR.scene.items.updateItems([targetId], ([target]) => {
+        target.metadata[METADATA_KEY] = {};
+    });
+    await OBR.scene.items.deleteItems(ids);
+}
+
+async function deleteAllSequencesForCurrentPlayer() {
+    console.log('deleting all for current');
+    const sequences = await OBR.scene.items.getItems(isSequenceTarget);
+    for (const sequence of sequences) {
+        if (sequence.metadata[METADATA_KEY].playerId === OBR.player.id) {
+            await deleteSequence(sequence.id);
         }
-        return sweeps;
     }
+}
 
-    async createDrag(target: Item, pointerPosition: Vector2): Promise<DragState | null> {
-        if (this.targetId !== target.id) {
-            return null;
+async function getSequenceLength(targetId: string) {
+    return (await Promise.all(
+        (await OBR.scene.items.getItems(isRuler))
+            .filter(belongsToSequenceForTarget(targetId))
+            .map((ruler) => OBR.scene.grid.getDistance(ruler.startPosition, ruler.endPosition))
+    )).reduce((a, b) => a + b, 0);
+}
+
+async function getOrCreateSweeps(targetId: string, emanations: Emanation[]): Promise<Path[]> {
+    const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(targetId)))
+        .filter(isPath) as (SequenceItem & Path)[];
+    const sweeps: Path[] = [];
+    for (const emanation of emanations) {
+        const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY]?.emanationId === emanation.id);
+        if (existingSweep) {
+            sweeps.push(existingSweep);
+        } else {
+            const sweep = buildPath()
+                .position({ x: 0, y: 0 })
+                .commands([])
+                .strokeWidth(emanation.style.strokeWidth)
+                .strokeColor(emanation.style.strokeColor)
+                .strokeDash(emanation.style.strokeDash)
+                .strokeOpacity(0)
+                .fillColor(emanation.style.fillColor)
+                .fillOpacity(emanation.style.fillOpacity)
+                .layer('DRAWING')
+                .fillRule('nonzero')
+                .disableHit(true)
+                .locked(true)
+                .metadata({ [METADATA_KEY]: createSequenceItemMetadata(targetId, emanation.id) })
+                .build();
+            sweeps.push(sweep);
         }
-        const [measurement, emanations] = await Promise.all([
-            OBR.scene.grid.getMeasurement(),
-            getEmanations(target.id)
-        ]);
-        const sweepers = emanations.map((emanation) => getSweeper(emanation));
-        const sweeps = await this.getOrCreateSweeps(emanations);
-        const snappingSensitivity = measurement === 'EUCLIDEAN' ? 0 : 1;
-        const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
-        const ruler = buildRuler()
-            .startPosition(target.position)
-            .endPosition(end)
-            .variant('DASHED')
-            .layer('PROP')
-            .disableHit(true)
-            .locked(true)
-            .metadata({ [METADATA_KEY]: createItemMetadata(this.id) })
-            .build();
-        const label = buildLabel()
-            .position(target.position)
-            .backgroundColor('black')
-            .backgroundOpacity(0.6)
-            .pointerDirection('DOWN')
-            .pointerWidth(20)
-            .pointerHeight(10)
-            .disableHit(true)
-            .locked(true)
-            .metadata({ [METADATA_KEY]: createItemMetadata(this.id) })
-            .build();
-        const baseCommands = sweeps.map((sweep) => sweep.commands);
-
-        return new DragState(
-            target.position,
-            end,
-            await this.getLength(),
-            // For some reason OBR wants existing items first in the interaction array, then newly created ones.
-            // It doesn't display updates to the existing items if existing items are at the back.
-            await OBR.interaction.startItemInteraction([target, ...sweeps, ruler, label]),
-            baseCommands,
-            sweepers,
-            snappingSensitivity,
-        );
     }
+    return sweeps;
 }
 
 class DragState {
@@ -190,7 +149,51 @@ class DragState {
     private readonly snappingSensitivity: number;
     private readonly baseDistance: number;
 
-    constructor(
+    static async createDrag(target: Item, pointerPosition: Vector2): Promise<DragState | null> {
+        const [measurement, emanations] = await Promise.all([
+            OBR.scene.grid.getMeasurement(),
+            getEmanations(target.id)
+        ]);
+        const sweepers = emanations.map((emanation) => getSweeper(emanation));
+        const sweeps = await getOrCreateSweeps(target.id, emanations);
+        const snappingSensitivity = measurement === 'EUCLIDEAN' ? 0 : 1;
+        const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
+        const ruler = buildRuler()
+            .startPosition(target.position)
+            .endPosition(end)
+            .variant('DASHED')
+            .layer('PROP')
+            .disableHit(true)
+            .locked(true)
+            .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
+            .build();
+        const label = buildLabel()
+            .position(target.position)
+            .backgroundColor('black')
+            .backgroundOpacity(0.6)
+            .pointerDirection('DOWN')
+            .pointerWidth(20)
+            .pointerHeight(10)
+            .disableHit(true)
+            .locked(true)
+            .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
+            .build();
+        const baseCommands = sweeps.map((sweep) => sweep.commands);
+
+        return new DragState(
+            target.position,
+            end,
+            await getSequenceLength(target.id),
+            // For some reason OBR wants existing items first in the interaction array, then newly created ones.
+            // It doesn't display updates to the existing items if existing items are at the back.
+            await OBR.interaction.startItemInteraction([target, ...sweeps, ruler, label]),
+            baseCommands,
+            sweepers,
+            snappingSensitivity,
+        );
+    }
+
+    private constructor(
         start: Vector2,
         end: Vector2,
         baseDistance: number,
@@ -272,7 +275,8 @@ class DragState {
         if (this.start.x != this.end.x || this.start.y != this.end.y) {
             await Promise.all([
                 OBR.scene.items.updateItems([target.id], ([target]) => {
-                    target.position = this.end;
+                    target.position = this.end; // Work around bug where positions aren't updated
+                    target.metadata[METADATA_KEY] = createSequenceTargetMetadata();
                 }),
                 OBR.scene.items.addItems([ruler, label, ...sweeps]),
             ]);
@@ -300,7 +304,6 @@ export async function installTool() {
     });
 
     let dragState: DragState | null = null;
-    let sequence: Sequence | null = null;
 
     OBR.tool.createMode({
         id: `${PLUGIN_ID}/drag-mode`,
@@ -358,12 +361,8 @@ export async function installTool() {
             if (!event.target || !isImage(event.target) || event.target.layer !== 'CHARACTER' || dragState != null) {
                 return;
             }
-            if (!sequence || sequence.targetId !== event.target.id) {
-                await sequence?.delete();
-                sequence = new Sequence(event.target, () => sequence = null);
-            }
 
-            dragState = await sequence.createDrag(event.target, event.pointerPosition);
+            dragState = await DragState.createDrag(event.target, event.pointerPosition);
         },
         async onToolDragMove(_, event) {
             await dragState?.update(event.pointerPosition);
@@ -377,7 +376,8 @@ export async function installTool() {
             dragState = null;
         },
         async onDeactivate(_context) {
-            await sequence?.delete();
+            console.log('tool deactivate', OBR.player.id);
+            await deleteAllSequencesForCurrentPlayer();
         },
     });
 
@@ -392,23 +392,39 @@ export async function installTool() {
             },
         }],
         async onClick(_context) {
-            await sequence?.delete();
-            sequence = null;
+            await deleteAllSequencesForCurrentPlayer();
         },
     });
 
-    // Delete a player's sequence when they leave
+    const unsubscribeFunctions = [];
     if (await OBR.player.getRole() === 'GM') {
-        OBR.party.onChange(async (players) => {
+        // Delete a player's sequence when they leave
+        unsubscribeFunctions.push(OBR.party.onChange(async (players) => {
             const activePlayers = new Set(players.map((player) => player.id));
-            const toDelete = [];
-            const sequenceItems = await OBR.scene.items.getItems(isSequenceItem);
-            for (const item of sequenceItems) {
-                if (!activePlayers.has(item.metadata[METADATA_KEY].playerId)) {
-                    toDelete.push(item.id);
+            activePlayers.add(OBR.player.id); // apparently the GM isn't in by default
+            console.log('players', activePlayers, 'iam', OBR.player.id);
+            const sequenceTargets = await OBR.scene.items.getItems(isSequenceTarget);
+            for (const target of sequenceTargets) {
+                if (!activePlayers.has(target.metadata[METADATA_KEY].playerId)) {
+                    console.log('deleting ownerless target', target, 'owner not in', activePlayers);
+                    deleteSequence(target.id);
                 }
             }
-            await OBR.scene.items.deleteItems(toDelete);
-        })
+        }));
+
+        // Delete a sequence when an item moves sout of it
+        unsubscribeFunctions.push(OBR.scene.items.onChange((items) => {
+            const ownerlessItems = items.filter(isSequenceItem)
+                .filter((item) => !items.find((potentialOwner) => item.metadata[METADATA_KEY].targetId === potentialOwner.id))
+                .map((item) => item.id);
+            console.log('deleting ownerless', ownerlessItems);
+            OBR.scene.items.deleteItems(ownerlessItems);
+            items.filter(isSequenceTarget).forEach((item) => {
+                if (itemMovedOutsideItsSequence(item, items)) {
+                    console.log('moved out', item.id);
+                    deleteSequence(item.id)
+                }
+            });
+        }));
     }
 }

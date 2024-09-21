@@ -9,6 +9,13 @@ Add emanations to any character.
 - Emanations will automatically resize after tokens are scaled.
 - Manage any number of emanations with any color.
 
+### Dragtool
+- Drag items around (mobile friendly)
+- Sequences for an item delete if another player moves them
+- Sequences for an item delete if their player leaves
+- Emanations become sweeps
+- Undo and restart sequences
+
 ## Installing
 
 The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.
