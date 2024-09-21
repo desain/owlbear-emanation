@@ -147,8 +147,8 @@ async function getSequenceLength(targetId: string) {
     )).reduce((a, b) => a + b, 0);
 }
 
-async function getOrCreateSweeps(targetId: string, emanations: Emanation[]): Promise<Path[]> {
-    const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(targetId)))
+async function getOrCreateSweeps(target: Item, emanations: Emanation[]): Promise<Path[]> {
+    const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
         .filter(isPath) as (SequenceItem & Path)[];
     const sweeps: Path[] = [];
     for (const emanation of emanations) {
@@ -169,7 +169,8 @@ async function getOrCreateSweeps(targetId: string, emanations: Emanation[]): Pro
                 .fillRule('nonzero')
                 .disableHit(true)
                 .locked(true)
-                .metadata({ [METADATA_KEY]: createSequenceItemMetadata(targetId, emanation.id) })
+                .visible(target.visible)
+                .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id, emanation.id) })
                 .build();
             sweeps.push(sweep);
         }
@@ -192,7 +193,7 @@ class DragState {
             getEmanations(target.id)
         ]);
         const sweepers = emanations.map((emanation) => getSweeper(emanation));
-        const sweeps = await getOrCreateSweeps(target.id, emanations);
+        const sweeps = await getOrCreateSweeps(target, emanations);
         const snappingSensitivity = measurement === 'EUCLIDEAN' ? 0 : 1;
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
         const ruler = buildRuler()
@@ -202,6 +203,7 @@ class DragState {
             .layer('PROP')
             .disableHit(true)
             .locked(true)
+            .visible(target.visible)
             .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
             .build();
         const label = buildLabel()
@@ -210,9 +212,10 @@ class DragState {
             .backgroundOpacity(0.6)
             .pointerDirection('DOWN')
             .pointerWidth(20)
-            .pointerHeight(10)
+            .pointerHeight(20)
             .disableHit(true)
             .locked(true)
+            .visible(target.visible)
             .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
             .build();
         const baseCommands = sweeps.map((sweep) => sweep.commands);
@@ -389,6 +392,14 @@ export async function installTool() {
         onToolDragCancel() {
             dragState?.cancel();
             dragState = null;
+        },
+        async onToolDoubleClick(_context, event) {
+            if (isValidTarget(event.target)) {
+                return true;
+            } else {
+                await deleteAllSequencesForCurrentPlayer();
+                return false;
+            }
         },
         async onDeactivate(_context) {
             console.log('tool deactivate', OBR.player.id);
