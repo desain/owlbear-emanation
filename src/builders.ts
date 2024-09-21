@@ -1,6 +1,6 @@
-import OBR, { buildCurve, buildShape, Image, Item, Math2, Vector2 } from "@owlbear-rodeo/sdk";
-import { Circle, Emanation, EmanationMetadata, EmanationStyle, getPluginId, SceneEmanationMetadata } from "./helpers";
+import OBR, { buildCurve, buildShape, Curve, Image, Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import { getHexGridUtils, HexGridType } from "./hexUtils";
+import { Circle, Emanation, EmanationMetadata, EmanationStyle, METADATA_KEY, SceneEmanationMetadata } from "./types";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
   return Math2.rotate(point, { x: 0, y: 0 }, degrees);
@@ -23,14 +23,13 @@ export function buildEmanation(
   style: EmanationStyle,
   size: number,
   { gridDpi, gridMeasurement, gridMultiplier, gridType, gridMode }: SceneEmanationMetadata,
-): Item {
+): Emanation {
   const dpiScale = gridDpi / item.grid.dpi;
   const numUnits = size / gridMultiplier;
   const absoluteSize = numUnits * gridDpi;
   const absoluteItemSize = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) * dpiScale;
-  const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
 
-  let emanation: Emanation;
+  let emanation: Circle | Curve;
   if (gridMeasurement === 'CHEBYSHEV' && gridType === 'SQUARE') {
     emanation = buildChebyshevSquareEmanation(item.position, numUnits, gridDpi, absoluteItemSize);
   } else if (gridMeasurement === 'CHEBYSHEV' && (gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL')) {
@@ -69,7 +68,6 @@ export function buildEmanation(
 
   emanation.locked = true;
   emanation.name = `${item.name} ${size} emanation`;
-  emanation.metadata = { ...emanation.metadata, [getPluginId("metadata")]: metadata };
   emanation.attachedTo = item.id;
   emanation.layer = 'DRAWING';
   emanation.disableHit = true;
@@ -82,7 +80,10 @@ export function buildEmanation(
   emanation.style.strokeWidth = style.strokeWidth;
   emanation.style.strokeDash = style.strokeDash;
 
-  return emanation;
+  const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
+  emanation.metadata = { [METADATA_KEY]: metadata };
+  const returnValue = emanation as typeof emanation & { metadata: { [METADATA_KEY]: EmanationMetadata } };
+  return returnValue;
 }
 
 function buildChebyshevSquareEmanation(position: Vector2, numUnits: number, unitSize: number, absoluteItemSize: number) {

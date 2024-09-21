@@ -1,54 +1,9 @@
-import OBR, { buildLabel, buildPath, buildRuler, buildShape, GridScale, Image, InteractionManager, isImage, isPath, isRuler, Item, KeyFilter, Label, Math2, Metadata, Path, PathCommand, Ruler, Shape, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { buildLabel, buildPath, buildRuler, buildShape, GridScale, Image, InteractionManager, isImage, isPath, isRuler, Item, KeyFilter, Label, Math2, Path, PathCommand, Ruler, Shape, Vector2 } from "@owlbear-rodeo/sdk";
+import { Emanation, isEmanation } from "../types";
 import check from "./check.svg";
 import icon from "./dragtool.svg";
-import { Emanation, isEmanation } from "./helpers";
 import { getSweeper, Sweeper } from "./sweepUtils";
-
-const PLUGIN_ID = 'com.desain.dragtool';
-const TOOL_ID = `${PLUGIN_ID}/tool`;
-const METADATA_KEY = `${PLUGIN_ID}/metadata`;
-
-type SequenceItemMetadata = {
-    type: 'SEQUENCE_ITEM',
-    targetId: string,
-    /**
-     * Which emanation the item is attached to, if it's attached to one (e.g it's a sweep).
-     */
-    emanationId?: string,
-}
-
-type SequenceTargetMetadata = {
-    type: 'SEQUENCE_TARGET',
-    playerId: string,
-}
-
-type SequenceItem = Item & {
-    metadata: Metadata & {
-        [METADATA_KEY]: SequenceItemMetadata,
-    },
-}
-
-type SequenceTarget = Item & {
-    metadata: Metadata & {
-        [METADATA_KEY]: SequenceTargetMetadata,
-    },
-}
-
-function isSequenceItem(item: Item): item is SequenceItem {
-    const metadata = item.metadata[METADATA_KEY];
-    return typeof metadata === 'object'
-        && metadata !== null
-        && 'type' in metadata
-        && metadata.type === 'SEQUENCE_ITEM';
-}
-
-function isSequenceTarget(item: Item): item is SequenceTarget {
-    const metadata = item.metadata[METADATA_KEY];
-    return typeof metadata === 'object'
-        && metadata !== null
-        && 'type' in metadata
-        && metadata.type === 'SEQUENCE_TARGET'
-}
+import { isSequenceItem, isSequenceTarget, METADATA_KEY, PLUGIN_ID, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, TOOL_ID } from "./types";
 
 function isValidTarget(target: Item | undefined): target is Image {
     return target !== undefined && isImage(target) && (target.layer === 'CHARACTER' || target.layer === 'MOUNT');

@@ -1,16 +1,13 @@
 import OBR, { Image, } from "@owlbear-rodeo/sdk";
 import { buildEmanation } from "./builders";
 import {
-  Emanation,
-  EmanationMetadata,
-  getPluginId,
+  getPlayerMetadata,
   getSceneEmanationMetadata,
-  isEmanation,
-  PlayerMetadata,
   rebuildEmanations,
   updatePlayerMetadata
 } from "./helpers";
 import "./style.css";
+import { Emanation, isEmanation, METADATA_KEY, PlayerMetadata } from "./types";
 
 /**
  * This file represents the HTML of the popover that is shown once
@@ -51,14 +48,20 @@ function emanationRow(id: string | null, color: string, size: number, multiplier
 }
 
 async function renderContextMenu() {
-  const playerEmanationMetadata = (await OBR.player.getMetadata())[getPluginId('metadata')] as PlayerMetadata | undefined;
-  const { parsed: { unit, multiplier } } = await OBR.scene.grid.getScale();
+  const [
+    playerEmanationMetadata,
+    { parsed: { unit, multiplier } },
+    selection,
+  ] = await Promise.all([
+    getPlayerMetadata(),
+    OBR.scene.grid.getScale(),
+    OBR.player.getSelection()
+  ]);
 
-  const selection = await OBR.player.getSelection();
   const extantEmanations = selection?.length === 1
     ? (await OBR.scene.items.getItems(isEmanation))
       .filter((emanation) => emanation.attachedTo == selection[0])
-      .map((emanation) => ({ emanation, metadata: emanation.metadata[getPluginId('metadata')] as EmanationMetadata }))
+      .map((emanation) => ({ emanation, metadata: emanation.metadata[METADATA_KEY] }))
       .sort(({ metadata: { size: sizeA } }, { metadata: { size: sizeB } }) => sizeA - sizeB)
       .map(({ emanation, metadata: { size } }) => emanationRow(
         emanation.id, emanation.style.strokeColor, size, multiplier, unit))
@@ -90,9 +93,8 @@ async function renderContextMenu() {
     await OBR.scene.items.updateItems<Emanation>([id], (emanations) => emanations.forEach((emanation) => {
       emanation.style.strokeColor = colorButton.value;
       emanation.style.fillColor = colorButton.value;
-      const metadata = emanation.metadata[getPluginId('metadata')] as EmanationMetadata;
-      metadata.style.strokeColor = colorButton.value;
-      metadata.style.fillColor = colorButton.value;
+      emanation.metadata[METADATA_KEY].style.strokeColor = colorButton.value;
+      emanation.metadata[METADATA_KEY].style.fillColor = colorButton.value;
     }));
   }));
 
@@ -100,8 +102,7 @@ async function renderContextMenu() {
     const id = sizeInput.dataset.id!!;
     const size = parseFloat(sizeInput.value);
     await OBR.scene.items.updateItems<Emanation>([id], (emanations) => emanations.forEach((emanation) => {
-      const metadata = emanation.metadata[getPluginId('metadata')] as EmanationMetadata;
-      metadata.size = size;
+      emanation.metadata.size = size;
     }));
     await rebuildEmanations(({ id: otherId }) => otherId === id);
     await renderContextMenu();
