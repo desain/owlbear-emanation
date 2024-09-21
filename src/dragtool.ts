@@ -1,4 +1,4 @@
-import OBR, { buildLabel, buildPath, buildRuler, GridScale, InteractionManager, isImage, isPath, isRuler, Item, Label, Math2, Metadata, Path, PathCommand, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { buildLabel, buildPath, buildRuler, GridScale, Image, InteractionManager, isImage, isPath, isRuler, Item, KeyFilter, Label, Math2, Metadata, Path, PathCommand, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
 import check from "./check.svg";
 import icon from "./dragtool.svg";
 import { Emanation, isEmanation } from "./helpers";
@@ -50,6 +50,45 @@ function isSequenceTarget(item: Item): item is SequenceTarget {
         && metadata.type === 'SEQUENCE_TARGET'
 }
 
+function isValidTarget(target: Item | undefined): target is Image {
+    return target !== undefined && isImage(target) && (target.layer === 'CHARACTER' || target.layer === 'MOUNT');
+}
+const VALID_TARGET_FILTER: KeyFilter[] = [
+    {
+        key: 'layer',
+        value: 'CHARACTER',
+        coordinator: '||',
+    },
+    {
+        key: 'layer',
+        value: 'MOUNT',
+        coordinator: '&&',
+    },
+    {
+        key: 'type',
+        value: 'IMAGE',
+    },
+];
+const INVALID_TARGET_FILTER: KeyFilter[] = [
+    {
+        key: 'layer',
+        operator: '!=',
+        value: 'CHARACTER',
+        coordinator: '&&',
+    },
+    {
+        key: 'layer',
+        operator: '!=',
+        value: 'MOUNT',
+        coordinator: '||',
+    },
+    {
+        key: 'type',
+        operator: '!=',
+        value: 'IMAGE',
+    },
+];
+
 function createSequenceItemMetadata(targetId: string, emanationId: string | undefined = undefined): SequenceItemMetadata {
     return { type: 'SEQUENCE_ITEM', targetId, emanationId };
 }
@@ -95,11 +134,9 @@ async function deleteSequence(targetId: string) {
 async function deleteAllSequencesForCurrentPlayer() {
     console.log('deleting all for current');
     const sequences = await OBR.scene.items.getItems(isSequenceTarget);
-    for (const sequence of sequences) {
-        if (sequence.metadata[METADATA_KEY].playerId === OBR.player.id) {
-            await deleteSequence(sequence.id);
-        }
-    }
+    await Promise.all(sequences
+        .filter((sequence) => sequence.metadata[METADATA_KEY].playerId === OBR.player.id)
+        .map((sequence) => deleteSequence(sequence.id)));
 }
 
 async function getSequenceLength(targetId: string) {
@@ -316,19 +353,7 @@ export async function installTool() {
             },
         }],
         preventDrag: {
-            target: [
-                {
-                    key: 'type',
-                    operator: '!=',
-                    value: 'IMAGE',
-                    coordinator: '||'
-                },
-                {
-                    key: 'layer',
-                    operator: '!=',
-                    value: 'CHARACTER',
-                }
-            ],
+            target: INVALID_TARGET_FILTER,
         },
         cursors: [
             {
@@ -340,17 +365,7 @@ export async function installTool() {
             {
                 cursor: 'grab',
                 filter: {
-                    target: [
-                        {
-                            key: 'type',
-                            value: 'IMAGE',
-                            coordinator: '&&'
-                        },
-                        {
-                            key: 'layer',
-                            value: 'CHARACTER',
-                        }
-                    ],
+                    target: VALID_TARGET_FILTER,
                 }
             },
             {
@@ -358,7 +373,7 @@ export async function installTool() {
             },
         ],
         async onToolDragStart(_context, event) {
-            if (!event.target || !isImage(event.target) || event.target.layer !== 'CHARACTER' || dragState != null) {
+            if (!isValidTarget(event.target) || dragState != null) {
                 return;
             }
 
