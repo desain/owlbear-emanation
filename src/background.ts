@@ -3,6 +3,7 @@ import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import icon from "./status.svg";
 import { getPluginId, rebuildEmanations, updateSceneMetadata } from "./helpers";
 import AwaitLock from "await-lock";
+import { installTool } from "./dragtool";
 
 /**
  * This file represents the background script run when the plugin loads.
@@ -45,6 +46,8 @@ async function install() {
       }
     });
   }
+
+  installTool();
 }
 
 function installItemHandler(emanationReplaceLock: AwaitLock) {

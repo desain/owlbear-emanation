@@ -13,7 +13,7 @@ Add emanations to any character.
 
 The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.
 
-[//]: # ([store page](https://extensions.owlbear.rodeo/owlbear-emanation))
+Eventually on [store page](https://extensions.owlbear.rodeo/owlbear-emanation).
 
 ## How it Works
 
@@ -45,6 +45,11 @@ To make a production build run:
 - Debounce rebuilds
 - Refocus size after rebuild
 - Clockwise polygons
+
+### Grabtool
+- Key to drop a point at current spot
+- Allow measure on non token
+- Watch items and remove sequence if current item changes
 
 ## License
 
