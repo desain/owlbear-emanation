@@ -1,5 +1,4 @@
 import OBR, { buildLabel, buildPath, buildRuler, GridScale, InteractionManager, isImage, isPath, isRuler, Item, Label, Math2, Path, PathCommand, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
-import { Draft } from "immer";
 import { Emanation, isEmanation } from "./helpers";
 import icon from "./status.svg";
 import { getSweeper, Sweeper } from "./sweepUtils";
@@ -194,7 +193,7 @@ class DragState {
 
                 const movementVector = Math2.subtract(this.end, this.start);
                 for (let i = 0; i < sweeps.length; i++) {
-                    const sweep = sweeps[i] as Draft<Path>;
+                    const sweep = sweeps[i] as Path;
                     const sweepCommands = this.sweepers[i](this.start, movementVector);
                     sweep.commands = [...this.baseCommands[i], ...sweepCommands];
                 }
