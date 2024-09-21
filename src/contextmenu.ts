@@ -1,17 +1,16 @@
-import "./style.css";
 import OBR, { Image, } from "@owlbear-rodeo/sdk";
+import { buildEmanation } from "./builders";
 import {
   Emanation,
   EmanationMetadata,
   getPluginId,
   getSceneEmanationMetadata,
-  getStyle,
   isEmanation,
-  rebuildEmanations,
   PlayerMetadata,
-  updatePlayerMetadata,
+  rebuildEmanations,
+  updatePlayerMetadata
 } from "./helpers";
-import { buildEmanation } from "./builders";
+import "./style.css";
 
 /**
  * This file represents the HTML of the popover that is shown once
@@ -53,16 +52,16 @@ function emanationRow(id: string | null, color: string, size: number, multiplier
 
 async function renderContextMenu() {
   const playerEmanationMetadata = (await OBR.player.getMetadata())[getPluginId('metadata')] as PlayerMetadata | undefined;
-  const {parsed: {unit, multiplier}} = await OBR.scene.grid.getScale();
+  const { parsed: { unit, multiplier } } = await OBR.scene.grid.getScale();
 
   const selection = await OBR.player.getSelection();
   const extantEmanations = selection?.length === 1
     ? (await OBR.scene.items.getItems(isEmanation))
       .filter((emanation) => emanation.attachedTo == selection[0])
-      .map((emanation) => ({emanation, metadata: emanation.metadata[getPluginId('metadata')] as EmanationMetadata}))
-      .sort(({metadata: {size: sizeA}}, {metadata: {size: sizeB}}) => sizeA - sizeB)
-      .map(({emanation, metadata: {size}}) => emanationRow(
-        emanation.id, getStyle(emanation).strokeColor, size, multiplier, unit))
+      .map((emanation) => ({ emanation, metadata: emanation.metadata[getPluginId('metadata')] as EmanationMetadata }))
+      .sort(({ metadata: { size: sizeA } }, { metadata: { size: sizeB } }) => sizeA - sizeB)
+      .map(({ emanation, metadata: { size } }) => emanationRow(
+        emanation.id, emanation.style.strokeColor, size, multiplier, unit))
     : ['<p>(Selection is more than 1 item)</p>']
 
   let size = playerEmanationMetadata?.size ?? multiplier;
@@ -78,12 +77,12 @@ async function renderContextMenu() {
   // Attach listeners
   document.querySelectorAll<HTMLButtonElement>(`.${NEW_EMANATION}.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', async () => {
     color = colorButton.value;
-    await updatePlayerMetadata({color});
+    await updatePlayerMetadata({ color });
   }));
 
   document.querySelectorAll<HTMLInputElement>(`.${NEW_EMANATION}.${EMANATION_SIZE}`).forEach((sizeInput) => sizeInput.addEventListener('change', async () => {
     size = parseFloat(sizeInput.value);
-    await updatePlayerMetadata({size});
+    await updatePlayerMetadata({ size });
   }));
 
   document.querySelectorAll<HTMLButtonElement>(`.${EXTANT_EMANATION}.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', async () => {
@@ -104,13 +103,13 @@ async function renderContextMenu() {
       const metadata = emanation.metadata[getPluginId('metadata')] as EmanationMetadata;
       metadata.size = size;
     }));
-    await rebuildEmanations(({id: otherId}) => otherId === id);
+    await rebuildEmanations(({ id: otherId }) => otherId === id);
     await renderContextMenu();
   }));
 
   document.querySelectorAll(`.${CREATE_EMANATION}`).forEach((button) => button.addEventListener('click', async () => {
     if (size > 0) {
-      const newPlayerMetadata: PlayerMetadata = await updatePlayerMetadata({size, color});
+      const newPlayerMetadata: PlayerMetadata = await updatePlayerMetadata({ size, color });
       await createEmanations(newPlayerMetadata);
     } else {
       await OBR.notification.show('Emanation size must be greater than 0', 'WARNING');
@@ -143,7 +142,7 @@ async function removeAllEmanations() {
   }
 }
 
-async function createEmanations({size, color, defaultOpacity}: PlayerMetadata) {
+async function createEmanations({ size, color, defaultOpacity }: PlayerMetadata) {
   const selection = await OBR.player.getSelection();
   if (!selection) {
     return;
