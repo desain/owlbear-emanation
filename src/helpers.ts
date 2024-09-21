@@ -1,4 +1,4 @@
-import OBR, { Curve, GridMeasurement, GridType, isCurve, isImage, isShape, Item, Shape, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { Curve, GridMeasurement, GridType, isImage, Item, Shape, Vector2 } from "@owlbear-rodeo/sdk";
 import { buildEmanation } from "./builders";
 
 // export interface Emanation extends Item {
@@ -48,15 +48,6 @@ function isPlainObject(
   return (
     item !== null && typeof item === "object" && item.constructor === Object
   );
-}
-
-export function getStyle(emanation: Item): EmanationStyle {
-  if (isCurve(emanation) || isShape(emanation)) {
-    return emanation.style;
-  } else {
-    const metadata = emanation.metadata[getPluginId("metadata")] as EmanationMetadata;
-    return metadata.style;
-  }
 }
 
 export async function getSceneEmanationMetadata(): Promise<SceneEmanationMetadata> {
@@ -110,7 +101,7 @@ export async function rebuildEmanations(updateFilter: (_: { metadata: EmanationM
       }
       return {
         id: emanation.id,
-        style: getStyle(emanation),
+        style: emanation.style,
         metadata: emanation.metadata[getPluginId("metadata")] as EmanationMetadata,
         sourceItem,
       };
