@@ -54,9 +54,12 @@ To make a production build run:
 - Clockwise polygons
 
 ### Grabtool
-- Key to drop a point at current spot
+- Key to drop a point at current spot?
 - Allow measure on non token
-- Watch items and remove sequence if current item changes
+- Little circles
+- offset label more
+- double click finish
+- check only visible when there ae segments
 
 ## License
 
