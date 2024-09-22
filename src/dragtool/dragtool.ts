@@ -3,10 +3,12 @@ import icon1x from "./1x.svg";
 import icon2x from "./2x.svg";
 import clear from "./clear.svg";
 import DragState from "./DragState";
-import icon from "./dragtool.svg";
 import { isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
 import { withBothItemApis } from "./interactionUtils";
+import ruler from "./ruler.svg";
+import rulerPrivate from "./rulerPrivate.svg";
 import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceUtils";
+import walk from "./walk.svg";
 
 type DragToolMetadata = {
     distanceScaling: number,
@@ -23,7 +25,7 @@ function createDragMode(readAndClearScalingJustClicked: () => boolean) {
         shortcut: 'G',
         icons: [
             {
-                icon,
+                icon: walk,
                 label: 'Move Character',
                 filter: {
                     activeTools: [TOOL_ID],
@@ -86,9 +88,6 @@ function createDragMode(readAndClearScalingJustClicked: () => boolean) {
                 return false;
             }
         },
-        onActivate() {
-            console.log('tool activate', OBR.player.id);
-        },
         async onDeactivate() {
             // console.log('tool deactivate', OBR.player.id);
             if (!readAndClearScalingJustClicked()) {
@@ -105,7 +104,7 @@ function createMeasureMode(privateMode: boolean, readAndClearScalingJustClicked:
         shortcut: privateMode ? 'X' : 'Z',
         icons: [
             {
-                icon,
+                icon: privateMode ? rulerPrivate : ruler,
                 label: `Measure Path${privateMode ? ' (Private)' : ''}`,
                 filter: {
                     activeTools: [TOOL_ID],
@@ -280,7 +279,7 @@ export async function installTool() {
     OBR.tool.create({
         id: TOOL_ID,
         icons: [{
-            icon,
+            icon: walk,
             label: "Drag path",
         }],
         shortcut: 'Z',
