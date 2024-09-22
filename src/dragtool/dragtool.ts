@@ -1,12 +1,22 @@
 import OBR, { Item, Player, Vector2 } from "@owlbear-rodeo/sdk";
-import check from "./check.svg";
+import icon1x from "./1x.svg";
+import icon2x from "./2x.svg";
+import clear from "./clear.svg";
 import DragState from "./DragState";
 import icon from "./dragtool.svg";
 import { isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
 import { withBothItemApis } from "./interactionUtils";
 import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceUtils";
 
-function createDragMode() {
+type DragToolMetadata = {
+    distanceScaling: number,
+}
+
+async function setToolMetadata(update: Partial<DragToolMetadata>) {
+    await OBR.tool.setMetadata(TOOL_ID, update);
+}
+
+function createDragMode(readAndClearScalingJustClicked: () => boolean) {
     let dragState: DragState | null = null;
     OBR.tool.createMode({
         id: `${PLUGIN_ID}/drag-item-mode`,
@@ -41,12 +51,21 @@ function createDragMode() {
                 cursor: 'move',
             },
         ],
-        async onToolDragStart(_context, event) {
+        async onToolDragStart(context, event) {
             if (!isDraggableItem(event.target) || dragState != null) {
                 return;
             }
+            if (typeof context.metadata.distanceScaling !== 'number') {
+                throw 'Invalid metadata';
+            }
 
-            dragState = await DragState.createDrag(event.target, event.pointerPosition, false, false);
+            dragState = await DragState.createDrag(
+                event.target,
+                event.pointerPosition,
+                context.metadata.distanceScaling,
+                false,
+                false
+            );
         },
         async onToolDragMove(_, event) {
             await dragState?.update(event.pointerPosition);
@@ -67,14 +86,19 @@ function createDragMode() {
                 return false;
             }
         },
+        onActivate() {
+            console.log('tool activate', OBR.player.id);
+        },
         async onDeactivate() {
             // console.log('tool deactivate', OBR.player.id);
-            await deleteAllSequencesForCurrentPlayer();
+            if (!readAndClearScalingJustClicked()) {
+                await deleteAllSequencesForCurrentPlayer();
+            }
         },
     });
 }
 
-function createMeasureMode(privateMode: boolean) {
+function createMeasureMode(privateMode: boolean, readAndClearScalingJustClicked: () => boolean) {
     let dragState: DragState | null = null;
     OBR.tool.createMode({
         id: `${PLUGIN_ID}/measure-path-mode${privateMode ? '-private' : ''}`,
@@ -106,10 +130,14 @@ function createMeasureMode(privateMode: boolean) {
                 cursor: 'crosshair',
             },
         ],
-        async onToolDragStart(_context, event) {
+        async onToolDragStart(context, event) {
             if (dragState != null) {
                 return;
             }
+            if (typeof context.metadata.distanceScaling !== 'number') {
+                throw 'Invalid metadata';
+            }
+
             let startPosition: Vector2;
             let target: Item | null;
             if (isIndependentDragMarker(event.target)) {
@@ -123,7 +151,13 @@ function createMeasureMode(privateMode: boolean) {
                 target = null;
             }
 
-            dragState = await DragState.createDrag(target, startPosition, privateMode, true);
+            dragState = await DragState.createDrag(
+                target,
+                startPosition,
+                context.metadata.distanceScaling,
+                privateMode,
+                true,
+            );
         },
         async onToolDragMove(_, event) {
             await dragState?.update(event.pointerPosition);
@@ -145,8 +179,9 @@ function createMeasureMode(privateMode: boolean) {
             }
         },
         async onDeactivate(_context) {
-            // console.log('tool deactivate', OBR.player.id);
-            await deleteAllSequencesForCurrentPlayer();
+            if (!readAndClearScalingJustClicked()) {
+                await deleteAllSequencesForCurrentPlayer();
+            }
         },
     });
 }
@@ -182,22 +217,66 @@ async function deleteInvalidatedSequences(items: Item[], api: ItemApi) {
     });
 }
 
-function createFinishAction() {
+function createClearAction() {
     OBR.tool.createAction({
-        id: `${PLUGIN_ID} /tool-action-finish`,
+        id: `${PLUGIN_ID} /tool-action-clear`,
         shortcut: 'Enter',
         icons: [{
-            icon: check,
-            label: "Finish Drag",
+            icon: clear,
+            label: "Clear Measurements",
             filter: {
                 activeTools: [TOOL_ID],
             },
         }],
-        onClick: deleteAllSequencesForCurrentPlayer,
+        async onClick() {
+            await deleteAllSequencesForCurrentPlayer();
+        },
     });
 }
 
+function createChangeScalingAction() {
+    let scalingJustClicked = false;
+
+    const distanceScaling: keyof DragToolMetadata = 'distanceScaling';
+    OBR.tool.createAction({
+        id: `${PLUGIN_ID} /tool-action-change-scaling`,
+        icons: [
+            {
+                icon: icon1x,
+                label: "Change Scaling to 2x",
+                filter: {
+                    activeTools: [TOOL_ID],
+                    metadata: [
+                        {
+                            key: distanceScaling,
+                            value: 1,
+                        },
+                    ],
+                },
+            },
+            {
+                icon: icon2x,
+                label: "Change Scaling to 1x",
+                filter: {
+                    activeTools: [TOOL_ID],
+                },
+            }
+        ],
+        async onClick(context) {
+            scalingJustClicked = true;
+            await setToolMetadata({ distanceScaling: context.metadata.distanceScaling === 1 ? 2 : 1 }); // deactivates tool
+        },
+    });
+
+    return () => {
+        const result = scalingJustClicked;
+        scalingJustClicked = false;
+        return result;
+    };
+}
+
 export async function installTool() {
+    const defaultMetadata: DragToolMetadata = { distanceScaling: 1 };
     OBR.tool.create({
         id: TOOL_ID,
         icons: [{
@@ -205,12 +284,14 @@ export async function installTool() {
             label: "Drag path",
         }],
         shortcut: 'Z',
+        defaultMetadata: defaultMetadata,
     });
 
-    createDragMode();
-    createMeasureMode(false);
-    createMeasureMode(true);
-    createFinishAction();
+    const readAndClearScalingJustClicked = createChangeScalingAction();
+    createDragMode(readAndClearScalingJustClicked);
+    createMeasureMode(false, readAndClearScalingJustClicked);
+    createMeasureMode(true, readAndClearScalingJustClicked);
+    createClearAction();
 
     const unsubscribeFunctions = [];
     if (await OBR.player.getRole() === 'GM') {

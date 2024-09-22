@@ -1,5 +1,5 @@
-import OBR, { GridMeasurement, GridScale, Item, Label, Math2, Path, PathCommand, Ruler, Shape, Vector2, buildLabel, buildRuler, buildShape, isPath } from "@owlbear-rodeo/sdk";
-import { METADATA_KEY, SequenceItem } from "./dragtoolTypes";
+import OBR, { GridMeasurement, GridScale, Item, Label, Math2, Path, PathCommand, Shape, Vector2, buildLabel, buildRuler, buildShape } from "@owlbear-rodeo/sdk";
+import { METADATA_KEY, SequenceItem, SequenceRuler, SequenceSweep, isSequenceSweep } from "./dragtoolTypes";
 import { AbstractInteraction, createLocalInteraction, wrapRealInteraction } from "./interactionUtils";
 import { belongsToSequenceForTarget, buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweep, getSequenceLength } from "./sequenceUtils";
 import { Sweeper, getSweeper } from "./sweepUtils";
@@ -38,6 +38,7 @@ export default class DragState {
     private readonly sweepData: SweepData[];
     private readonly interaction: AbstractInteraction<Item[]>;
     private readonly snappingSensitivity: number;
+    private readonly distanceScaling: number;
     /**
      * Distance the target has traveled before the current drag.
      */
@@ -58,6 +59,7 @@ export default class DragState {
     static async createDrag(
         targetArg: Item | null,
         pointerPosition: Vector2,
+        distanceScaling: number,
         privateMode: boolean,
         aboveCharacters: boolean,
     ): Promise<DragState | null> {
@@ -88,8 +90,8 @@ export default class DragState {
 
 
         const emanations = await getEmanations(target.id, OBR.scene.items);
-        const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
-            .filter(isPath) as (SequenceItem & Path)[];
+        const existingSweeps: SequenceSweep[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
+            .filter(isSequenceSweep);
         const sweeps = await Promise.all(emanations.map((emanation) => getOrCreateSweep(target, emanation, existingSweeps)));
         const sweepData: SweepData[] = [];
         for (let i = 0; i < emanations.length; i++) {
@@ -102,13 +104,14 @@ export default class DragState {
         }
 
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
-        const ruler: Ruler = buildSequenceItem(target, layer, RULER_Z_INDEX, buildRuler()
+        const ruler: SequenceRuler = buildSequenceItem(target, layer, RULER_Z_INDEX, buildRuler)
             .name(`Path Ruler for ${target.name}`)
             .startPosition(target.position)
             .endPosition(end)
             .variant('DASHED')
-        );
-        const waypoint: Shape = buildSequenceItem(target, layer, WAYPOINT_Z_INDEX, buildShape()
+            .build() as SequenceRuler;
+        ruler.metadata[METADATA_KEY].scalingFactor = distanceScaling;
+        const waypoint: Shape & SequenceItem = buildSequenceItem(target, layer, WAYPOINT_Z_INDEX, buildShape)
             .name(`Path Waypoint for ${target.name}`)
             .position(target.position)
             .shapeType('CIRCLE')
@@ -117,9 +120,9 @@ export default class DragState {
             .fillColor(playerColor)
             .strokeColor('gray')
             .strokeWidth(markerStrokeWidth)
-        );
+            .build() as Shape & SequenceItem;
         // Labels always go above characters
-        const label: Label = buildSequenceItem(target, 'RULER', LABEL_Z_INDEX, buildLabel()
+        const label: Label & SequenceItem = buildSequenceItem(target, 'RULER', LABEL_Z_INDEX, buildLabel)
             .name(`Path Label for ${target.name}`)
             .position(target.position)
             .backgroundColor('black')
@@ -127,7 +130,7 @@ export default class DragState {
             .pointerDirection('DOWN')
             .pointerWidth(20)
             .pointerHeight(40)
-        );
+            .build() as Label & SequenceItem;
 
         const interactionItems = DragState.composeItems({ target, sweeps, ruler, label, waypoint });
         const interaction: AbstractInteraction<Item[]> = privateMode
@@ -138,6 +141,7 @@ export default class DragState {
             target.position,
             end,
             await getSequenceLength(target.id, interaction.itemApi),
+            distanceScaling,
             interaction,
             sweepData,
             snappingSensitivity,
@@ -149,6 +153,7 @@ export default class DragState {
         start: Vector2,
         end: Vector2,
         baseDistance: number,
+        distanceScaling: number,
         interaction: AbstractInteraction<Item[]>,
         sweepData: SweepData[],
         snappingSensitivity: number,
@@ -156,6 +161,7 @@ export default class DragState {
     ) {
         this.start = start;
         this.baseDistance = baseDistance;
+        this.distanceScaling = distanceScaling;
         this.interaction = interaction;
         this.snappingSensitivity = snappingSensitivity;
         this.targetIsNew = targetIsNew;
@@ -191,21 +197,22 @@ export default class DragState {
         const target = items[idx++];
 
         const numSweeps = this.sweepData.length;
-        const sweeps = items.slice(idx, idx += numSweeps) as Path[];
+        const sweeps = items.slice(idx, idx += numSweeps) as (Path & SequenceItem)[];
 
-        const ruler = items[idx++] as Ruler;
-        const label = items[idx++] as Label;
-        const waypoint = items[idx++] as Shape;
+        const ruler = items[idx++] as SequenceRuler;
+        const label = items[idx++] as Label & SequenceItem;
+        const waypoint = items[idx++] as Shape & SequenceItem;
         return { target, sweeps, ruler, label, waypoint };
     }
 
     async update(pointerPosition: Vector2) {
         const changedEnd = await this.setEnd(pointerPosition);
-        const [newDistance, scale] = await Promise.all([
+        const [unadjustedNewDistance, scale] = await Promise.all([
             OBR.scene.grid.getDistance(this.start, this.end),
             OBR.scene.grid.getScale(),
         ]);
-        const totalDistance = this.baseDistance + newDistance;
+        const adjustedNewDistance = unadjustedNewDistance * this.distanceScaling;
+        const totalDistance = this.baseDistance + adjustedNewDistance;
         const { update } = this.interaction;
         const items = await update((items) => {
             if (changedEnd) {
@@ -214,7 +221,7 @@ export default class DragState {
                 label.position = this.end;
 
                 ruler.endPosition = this.end;
-                ruler.measurement = getMeasurementText(newDistance, scale);
+                ruler.measurement = getMeasurementText(adjustedNewDistance, scale);
 
                 target.position = this.end;
 
