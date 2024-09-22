@@ -1,4 +1,4 @@
-import OBR, { Image, Item, KeyFilter, Layer, Math2, Path, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isPath, isRuler, isShape } from "@owlbear-rodeo/sdk";
+import OBR, { Image, Item, KeyFilter, Layer, Math2, Path, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isRuler, isShape } from "@owlbear-rodeo/sdk";
 import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemBuilder";
 import { Emanation, isEmanation, } from "../types";
 import { ItemApi, METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, isSequenceItem, isSequenceTarget } from "./dragtoolTypes";
@@ -157,33 +157,24 @@ export async function getSequenceLength(targetId: string, api: ItemApi) {
     )).reduce((a, b) => a + b, 0);
 }
 
-export async function getOrCreateSweeps(target: Item, emanations: Emanation[], api: ItemApi): Promise<Path[]> {
-    if (target === null) {
-        return [];
+export async function getOrCreateSweep(target: Item, emanation: Emanation, existingSweeps: (SequenceItem & Path)[]): Promise<Path> {
+    const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY]?.emanationId === emanation.id);
+    if (existingSweep) {
+        return existingSweep;
+    } else {
+        const sweep: Path & SequenceItem = buildSequenceItem(target, 'DRAWING', null, buildPath()
+            .position({ x: 0, y: 0 })
+            .commands([])
+            .strokeWidth(emanation.style.strokeWidth)
+            .strokeColor(emanation.style.strokeColor)
+            .strokeDash(emanation.style.strokeDash)
+            .strokeOpacity(0)
+            .fillColor(emanation.style.fillColor)
+            .fillOpacity(emanation.style.fillOpacity)
+            .fillRule('nonzero'));
+        sweep.metadata[METADATA_KEY].emanationId = emanation.id;
+        return sweep;
     }
-    const existingSweeps: (SequenceItem & Path)[] = (await api.getItems(belongsToSequenceForTarget(target.id)))
-        .filter(isPath) as (SequenceItem & Path)[];
-    const sweeps: Path[] = [];
-    for (const emanation of emanations) {
-        const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY]?.emanationId === emanation.id);
-        if (existingSweep) {
-            sweeps.push(existingSweep);
-        } else {
-            const sweep: Path & SequenceItem = buildSequenceItem(target, 'DRAWING', null, buildPath()
-                .position({ x: 0, y: 0 })
-                .commands([])
-                .strokeWidth(emanation.style.strokeWidth)
-                .strokeColor(emanation.style.strokeColor)
-                .strokeDash(emanation.style.strokeDash)
-                .strokeOpacity(0)
-                .fillColor(emanation.style.fillColor)
-                .fillOpacity(emanation.style.fillOpacity)
-                .fillRule('nonzero'));
-            sweep.metadata[METADATA_KEY].emanationId = emanation.id;
-            sweeps.push(sweep);
-        }
-    }
-    return sweeps;
 }
 
 export function createSequenceItemMetadata(targetId: string, emanationId: string | undefined = undefined): SequenceItemMetadata {

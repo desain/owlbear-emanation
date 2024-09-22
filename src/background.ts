@@ -28,7 +28,7 @@ OBR.onReady(async () => {
 });
 
 async function install() {
-  console.log("Emanations version 0.0.5");
+  console.log("Emanations version 0.0.6");
   createContextMenu();
 
   // Only install global listeners that can change items for one instance
