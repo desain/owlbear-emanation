@@ -1,6 +1,6 @@
-import OBR, { GridMeasurement, GridScale, Item, Label, Math2, Path, PathCommand, Ruler, Shape, Vector2, buildLabel, buildRuler, buildShape } from "@owlbear-rodeo/sdk";
-import { ItemApi, METADATA_KEY } from "./dragtoolTypes";
-import { buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweeps, getSequenceLength } from "./sequenceutils";
+import OBR, { GridMeasurement, GridScale, Item, Label, Math2, Path, PathCommand, Ruler, Shape, Vector2, buildLabel, buildRuler, buildShape, isPath } from "@owlbear-rodeo/sdk";
+import { ItemApi, METADATA_KEY, SequenceItem } from "./dragtoolTypes";
+import { belongsToSequenceForTarget, buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweep, getSequenceLength } from "./sequenceutils";
 import { Sweeper, getSweeper } from "./sweepUtils";
 
 const RULER_Z_INDEX = 0;
@@ -21,7 +21,7 @@ function getMeasurementText(numGridUnits: number, scale: GridScale) {
  */
 type AbstractInteraction<T> = {
     update(updater: (value: T) => void): Promise<T>,
-    stopAndReadd(readd: T): Promise<void>,
+    stopAndReAdd(toReAdd: T): Promise<void>,
     itemApi: ItemApi,
 }
 
@@ -31,7 +31,7 @@ async function wrapRealInteraction(items: Item[]): Promise<AbstractInteraction<I
         async update(updater: (_: Item[]) => void) {
             return update(updater);
         },
-        async stopAndReadd(items: Item[]) {
+        async stopAndReAdd(items: Item[]) {
             stop();
             await OBR.scene.items.addItems(items);
         },
@@ -49,7 +49,7 @@ async function localInteraction(items: Item[]): Promise<AbstractInteraction<Item
             OBR.scene.local.updateItems(ids, updater);
             return OBR.scene.local.getItems(ids);
         },
-        async stopAndReadd(items: Item[]) {
+        async stopAndReAdd(items: Item[]) {
             const idsToKeep = items.map((item) => item.id);
             const toDelete = newItems
                 .map((item) => item.id)
@@ -60,14 +60,34 @@ async function localInteraction(items: Item[]): Promise<AbstractInteraction<Item
     };
 }
 
+/**
+ * Type that represents the data needed to sweep a path.
+ */
+type SweepData = {
+    /**
+     * Commands from the sweeps for the emanation so far.
+     */
+    baseCommands: PathCommand[],
+    sweeper: Sweeper,
+    /**
+     * Emanation position offset from target.
+     */
+    baseOffset: Vector2,
+};
+
 export default class DragState {
     private readonly start: Vector2;
     private end: Vector2;
-    private readonly baseCommands: PathCommand[][];
-    private readonly sweepers: Sweeper[];
+    private readonly sweepData: SweepData[];
     private readonly interaction: AbstractInteraction<Item[]>;
     private readonly snappingSensitivity: number;
+    /**
+     * Distance the target has traveled before the current drag.
+     */
     private readonly baseDistance: number;
+    /**
+     * Whether the target was created just for this drag (e.g it's a marker for a measurement).
+     */
     private readonly targetIsNew: boolean;
 
     /**
@@ -76,7 +96,7 @@ export default class DragState {
      * @param pointerPosition Position of mouse pointer.s
      * @param privateMode Whether to use only local items. Must not be set when the item is not a local item.
      * @param aboveCharacters Whether to place the sequence items above characters in the Z order.
-     * @returns 
+     * @returns New drag state.
      */
     static async createDrag(
         targetArg: Item | null,
@@ -109,10 +129,20 @@ export default class DragState {
             target = targetArg;
         }
 
+
         const emanations = await getEmanations(target.id, OBR.scene.items);
-        const sweepers = emanations.map((emanation) => getSweeper(emanation));
-        const sweeps = await getOrCreateSweeps(target, emanations, OBR.scene.items);
-        const baseCommands = sweeps.map((sweep) => sweep.commands);
+        const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
+            .filter(isPath) as (SequenceItem & Path)[];
+        const sweeps = await Promise.all(emanations.map((emanation) => getOrCreateSweep(target, emanation, existingSweeps)));
+        const sweepData: SweepData[] = [];
+        for (let i = 0; i < emanations.length; i++) {
+            sweepData.push({
+                sweeper: getSweeper(emanations[i]),
+                baseCommands: sweeps[i].commands,
+                baseOffset: Math2.subtract(emanations[i].position, target.position),
+            });
+            console.log(sweepData[i]);
+        }
 
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
         const ruler: Ruler = buildSequenceItem(target, layer, RULER_Z_INDEX, buildRuler()
@@ -152,11 +182,8 @@ export default class DragState {
             target.position,
             end,
             await getSequenceLength(target.id, interaction.itemApi),
-            // For some reason OBR wants existing items first in the interaction array, then newly created ones.
-            // It doesn't display updates to the existing items if existing items are at the back.
             interaction,
-            baseCommands,
-            sweepers,
+            sweepData,
             snappingSensitivity,
             targetIsNew,
         );
@@ -167,8 +194,7 @@ export default class DragState {
         end: Vector2,
         baseDistance: number,
         interaction: AbstractInteraction<Item[]>,
-        baseCommands: PathCommand[][],
-        sweepers: Sweeper[],
+        sweepData: SweepData[],
         snappingSensitivity: number,
         targetIsNew: boolean,
     ) {
@@ -176,9 +202,8 @@ export default class DragState {
         this.baseDistance = baseDistance;
         this.interaction = interaction;
         this.snappingSensitivity = snappingSensitivity;
-        this.baseCommands = baseCommands;
         this.targetIsNew = targetIsNew;
-        this.sweepers = sweepers;
+        this.sweepData = sweepData;
         this.end = end; // make compiler happy that we're assigning this
         this.setEnd(end); // snap initial end
     }
@@ -195,6 +220,8 @@ export default class DragState {
     }
 
     private static composeItems({ target, sweeps, ruler, label, waypoint }: ReturnType<typeof DragState.prototype.decomposeItems>): Item[] {
+        // For some reason OBR wants existing items first in the interaction array, then newly created ones.
+        // It doesn't display updates to the existing items if existing items are at the back.
         return [target, ...sweeps, ruler, label, waypoint];
     }
 
@@ -207,7 +234,7 @@ export default class DragState {
         let idx = 0;
         const target = items[idx++];
 
-        const numSweeps = this.sweepers.length;
+        const numSweeps = this.sweepData.length;
         const sweeps = items.slice(idx, idx += numSweeps) as Path[];
 
         const ruler = items[idx++] as Ruler;
@@ -238,8 +265,9 @@ export default class DragState {
                 const movementVector = Math2.subtract(this.end, this.start);
                 for (let i = 0; i < sweeps.length; i++) {
                     const sweep = sweeps[i] as Path;
-                    const sweepCommands = this.sweepers[i](this.start, movementVector);
-                    sweep.commands = [...this.baseCommands[i], ...sweepCommands];
+                    const startPosition = Math2.add(this.start, this.sweepData[i].baseOffset);
+                    const sweepCommands = this.sweepData[i].sweeper(startPosition, movementVector);
+                    sweep.commands = [...this.sweepData[i].baseCommands, ...sweepCommands];
                 }
             }
         });
@@ -258,7 +286,7 @@ export default class DragState {
             toAdd.push(target);
         }
 
-        const { stopAndReadd, itemApi } = this.interaction;
+        const { stopAndReAdd: stopAndReadd, itemApi } = this.interaction;
         await stopAndReadd(toAdd);
 
         if (!this.targetIsNew) {
@@ -270,7 +298,7 @@ export default class DragState {
     }
 
     async cancel() {
-        const { update, stopAndReadd } = this.interaction;
+        const { update, stopAndReAdd: stopAndReadd } = this.interaction;
         // Fix bug where token is not locally displayed at its initial position on cancel
         await update((items) => {
             const { target } = this.decomposeItems(items);
