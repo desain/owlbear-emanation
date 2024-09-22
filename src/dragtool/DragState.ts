@@ -17,6 +17,11 @@ function getMeasurementText(numGridUnits: number, scale: GridScale) {
     return `${Math.round(numGridUnits * scale.parsed.multiplier).toString()}${scale.parsed.unit}`
 }
 
+function getRulerText(numGridUnits: number, scale: GridScale, scalingFactor: number) {
+    const xFactorText = scalingFactor === 1 ? '' : `x${scalingFactor}`;
+    return `${Math.round(numGridUnits * scale.parsed.multiplier)}${xFactorText}${scale.parsed.unit}`;
+}
+
 /**
  * Type that represents the data needed to sweep a path.
  */
@@ -221,7 +226,7 @@ export default class DragState {
                 label.position = this.end;
 
                 ruler.endPosition = this.end;
-                ruler.measurement = getMeasurementText(adjustedNewDistance, scale);
+                ruler.measurement = getRulerText(unadjustedNewDistance, scale, this.distanceScaling);
 
                 target.position = this.end;
 
