@@ -1,4 +1,4 @@
-import OBR, { Item, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { Item, Player, Vector2 } from "@owlbear-rodeo/sdk";
 import check from "./check.svg";
 import DragState from "./DragState";
 import icon from "./dragtool.svg";
@@ -12,21 +12,11 @@ async function withBothItemApis(f: (api: ItemApi) => Promise<void>) {
     ]);
 }
 
-export async function installTool() {
-    OBR.tool.create({
-        id: TOOL_ID,
-        icons: [{
-            icon,
-            label: "Drag path",
-        }],
-        shortcut: 'Z',
-    });
-
+function createDragMode() {
     let dragState: DragState | null = null;
-
     OBR.tool.createMode({
         id: `${PLUGIN_ID}/drag-item-mode`,
-        shortcut: 'Z',
+        shortcut: 'G',
         icons: [
             {
                 icon,
@@ -62,7 +52,7 @@ export async function installTool() {
                 return;
             }
 
-            dragState = await DragState.createDrag(event.target, event.pointerPosition, false);
+            dragState = await DragState.createDrag(event.target, event.pointerPosition, false, false);
         },
         async onToolDragMove(_, event) {
             await dragState?.update(event.pointerPosition);
@@ -92,14 +82,17 @@ export async function installTool() {
             });
         },
     });
+}
 
+function createMeasureMode(privateMode: boolean) {
+    let dragState: DragState | null = null;
     OBR.tool.createMode({
-        id: `${PLUGIN_ID}/measure-path-mode`,
-        shortcut: 'X',
+        id: `${PLUGIN_ID}/measure-path-mode${privateMode ? '-private' : ''}`,
+        shortcut: privateMode ? 'X' : 'Z',
         icons: [
             {
                 icon,
-                label: 'Measure Path',
+                label: `Measure Path${privateMode ? ' (Private)' : ''}`,
                 filter: {
                     activeTools: [TOOL_ID],
                 },
@@ -140,7 +133,7 @@ export async function installTool() {
                 target = null;
             }
 
-            dragState = await DragState.createDrag(target, startPosition, true);
+            dragState = await DragState.createDrag(target, startPosition, privateMode, true);
         },
         async onToolDragMove(_, event) {
             await dragState?.update(event.pointerPosition);
@@ -170,7 +163,40 @@ export async function installTool() {
             });
         },
     });
+}
 
+async function deleteSequencesFromVanishedPlayers(players: Player[]) {
+    const activePlayers = new Set(players.map((player) => player.id));
+    activePlayers.add(OBR.player.id); // apparently the GM isn't in by default
+    // console.log('players', activePlayers, 'iam', OBR.player.id);
+    await withBothItemApis(async (api) => {
+        const sequenceTargets = await api.getItems(isSequenceTarget);
+        for (const target of sequenceTargets) {
+            if (!activePlayers.has(target.metadata[METADATA_KEY].playerId)) {
+                // console.log('deleting sequence of ownerless target', target, 'owner not in', activePlayers);
+                deleteSequence(target, api);
+            }
+        }
+    });
+}
+
+async function deleteInvalidatedSequences(items: Item[], api: ItemApi) {
+    // Remove sequence items whose target was removed
+    const ownerlessItems = items.filter(isSequenceItem)
+        .filter((item) => !items.find((potentialOwner) => item.metadata[METADATA_KEY].targetId === potentialOwner.id))
+        .map((item) => item.id);
+    // console.log('deleting ownerless', ownerlessItems);
+    api.deleteItems(ownerlessItems);
+    // Remove sequence items whose target was moved
+    items.filter(isSequenceTarget).forEach((item) => {
+        if (itemMovedOutsideItsSequence(item, items)) {
+            console.log('item moved out of its sequence', item.id, 'items are', items);
+            deleteSequence(item, api)
+        }
+    });
+}
+
+function createFinishAction() {
     OBR.tool.createAction({
         id: `${PLUGIN_ID} /tool-action-finish`,
         shortcut: 'Enter',
@@ -181,49 +207,40 @@ export async function installTool() {
                 activeTools: [TOOL_ID],
             },
         }],
-        async onClick(_context) {
+        async onClick() {
             await withBothItemApis(async (api) => {
                 await deleteAllSequencesForCurrentPlayer(api);
             });
         },
     });
+}
+
+export async function installTool() {
+    OBR.tool.create({
+        id: TOOL_ID,
+        icons: [{
+            icon,
+            label: "Drag path",
+        }],
+        shortcut: 'Z',
+    });
+
+    createDragMode();
+    createMeasureMode(false);
+    createMeasureMode(true);
+    createFinishAction();
 
     const unsubscribeFunctions = [];
     if (await OBR.player.getRole() === 'GM') {
         // Delete a player's sequence when they leave
-        unsubscribeFunctions.push(OBR.party.onChange(async (players) => {
-            const activePlayers = new Set(players.map((player) => player.id));
-            activePlayers.add(OBR.player.id); // apparently the GM isn't in by default
-            // console.log('players', activePlayers, 'iam', OBR.player.id);
-            await withBothItemApis(async (api) => {
-                const sequenceTargets = await api.getItems(isSequenceTarget);
-                for (const target of sequenceTargets) {
-                    if (!activePlayers.has(target.metadata[METADATA_KEY].playerId)) {
-                        // console.log('deleting sequence of ownerless target', target, 'owner not in', activePlayers);
-                        deleteSequence(target, api);
-                    }
-                }
-            });
-        }));
+        unsubscribeFunctions.push(OBR.party.onChange(deleteSequencesFromVanishedPlayers));
 
         // Delete a sequence when an item moves sout of it
         await withBothItemApis(async (api) => {
             unsubscribeFunctions.push(api.onChange((items) => {
-                // Remove sequence items whose target was removed
-                const ownerlessItems = items.filter(isSequenceItem)
-                    .filter((item) => !items.find((potentialOwner) => item.metadata[METADATA_KEY].targetId === potentialOwner.id))
-                    .map((item) => item.id);
-                // console.log('deleting ownerless', ownerlessItems);
-                api.deleteItems(ownerlessItems);
-                // Remove sequence items whose target was moved
-                items.filter(isSequenceTarget).forEach((item) => {
-                    if (itemMovedOutsideItsSequence(item, items)) {
-                        console.log('item moved out of its sequence', item.id, 'items are', items);
-                        deleteSequence(item, api)
-                    }
-                });
+                deleteInvalidatedSequences(items, api);
             }));
-        })
-
+        });
     }
+    // TODO on scene ready change to not ready call unsubscribe?
 }

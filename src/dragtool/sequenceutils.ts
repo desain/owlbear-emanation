@@ -1,4 +1,4 @@
-import OBR, { Image, Item, KeyFilter, Math2, Path, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isPath, isRuler, isShape } from "@owlbear-rodeo/sdk";
+import OBR, { Image, Item, KeyFilter, Layer, Math2, Path, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isPath, isRuler, isShape } from "@owlbear-rodeo/sdk";
 import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemBuilder";
 import { Emanation, isEmanation, } from "../types";
 import { ItemApi, METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, isSequenceItem, isSequenceTarget } from "./dragtoolTypes";
@@ -54,20 +54,31 @@ export const NOT_DRAGGABLE_ITEM_FILTER: KeyFilter[] = [
         value: true,
     },
 ];
-export function createDragMarker(position: Vector2, dpi: number, playerColor: string, markerStrokeWidth: number) {
+export function createDragMarker(
+    position: Vector2,
+    dpi: number,
+    playerColor: string,
+    markerStrokeWidth: number,
+    layer: Layer,
+    zIndex: number,
+    privateMode: boolean,
+) {
     return buildShape()
         .name('Measurement Marker')
         .shapeType('CIRCLE')
         .position(position)
+        .disableAutoZIndex(true)
+        .zIndex(zIndex)
         .width(dpi / 2)
         .height(dpi / 2)
         .fillColor(playerColor)
         .fillOpacity(1)
         .strokeColor('gray')
         .strokeOpacity(1)
+        .strokeDash(privateMode ? [30, 10] : [])
         .strokeWidth(markerStrokeWidth)
         .locked(true)
-        .layer('RULER')
+        .layer(layer)
         .metadata({ [METADATA_KEY]: createSequenceTargetMetadata() })
         .build();
 }
@@ -85,15 +96,18 @@ export async function getEmanations(id: string, api: ItemApi): Promise<Emanation
 
 export function buildSequenceItem<Built extends Item, Builder extends GenericItemBuilder<Builder> & { build: () => Built }>(
     target: Item,
-    metadata: SequenceItemMetadata,
-    builder: Builder
+    layer: Layer,
+    zIndex: number | null,
+    builder: Builder,
 ): Built & SequenceItem {
     const built: Built = builder
         .disableHit(true)
+        .disableAutoZIndex(zIndex !== null)
+        .zIndex(zIndex!)
         .locked(true)
         .visible(target.visible)
-        .layer('RULER')
-        .metadata({ [METADATA_KEY]: metadata })
+        .layer(layer)
+        .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
         .build();
     const returnValue: Built & SequenceItem = built as typeof built & { metadata: { [METADATA_KEY]: SequenceItemMetadata } };
     return returnValue;
@@ -155,7 +169,7 @@ export async function getOrCreateSweeps(target: Item, emanations: Emanation[], a
         if (existingSweep) {
             sweeps.push(existingSweep);
         } else {
-            const sweep: Path = buildSequenceItem(target, createSequenceItemMetadata(target.id, emanation.id), buildPath()
+            const sweep: Path & SequenceItem = buildSequenceItem(target, 'DRAWING', null, buildPath()
                 .position({ x: 0, y: 0 })
                 .commands([])
                 .strokeWidth(emanation.style.strokeWidth)
@@ -164,8 +178,8 @@ export async function getOrCreateSweeps(target: Item, emanations: Emanation[], a
                 .strokeOpacity(0)
                 .fillColor(emanation.style.fillColor)
                 .fillOpacity(emanation.style.fillOpacity)
-                .layer('DRAWING')
                 .fillRule('nonzero'));
+            sweep.metadata[METADATA_KEY].emanationId = emanation.id;
             sweeps.push(sweep);
         }
     }
