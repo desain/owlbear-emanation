@@ -3,7 +3,7 @@ import icon1x from "./1x.svg";
 import icon2x from "./2x.svg";
 import clear from "./clear.svg";
 import DragState from "./DragState";
-import { isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
+import { DRAG_MODE_ID, isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
 import { withBothItemApis } from "./interactionUtils";
 import ruler from "./ruler.svg";
 import rulerPrivate from "./rulerPrivate.svg";
@@ -21,7 +21,7 @@ async function setToolMetadata(update: Partial<DragToolMetadata>) {
 function createDragMode(readAndClearScalingJustClicked: () => boolean) {
     let dragState: DragState | null = null;
     OBR.tool.createMode({
-        id: `${PLUGIN_ID}/drag-item-mode`,
+        id: DRAG_MODE_ID,
         shortcut: 'G',
         icons: [
             {
@@ -89,7 +89,6 @@ function createDragMode(readAndClearScalingJustClicked: () => boolean) {
             }
         },
         async onDeactivate() {
-            // console.log('tool deactivate', OBR.player.id);
             if (!readAndClearScalingJustClicked()) {
                 await deleteAllSequencesForCurrentPlayer();
             }
@@ -101,7 +100,7 @@ function createMeasureMode(privateMode: boolean, readAndClearScalingJustClicked:
     let dragState: DragState | null = null;
     OBR.tool.createMode({
         id: `${PLUGIN_ID}/measure-path-mode${privateMode ? '-private' : ''}`,
-        shortcut: privateMode ? 'X' : 'Z',
+        shortcut: privateMode ? 'P' : 'Z',
         icons: [
             {
                 icon: privateMode ? rulerPrivate : ruler,
@@ -239,6 +238,7 @@ function createChangeScalingAction() {
     const distanceScaling: keyof DragToolMetadata = 'distanceScaling';
     OBR.tool.createAction({
         id: `${PLUGIN_ID} /tool-action-change-scaling`,
+        shortcut: 'X',
         icons: [
             {
                 icon: icon1x,
@@ -284,6 +284,11 @@ export async function installTool() {
         }],
         shortcut: 'Z',
         defaultMetadata: defaultMetadata,
+        defaultMode: DRAG_MODE_ID,
+        async onClick() {
+            await setToolMetadata({ distanceScaling: 1 });
+            return true;
+        },
     });
 
     const readAndClearScalingJustClicked = createChangeScalingAction();
