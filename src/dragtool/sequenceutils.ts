@@ -2,6 +2,7 @@ import OBR, { Image, Item, KeyFilter, Layer, Math2, Path, Ruler, Shape, Vector2,
 import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemBuilder";
 import { Emanation, isEmanation, } from "../types";
 import { ItemApi, METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, isSequenceItem, isSequenceTarget } from "./dragtoolTypes";
+import { withBothItemApis } from "./interactionUtils";
 
 export function isDraggableItem(target: Item | undefined, requireUnlocked: boolean = true): target is Image {
     return target !== undefined
@@ -139,14 +140,16 @@ export async function deleteSequence(target: Item, api: ItemApi) {
     await api.deleteItems(toDelete);
 }
 
-export async function deleteAllSequencesForCurrentPlayer(api: ItemApi) {
+export async function deleteAllSequencesForCurrentPlayer() {
     // console.log('deleting all for current');
-    const sequenceTargets = await api.getItems(isSequenceTarget);
-    await Promise.all(
-        sequenceTargets
-            .filter((target) => target.metadata[METADATA_KEY].playerId === OBR.player.id)
-            .map((target) => deleteSequence(target, api))
-    );
+    withBothItemApis(async (api) => {
+        const sequenceTargets = await api.getItems(isSequenceTarget);
+        await Promise.all(
+            sequenceTargets
+                .filter((target) => target.metadata[METADATA_KEY].playerId === OBR.player.id)
+                .map((target) => deleteSequence(target, api))
+        );
+    });
 }
 
 export async function getSequenceLength(targetId: string, api: ItemApi) {

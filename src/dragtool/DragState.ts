@@ -1,6 +1,7 @@
 import OBR, { GridMeasurement, GridScale, Item, Label, Math2, Path, PathCommand, Ruler, Shape, Vector2, buildLabel, buildRuler, buildShape, isPath } from "@owlbear-rodeo/sdk";
-import { ItemApi, METADATA_KEY, SequenceItem } from "./dragtoolTypes";
-import { belongsToSequenceForTarget, buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweep, getSequenceLength } from "./sequenceutils";
+import { METADATA_KEY, SequenceItem } from "./dragtoolTypes";
+import { AbstractInteraction, createLocalInteraction, wrapRealInteraction } from "./interactionUtils";
+import { belongsToSequenceForTarget, buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweep, getSequenceLength } from "./sequenceUtils";
 import { Sweeper, getSweeper } from "./sweepUtils";
 
 const RULER_Z_INDEX = 0;
@@ -14,50 +15,6 @@ export function getSnappingSensitivity(measurement: GridMeasurement) {
 
 function getMeasurementText(numGridUnits: number, scale: GridScale) {
     return `${Math.round(numGridUnits * scale.parsed.multiplier).toString()}${scale.parsed.unit}`
-}
-
-/**
- * Type that abstracts over a network interaction or a local item interaction
- */
-type AbstractInteraction<T> = {
-    update(updater: (value: T) => void): Promise<T>,
-    stopAndReAdd(toReAdd: T): Promise<void>,
-    itemApi: ItemApi,
-}
-
-async function wrapRealInteraction(items: Item[]): Promise<AbstractInteraction<Item[]>> {
-    const [update, stop] = await OBR.interaction.startItemInteraction(items);
-    return {
-        async update(updater: (_: Item[]) => void) {
-            return update(updater);
-        },
-        async stopAndReAdd(items: Item[]) {
-            stop();
-            await OBR.scene.items.addItems(items);
-        },
-        itemApi: OBR.scene.items,
-    };
-}
-
-async function localInteraction(items: Item[]): Promise<AbstractInteraction<Item[]>> {
-    const ids = items.map((item) => item.id);
-    const existingIds = (await OBR.scene.local.getItems(ids)).map((item) => item.id);
-    const newItems = items.filter((item) => !existingIds.includes(item.id));
-    await OBR.scene.local.addItems(newItems);
-    return {
-        update: async (updater: (_: Item[]) => void) => {
-            OBR.scene.local.updateItems(ids, updater);
-            return OBR.scene.local.getItems(ids);
-        },
-        async stopAndReAdd(items: Item[]) {
-            const idsToKeep = items.map((item) => item.id);
-            const toDelete = newItems
-                .map((item) => item.id)
-                .filter((id) => !idsToKeep.includes(id));
-            await OBR.scene.local.deleteItems(toDelete);
-        },
-        itemApi: OBR.scene.local,
-    };
 }
 
 /**
@@ -172,10 +129,9 @@ export default class DragState {
             .pointerHeight(40)
         );
 
-
         const interactionItems = DragState.composeItems({ target, sweeps, ruler, label, waypoint });
         const interaction: AbstractInteraction<Item[]> = privateMode
-            ? await localInteraction(interactionItems)
+            ? await createLocalInteraction(interactionItems)
             : await wrapRealInteraction(interactionItems);
 
         return new DragState(
