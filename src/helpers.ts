@@ -53,7 +53,7 @@ export async function rebuildEmanations(updateFilter: (_: { metadata: EmanationM
       return {
         id: emanation.id,
         style: emanation.style,
-        metadata: emanation.metadata[METADATA_KEY] as EmanationMetadata,
+        metadata: emanation.metadata[METADATA_KEY],
         sourceItem,
       };
     })

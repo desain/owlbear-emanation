@@ -102,7 +102,7 @@ async function renderContextMenu() {
     const id = sizeInput.dataset.id!!;
     const size = parseFloat(sizeInput.value);
     await OBR.scene.items.updateItems<Emanation>([id], (emanations) => emanations.forEach((emanation) => {
-      emanation.metadata.size = size;
+      emanation.metadata[METADATA_KEY].size = size;
     }));
     await rebuildEmanations(({ id: otherId }) => otherId === id);
     await renderContextMenu();
