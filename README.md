@@ -16,6 +16,8 @@ Add emanations to any character.
 - Emanations become sweeps
 - Undo and restart sequences
 
+Font: Acme
+
 ## Installing
 
 The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.

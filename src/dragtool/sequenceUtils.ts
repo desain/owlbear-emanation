@@ -1,7 +1,7 @@
-import OBR, { Image, Item, KeyFilter, Layer, Math2, Path, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isRuler, isShape } from "@owlbear-rodeo/sdk";
+import OBR, { Image, Item, KeyFilter, Layer, Math2, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isRuler, isShape } from "@owlbear-rodeo/sdk";
 import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemBuilder";
 import { Emanation, isEmanation, } from "../types";
-import { ItemApi, METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, isSequenceItem, isSequenceTarget } from "./dragtoolTypes";
+import { ItemApi, METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceSweep, SequenceTargetMetadata, isSequenceItem, isSequenceRuler, isSequenceTarget } from "./dragtoolTypes";
 import { withBothItemApis } from "./interactionUtils";
 
 export function isDraggableItem(target: Item | undefined, requireUnlocked: boolean = true): target is Image {
@@ -95,23 +95,20 @@ export async function getEmanations(id: string, api: ItemApi): Promise<Emanation
     return (await api.getItemAttachments([id])).filter(isEmanation);
 }
 
-export function buildSequenceItem<Built extends Item, Builder extends GenericItemBuilder<Builder> & { build: () => Built }>(
+export function buildSequenceItem<Builder extends GenericItemBuilder<Builder>>(
     target: Item,
     layer: Layer,
     zIndex: number | null,
-    builder: Builder,
-): Built & SequenceItem {
-    const built: Built = builder
+    builder: () => Builder,
+): Builder {
+    return builder()
         .disableHit(true)
         .disableAutoZIndex(zIndex !== null)
         .zIndex(zIndex!)
         .locked(true)
         .visible(target.visible)
         .layer(layer)
-        .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) })
-        .build();
-    const returnValue: Built & SequenceItem = built as typeof built & { metadata: { [METADATA_KEY]: SequenceItemMetadata } };
-    return returnValue;
+        .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) });
 }
 
 export function itemMovedOutsideItsSequence(item: Item, items: Item[]): boolean {
@@ -154,18 +151,21 @@ export async function deleteAllSequencesForCurrentPlayer() {
 
 export async function getSequenceLength(targetId: string, api: ItemApi) {
     return (await Promise.all(
-        (await api.getItems(isRuler))
+        (await api.getItems(isSequenceRuler))
             .filter(belongsToSequenceForTarget(targetId))
-            .map((ruler) => OBR.scene.grid.getDistance(ruler.startPosition, ruler.endPosition))
+            .map(async (ruler) => {
+                const distance = await OBR.scene.grid.getDistance(ruler.startPosition, ruler.endPosition);
+                return distance * ruler.metadata[METADATA_KEY].scalingFactor;
+            })
     )).reduce((a, b) => a + b, 0);
 }
 
-export async function getOrCreateSweep(target: Item, emanation: Emanation, existingSweeps: (SequenceItem & Path)[]): Promise<Path> {
-    const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY]?.emanationId === emanation.id);
+export async function getOrCreateSweep(target: Item, emanation: Emanation, existingSweeps: SequenceSweep[]): Promise<SequenceSweep> {
+    const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY].emanationId === emanation.id);
     if (existingSweep) {
         return existingSweep;
     } else {
-        const sweep: Path & SequenceItem = buildSequenceItem(target, 'DRAWING', null, buildPath()
+        const sweep = buildSequenceItem(target, 'DRAWING', null, buildPath)
             .position({ x: 0, y: 0 })
             .commands([])
             .strokeWidth(emanation.style.strokeWidth)
@@ -174,14 +174,15 @@ export async function getOrCreateSweep(target: Item, emanation: Emanation, exist
             .strokeOpacity(0)
             .fillColor(emanation.style.fillColor)
             .fillOpacity(emanation.style.fillOpacity)
-            .fillRule('nonzero'));
+            .fillRule('nonzero')
+            .build() as SequenceSweep; // todo how to typecheck this?
         sweep.metadata[METADATA_KEY].emanationId = emanation.id;
         return sweep;
     }
 }
 
-export function createSequenceItemMetadata(targetId: string, emanationId: string | undefined = undefined): SequenceItemMetadata {
-    return { type: 'SEQUENCE_ITEM', targetId, emanationId };
+export function createSequenceItemMetadata(targetId: string): SequenceItemMetadata {
+    return { type: 'SEQUENCE_ITEM', targetId };
 }
 
 export function createSequenceTargetMetadata(): SequenceTargetMetadata {
