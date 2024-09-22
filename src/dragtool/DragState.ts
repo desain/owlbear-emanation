@@ -45,11 +45,13 @@ export default class DragState {
         const sweeps = await getOrCreateSweeps(target, emanations);
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
         const ruler: Ruler = buildSequenceItem(target, createSequenceItemMetadata(target.id), buildRuler()
+            .name(`Path Ruler for ${target.name}`)
             .startPosition(target.position)
             .endPosition(end)
             .variant('DASHED')
         );
         const label: Label = buildSequenceItem(target, createSequenceItemMetadata(target.id), buildLabel()
+            .name(`Path Label for ${target.name}`)
             .position(target.position)
             .backgroundColor('black')
             .backgroundOpacity(0.6)
@@ -58,6 +60,7 @@ export default class DragState {
             .pointerHeight(20)
         );
         const waypoint: Shape = buildSequenceItem(target, createSequenceItemMetadata(target.id), buildShape()
+            .name(`Path Waypoint for ${target.name}`)
             .shapeType('CIRCLE')
             .position(target.position)
             .width(dpi / 4)

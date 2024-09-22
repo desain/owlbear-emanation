@@ -3,10 +3,10 @@ import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemB
 import { Emanation, isEmanation, } from "../types";
 import { METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, isSequenceItem, isSequenceTarget } from "./dragtoolTypes";
 
-export function isDraggableItem(target: Item | undefined): target is Image {
+export function isDraggableItem(target: Item | undefined, requireUnlocked: boolean = true): target is Image {
     return target !== undefined
         && isImage(target)
-        && !target.locked
+        && (!requireUnlocked || !target.locked)
         && (target.layer === 'CHARACTER' || target.layer === 'MOUNT');
 }
 export const DRAGGABLE_ITEM_FILTER: KeyFilter[] = [
@@ -56,7 +56,7 @@ export const NOT_DRAGGABLE_ITEM_FILTER: KeyFilter[] = [
 ];
 export function createDragMarker(position: Vector2, dpi: number, playerColor: string, markerStrokeWidth: number) {
     return buildShape()
-        .name('')
+        .name('Measurement Marker')
         .shapeType('CIRCLE')
         .position(position)
         .width(dpi / 2)

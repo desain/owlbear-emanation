@@ -69,7 +69,7 @@ export async function installTool() {
             dragState = null;
         },
         async onToolDoubleClick(_, event) {
-            if (isDraggableItem(event.target)) {
+            if (isDraggableItem(event.target, false)) {
                 return true;
             } else {
                 await deleteAllSequencesForCurrentPlayer();
@@ -83,7 +83,7 @@ export async function installTool() {
     });
 
     OBR.tool.createMode({
-        id: `${PLUGIN_ID}/drag-path-mode`,
+        id: `${PLUGIN_ID}/measure-path-mode`,
         shortcut: 'X',
         icons: [
             {
