@@ -21,7 +21,7 @@ async function setupSettings() {
     const playerMetadata = await getPlayerMetadata();
     const gridModeChecked = (sceneEmanationMetadata?.gridMode ?? true) ? 'checked' : '';
 
-    const startingOpacity = playerMetadata?.defaultOpacity ?? 0.1;
+    const startingOpacity = playerMetadata.defaultOpacity;
     document.getElementById('app')!.innerHTML = `
         <label for="grid-mode">Grid Mode</label>
         <input type="checkbox" id="grid-mode" name="grid-mode" ${gridModeChecked} />
