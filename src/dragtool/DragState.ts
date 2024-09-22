@@ -1,7 +1,12 @@
 import OBR, { GridMeasurement, GridScale, Item, Label, Math2, Path, PathCommand, Ruler, Shape, Vector2, buildLabel, buildRuler, buildShape } from "@owlbear-rodeo/sdk";
 import { ItemApi, METADATA_KEY } from "./dragtoolTypes";
-import { buildSequenceItem, createDragMarker, createSequenceItemMetadata, createSequenceTargetMetadata, getEmanations, getOrCreateSweeps, getSequenceLength } from "./sequenceutils";
+import { buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweeps, getSequenceLength } from "./sequenceutils";
 import { Sweeper, getSweeper } from "./sweepUtils";
+
+const RULER_Z_INDEX = 0;
+const WAYPOINT_Z_INDEX = 1;
+const MARKER_Z_INDEX = 2;
+const LABEL_Z_INDEX = 3;
 
 export function getSnappingSensitivity(measurement: GridMeasurement) {
     return measurement === 'EUCLIDEAN' ? 0 : 1;
@@ -11,9 +16,12 @@ function getMeasurementText(numGridUnits: number, scale: GridScale) {
     return `${Math.round(numGridUnits * scale.parsed.multiplier).toString()}${scale.parsed.unit}`
 }
 
+/**
+ * Type that abstracts over a network interaction or a local item interaction
+ */
 type AbstractInteraction<T> = {
     update(updater: (value: T) => void): Promise<T>,
-    stopAndReadd<R extends T>(readd: R): Promise<void>,
+    stopAndReadd(readd: T): Promise<void>,
     itemApi: ItemApi,
 }
 
@@ -63,13 +71,19 @@ export default class DragState {
     private readonly targetIsNew: boolean;
 
     /**
-     * 
+     * Create a new drag state and create all necessary items.
      * @param targetArg Item to start moving, or null to create a marker.
      * @param pointerPosition Position of mouse pointer.s
      * @param privateMode Whether to use only local items. Must not be set when the item is not a local item.
+     * @param aboveCharacters Whether to place the sequence items above characters in the Z order.
      * @returns 
      */
-    static async createDrag(targetArg: Item | null, pointerPosition: Vector2, privateMode: boolean): Promise<DragState | null> {
+    static async createDrag(
+        targetArg: Item | null,
+        pointerPosition: Vector2,
+        privateMode: boolean,
+        aboveCharacters: boolean,
+    ): Promise<DragState | null> {
         const [measurement, dpi, playerColor] = await Promise.all([
             OBR.scene.grid.getMeasurement(),
             OBR.scene.grid.getDpi(),
@@ -77,6 +91,7 @@ export default class DragState {
         ]);
         const snappingSensitivity = getSnappingSensitivity(measurement);
         const markerStrokeWidth = dpi / 20;
+        const layer = aboveCharacters ? 'RULER' : 'DRAWING';
 
         let target: Item;
         let targetIsNew = targetArg === null;
@@ -86,6 +101,9 @@ export default class DragState {
                 dpi,
                 playerColor,
                 markerStrokeWidth,
+                layer,
+                MARKER_Z_INDEX,
+                privateMode,
             );
         } else {
             target = targetArg;
@@ -95,32 +113,35 @@ export default class DragState {
         const sweepers = emanations.map((emanation) => getSweeper(emanation));
         const sweeps = await getOrCreateSweeps(target, emanations, OBR.scene.items);
         const baseCommands = sweeps.map((sweep) => sweep.commands);
+
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
-        const ruler: Ruler = buildSequenceItem(target, createSequenceItemMetadata(target.id), buildRuler()
+        const ruler: Ruler = buildSequenceItem(target, layer, RULER_Z_INDEX, buildRuler()
             .name(`Path Ruler for ${target.name}`)
             .startPosition(target.position)
             .endPosition(end)
             .variant('DASHED')
         );
-        const label: Label = buildSequenceItem(target, createSequenceItemMetadata(target.id), buildLabel()
-            .name(`Path Label for ${target.name}`)
-            .position(target.position)
-            .backgroundColor('black')
-            .backgroundOpacity(0.6)
-            .pointerDirection('DOWN')
-            .pointerWidth(20)
-            .pointerHeight(20)
-        );
-        const waypoint: Shape = buildSequenceItem(target, createSequenceItemMetadata(target.id), buildShape()
+        const waypoint: Shape = buildSequenceItem(target, layer, WAYPOINT_Z_INDEX, buildShape()
             .name(`Path Waypoint for ${target.name}`)
-            .shapeType('CIRCLE')
             .position(target.position)
+            .shapeType('CIRCLE')
             .width(dpi / 4)
             .height(dpi / 4)
             .fillColor(playerColor)
             .strokeColor('gray')
             .strokeWidth(markerStrokeWidth)
         );
+        // Labels always go above characters
+        const label: Label = buildSequenceItem(target, 'RULER', LABEL_Z_INDEX, buildLabel()
+            .name(`Path Label for ${target.name}`)
+            .position(target.position)
+            .backgroundColor('black')
+            .backgroundOpacity(0.6)
+            .pointerDirection('DOWN')
+            .pointerWidth(20)
+            .pointerHeight(40)
+        );
+
 
         const interactionItems = DragState.composeItems({ target, sweeps, ruler, label, waypoint });
         const interaction: AbstractInteraction<Item[]> = privateMode
@@ -226,20 +247,18 @@ export default class DragState {
     }
 
     async finish(pointerPosition: Vector2) {
-        const { target, ruler, label, sweeps, waypoint } = await this.update(pointerPosition);
+        if (this.start.x === this.end.x && this.start.y === this.end.y) {
+            await this.cancel();
+            return;
+        }
 
+        const { target, ruler, label, sweeps, waypoint } = await this.update(pointerPosition);
         const toAdd: Item[] = [ruler, label, waypoint, ...sweeps];
         if (this.targetIsNew) {
             toAdd.push(target);
         }
 
         const { stopAndReadd, itemApi } = this.interaction;
-
-        if (this.start.x === this.end.x && this.start.y === this.end.y) {
-            await this.cancel();
-            return;
-        }
-
         await stopAndReadd(toAdd);
 
         if (!this.targetIsNew) {
