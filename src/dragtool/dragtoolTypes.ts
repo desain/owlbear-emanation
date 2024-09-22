@@ -1,4 +1,4 @@
-import { Item, Metadata } from "@owlbear-rodeo/sdk";
+import { Item, ItemFilter, Metadata } from "@owlbear-rodeo/sdk";
 
 export const PLUGIN_ID = 'com.desain.dragtool';
 export const TOOL_ID = `${PLUGIN_ID}/tool`;
@@ -44,4 +44,13 @@ export function isSequenceTarget(item: Item): item is SequenceTarget {
         && metadata !== null
         && 'type' in metadata
         && metadata.type === 'SEQUENCE_TARGET'
+}
+
+export type ItemApi = {
+    updateItems(items: ItemFilter<Item> | Item[], updater: (draft: Item[]) => void): Promise<void>,
+    addItems(items: Item[]): Promise<void>,
+    deleteItems(ids: string[]): Promise<void>,
+    getItems<ItemType extends Item>(filter?: ItemFilter<ItemType>): Promise<ItemType[]>,
+    onChange(callback: (items: Item[]) => void): () => void;
+    getItemAttachments(ids: string[]): Promise<Item[]>;
 }

@@ -1,7 +1,7 @@
 import OBR, { Image, Item, KeyFilter, Math2, Path, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isPath, isRuler, isShape } from "@owlbear-rodeo/sdk";
 import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemBuilder";
 import { Emanation, isEmanation, } from "../types";
-import { METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, isSequenceItem, isSequenceTarget } from "./dragtoolTypes";
+import { ItemApi, METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceTargetMetadata, isSequenceItem, isSequenceTarget } from "./dragtoolTypes";
 
 export function isDraggableItem(target: Item | undefined, requireUnlocked: boolean = true): target is Image {
     return target !== undefined
@@ -79,12 +79,8 @@ export const DRAG_MARKER_FILTER: KeyFilter[] = [
     { key: ['metadata', METADATA_KEY, 'type'], value: 'SEQUENCE_TARGET' }
 ]
 
-export async function getEmanations(id: string | undefined): Promise<Emanation[]> {
-    if (id === undefined) {
-        return [];
-    } else {
-        return (await OBR.scene.items.getItemAttachments([id])).filter(isEmanation);
-    }
+export async function getEmanations(id: string, api: ItemApi): Promise<Emanation[]> {
+    return (await api.getItemAttachments([id])).filter(isEmanation);
 }
 
 export function buildSequenceItem<Built extends Item, Builder extends GenericItemBuilder<Builder> & { build: () => Built }>(
@@ -115,41 +111,43 @@ export function itemMovedOutsideItsSequence(item: Item, items: Item[]): boolean 
     return true;
 }
 
-export async function deleteSequence(target: Item) {
+export async function deleteSequence(target: Item, api: ItemApi) {
     // console.log('deleting sequence for', target.id);
-    const toDelete = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
+    const toDelete = (await api.getItems(belongsToSequenceForTarget(target.id)))
         .map((item) => item.id);
     if (isIndependentDragMarker(target)) {
         toDelete.push(target.id);
     } else {
-        await OBR.scene.items.updateItems([target], ([target]) => {
+        await api.updateItems([target], ([target]) => {
             target.metadata[METADATA_KEY] = {};
         });
     }
-    await OBR.scene.items.deleteItems(toDelete);
+    await api.deleteItems(toDelete);
 }
 
-export async function deleteAllSequencesForCurrentPlayer() {
+export async function deleteAllSequencesForCurrentPlayer(api: ItemApi) {
     // console.log('deleting all for current');
-    const sequences = await OBR.scene.items.getItems(isSequenceTarget);
-    await Promise.all(sequences
-        .filter((sequence) => sequence.metadata[METADATA_KEY].playerId === OBR.player.id)
-        .map(deleteSequence));
+    const sequenceTargets = await api.getItems(isSequenceTarget);
+    await Promise.all(
+        sequenceTargets
+            .filter((target) => target.metadata[METADATA_KEY].playerId === OBR.player.id)
+            .map((target) => deleteSequence(target, api))
+    );
 }
 
-export async function getSequenceLength(targetId: string) {
+export async function getSequenceLength(targetId: string, api: ItemApi) {
     return (await Promise.all(
-        (await OBR.scene.items.getItems(isRuler))
+        (await api.getItems(isRuler))
             .filter(belongsToSequenceForTarget(targetId))
             .map((ruler) => OBR.scene.grid.getDistance(ruler.startPosition, ruler.endPosition))
     )).reduce((a, b) => a + b, 0);
 }
 
-export async function getOrCreateSweeps(target: Item, emanations: Emanation[]): Promise<Path[]> {
+export async function getOrCreateSweeps(target: Item, emanations: Emanation[], api: ItemApi): Promise<Path[]> {
     if (target === null) {
         return [];
     }
-    const existingSweeps: (SequenceItem & Path)[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
+    const existingSweeps: (SequenceItem & Path)[] = (await api.getItems(belongsToSequenceForTarget(target.id)))
         .filter(isPath) as (SequenceItem & Path)[];
     const sweeps: Path[] = [];
     for (const emanation of emanations) {
