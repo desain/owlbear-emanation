@@ -3,14 +3,8 @@ import check from "./check.svg";
 import DragState from "./DragState";
 import icon from "./dragtool.svg";
 import { isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
-import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceutils";
-
-async function withBothItemApis(f: (api: ItemApi) => Promise<void>) {
-    await Promise.all([
-        f(OBR.scene.items),
-        f(OBR.scene.local),
-    ]);
-}
+import { withBothItemApis } from "./interactionUtils";
+import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceUtils";
 
 function createDragMode() {
     let dragState: DragState | null = null;
@@ -69,17 +63,13 @@ function createDragMode() {
             if (isDraggableItem(event.target, false)) {
                 return true;
             } else {
-                await withBothItemApis(async (api) => {
-                    await deleteAllSequencesForCurrentPlayer(api);
-                });
+                await deleteAllSequencesForCurrentPlayer();
                 return false;
             }
         },
         async onDeactivate() {
             // console.log('tool deactivate', OBR.player.id);
-            await withBothItemApis(async (api) => {
-                await deleteAllSequencesForCurrentPlayer(api);
-            });
+            await deleteAllSequencesForCurrentPlayer();
         },
     });
 }
@@ -150,17 +140,13 @@ function createMeasureMode(privateMode: boolean) {
             if (isIndependentDragMarker(event.target)) {
                 return true;
             } else {
-                await withBothItemApis(async (api) => {
-                    await deleteAllSequencesForCurrentPlayer(api);
-                });
+                await deleteAllSequencesForCurrentPlayer();
                 return false;
             }
         },
         async onDeactivate(_context) {
             // console.log('tool deactivate', OBR.player.id);
-            await withBothItemApis(async (api) => {
-                await deleteAllSequencesForCurrentPlayer(api);
-            });
+            await deleteAllSequencesForCurrentPlayer();
         },
     });
 }
@@ -207,11 +193,7 @@ function createFinishAction() {
                 activeTools: [TOOL_ID],
             },
         }],
-        async onClick() {
-            await withBothItemApis(async (api) => {
-                await deleteAllSequencesForCurrentPlayer(api);
-            });
-        },
+        onClick: deleteAllSequencesForCurrentPlayer,
     });
 }
 
