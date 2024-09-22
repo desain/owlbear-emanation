@@ -24,17 +24,17 @@ export async function updateSceneMetadata(metadata: Partial<SceneEmanationMetada
   }
 }
 
-export async function getPlayerMetadata(): Promise<PlayerMetadata | undefined> {
+export async function getPlayerMetadata(): Promise<PlayerMetadata> {
   return (await OBR.player.getMetadata())[METADATA_KEY] as PlayerMetadata | undefined
+    ?? {
+    size: (await OBR.scene.grid.getScale()).parsed.multiplier,
+    color: await OBR.player.getColor(),
+    defaultOpacity: 0.3,
+  };
 }
 
 export async function updatePlayerMetadata(metadata: Partial<PlayerMetadata>): Promise<PlayerMetadata> {
-  const currentMetadata = await getPlayerMetadata()
-    ?? {
-    size: 0,
-    color: await OBR.player.getColor(),
-    defaultOpacity: 0.1,
-  };
+  const currentMetadata = await getPlayerMetadata();
   const newMetadata = { ...currentMetadata, ...metadata };
   await OBR.player.setMetadata({ [METADATA_KEY]: newMetadata });
   return newMetadata;
