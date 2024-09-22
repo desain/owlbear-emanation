@@ -2,8 +2,15 @@ import OBR, { Item, Vector2 } from "@owlbear-rodeo/sdk";
 import check from "./check.svg";
 import DragState from "./DragState";
 import icon from "./dragtool.svg";
-import { isSequenceItem, isSequenceTarget, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
+import { isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
 import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceutils";
+
+async function withBothItemApis(f: (api: ItemApi) => Promise<void>) {
+    await Promise.all([
+        f(OBR.scene.items),
+        f(OBR.scene.local),
+    ]);
+}
 
 export async function installTool() {
     OBR.tool.create({
@@ -55,7 +62,7 @@ export async function installTool() {
                 return;
             }
 
-            dragState = await DragState.createDrag(event.target, event.pointerPosition);
+            dragState = await DragState.createDrag(event.target, event.pointerPosition, false);
         },
         async onToolDragMove(_, event) {
             await dragState?.update(event.pointerPosition);
@@ -64,21 +71,25 @@ export async function installTool() {
             await dragState?.finish(event.pointerPosition);
             dragState = null;
         },
-        onToolDragCancel() {
-            dragState?.cancel();
+        async onToolDragCancel() {
+            await dragState?.cancel();
             dragState = null;
         },
         async onToolDoubleClick(_, event) {
             if (isDraggableItem(event.target, false)) {
                 return true;
             } else {
-                await deleteAllSequencesForCurrentPlayer();
+                await withBothItemApis(async (api) => {
+                    await deleteAllSequencesForCurrentPlayer(api);
+                });
                 return false;
             }
         },
         async onDeactivate() {
             // console.log('tool deactivate', OBR.player.id);
-            await deleteAllSequencesForCurrentPlayer();
+            await withBothItemApis(async (api) => {
+                await deleteAllSequencesForCurrentPlayer(api);
+            });
         },
     });
 
@@ -129,7 +140,7 @@ export async function installTool() {
                 target = null;
             }
 
-            dragState = await DragState.createDrag(target, startPosition);
+            dragState = await DragState.createDrag(target, startPosition, true);
         },
         async onToolDragMove(_, event) {
             await dragState?.update(event.pointerPosition);
@@ -138,21 +149,25 @@ export async function installTool() {
             await dragState?.finish(event.pointerPosition);
             dragState = null;
         },
-        onToolDragCancel() {
-            dragState?.cancel();
+        async onToolDragCancel() {
+            await dragState?.cancel();
             dragState = null;
         },
         async onToolDoubleClick(_, event) {
             if (isIndependentDragMarker(event.target)) {
                 return true;
             } else {
-                await deleteAllSequencesForCurrentPlayer();
+                await withBothItemApis(async (api) => {
+                    await deleteAllSequencesForCurrentPlayer(api);
+                });
                 return false;
             }
         },
         async onDeactivate(_context) {
             // console.log('tool deactivate', OBR.player.id);
-            await deleteAllSequencesForCurrentPlayer();
+            await withBothItemApis(async (api) => {
+                await deleteAllSequencesForCurrentPlayer(api);
+            });
         },
     });
 
@@ -167,7 +182,9 @@ export async function installTool() {
             },
         }],
         async onClick(_context) {
-            await deleteAllSequencesForCurrentPlayer();
+            await withBothItemApis(async (api) => {
+                await deleteAllSequencesForCurrentPlayer(api);
+            });
         },
     });
 
@@ -178,28 +195,35 @@ export async function installTool() {
             const activePlayers = new Set(players.map((player) => player.id));
             activePlayers.add(OBR.player.id); // apparently the GM isn't in by default
             // console.log('players', activePlayers, 'iam', OBR.player.id);
-            const sequenceTargets = await OBR.scene.items.getItems(isSequenceTarget);
-            for (const target of sequenceTargets) {
-                if (!activePlayers.has(target.metadata[METADATA_KEY].playerId)) {
-                    // console.log('deleting sequence of ownerless target', target, 'owner not in', activePlayers);
-                    deleteSequence(target);
-                }
-            }
-        }));
-
-        // Delete a sequence when an item moves sout of it
-        unsubscribeFunctions.push(OBR.scene.items.onChange((items) => {
-            const ownerlessItems = items.filter(isSequenceItem)
-                .filter((item) => !items.find((potentialOwner) => item.metadata[METADATA_KEY].targetId === potentialOwner.id))
-                .map((item) => item.id);
-            // console.log('deleting ownerless', ownerlessItems);
-            OBR.scene.items.deleteItems(ownerlessItems);
-            items.filter(isSequenceTarget).forEach((item) => {
-                if (itemMovedOutsideItsSequence(item, items)) {
-                    // console.log('item moved out of its sequence', item.id);
-                    deleteSequence(item)
+            await withBothItemApis(async (api) => {
+                const sequenceTargets = await api.getItems(isSequenceTarget);
+                for (const target of sequenceTargets) {
+                    if (!activePlayers.has(target.metadata[METADATA_KEY].playerId)) {
+                        // console.log('deleting sequence of ownerless target', target, 'owner not in', activePlayers);
+                        deleteSequence(target, api);
+                    }
                 }
             });
         }));
+
+        // Delete a sequence when an item moves sout of it
+        await withBothItemApis(async (api) => {
+            unsubscribeFunctions.push(api.onChange((items) => {
+                // Remove sequence items whose target was removed
+                const ownerlessItems = items.filter(isSequenceItem)
+                    .filter((item) => !items.find((potentialOwner) => item.metadata[METADATA_KEY].targetId === potentialOwner.id))
+                    .map((item) => item.id);
+                // console.log('deleting ownerless', ownerlessItems);
+                api.deleteItems(ownerlessItems);
+                // Remove sequence items whose target was moved
+                items.filter(isSequenceTarget).forEach((item) => {
+                    if (itemMovedOutsideItsSequence(item, items)) {
+                        console.log('item moved out of its sequence', item.id, 'items are', items);
+                        deleteSequence(item, api)
+                    }
+                });
+            }));
+        })
+
     }
 }
