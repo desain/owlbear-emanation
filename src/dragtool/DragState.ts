@@ -1,4 +1,4 @@
-import OBR, { GridMeasurement, GridScale, Item, Label, Math2, Path, PathCommand, Shape, Vector2, buildLabel, buildRuler, buildShape } from "@owlbear-rodeo/sdk";
+import OBR, { GridMeasurement, GridScale, Item, Label, Math2, PathCommand, Shape, Vector2, buildLabel, buildRuler, buildShape } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY, SequenceItem, SequenceRuler, SequenceSweep, isSequenceSweep } from "./dragtoolTypes";
 import { AbstractInteraction, createLocalInteraction, wrapRealInteraction } from "./interactionUtils";
 import { belongsToSequenceForTarget, buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweep, getSequenceLength } from "./sequenceUtils";
@@ -109,14 +109,13 @@ export default class DragState {
         }
 
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
-        const ruler: SequenceRuler = buildSequenceItem(target, layer, RULER_Z_INDEX, buildRuler)
+        const ruler: SequenceRuler = buildSequenceItem(target, layer, RULER_Z_INDEX, { scalingFactor: distanceScaling }, buildRuler()
             .name(`Path Ruler for ${target.name}`)
             .startPosition(target.position)
             .endPosition(end)
-            .variant('DASHED')
-            .build() as SequenceRuler;
+            .variant('DASHED'));
         ruler.metadata[METADATA_KEY].scalingFactor = distanceScaling;
-        const waypoint: Shape & SequenceItem = buildSequenceItem(target, layer, WAYPOINT_Z_INDEX, buildShape)
+        const waypoint: Shape & SequenceItem = buildSequenceItem(target, layer, WAYPOINT_Z_INDEX, {}, buildShape()
             .name(`Path Waypoint for ${target.name}`)
             .position(target.position)
             .shapeType('CIRCLE')
@@ -124,18 +123,16 @@ export default class DragState {
             .height(dpi / 4)
             .fillColor(playerColor)
             .strokeColor('gray')
-            .strokeWidth(markerStrokeWidth)
-            .build() as Shape & SequenceItem;
-        // Labels always go above characters
-        const label: Label & SequenceItem = buildSequenceItem(target, 'RULER', LABEL_Z_INDEX, buildLabel)
+            .strokeWidth(markerStrokeWidth));
+        // Labels always go above characters so put them on the ruler layer
+        const label: Label & SequenceItem = buildSequenceItem(target, 'RULER', LABEL_Z_INDEX, {}, buildLabel()
             .name(`Path Label for ${target.name}`)
             .position(target.position)
             .backgroundColor('black')
             .backgroundOpacity(0.6)
             .pointerDirection('DOWN')
             .pointerWidth(20)
-            .pointerHeight(40)
-            .build() as Label & SequenceItem;
+            .pointerHeight(40));
 
         const interactionItems = DragState.composeItems({ target, sweeps, ruler, label, waypoint });
         const interaction: AbstractInteraction<Item[]> = privateMode
@@ -202,7 +199,7 @@ export default class DragState {
         const target = items[idx++];
 
         const numSweeps = this.sweepData.length;
-        const sweeps = items.slice(idx, idx += numSweeps) as (Path & SequenceItem)[];
+        const sweeps = items.slice(idx, idx += numSweeps) as SequenceSweep[];
 
         const ruler = items[idx++] as SequenceRuler;
         const label = items[idx++] as Label & SequenceItem;
@@ -232,7 +229,7 @@ export default class DragState {
 
                 const movementVector = Math2.subtract(this.end, this.start);
                 for (let i = 0; i < sweeps.length; i++) {
-                    const sweep = sweeps[i] as Path;
+                    const sweep = sweeps[i];
                     const startPosition = Math2.add(this.start, this.sweepData[i].baseOffset);
                     const sweepCommands = this.sweepData[i].sweeper(startPosition, movementVector);
                     sweep.commands = [...this.sweepData[i].baseCommands, ...sweepCommands];

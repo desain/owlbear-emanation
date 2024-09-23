@@ -95,20 +95,29 @@ export async function getEmanations(id: string, api: ItemApi): Promise<Emanation
     return (await api.getItemAttachments([id])).filter(isEmanation);
 }
 
-export function buildSequenceItem<Builder extends GenericItemBuilder<Builder>>(
+export function buildSequenceItem<
+    MetadataType extends SequenceItemMetadata,
+    Builder extends GenericItemBuilder<Builder> & { build(): Item },
+>(
     target: Item,
     layer: Layer,
     zIndex: number | null,
-    builder: () => Builder,
-): Builder {
-    return builder()
+    metadata: Omit<MetadataType, keyof SequenceItemMetadata>,
+    builder: Builder,
+): ReturnType<Builder['build']> & { metadata: { [METADATA_KEY]: MetadataType } } {
+    const builder2 = builder
         .disableHit(true)
         .disableAutoZIndex(zIndex !== null)
         .zIndex(zIndex!)
         .locked(true)
         .visible(target.visible)
         .layer(layer)
-        .metadata({ [METADATA_KEY]: createSequenceItemMetadata(target.id) });
+        .attachedTo('omg')
+        .metadata({
+            // assuming this is all that's needed to create a MetadataType - don't manually pass in a type param more restrictive
+            [METADATA_KEY]: { ...metadata, ...createSequenceItemMetadata(target.id) }
+        }) as Builder & { build(): ReturnType<Builder['build']> & { metadata: { [METADATA_KEY]: MetadataType } } };
+    return builder2.build() as ReturnType<(typeof builder2)['build']>;
 }
 
 export function itemMovedOutsideItsSequence(item: Item, items: Item[]): boolean {
@@ -165,7 +174,7 @@ export async function getOrCreateSweep(target: Item, emanation: Emanation, exist
     if (existingSweep) {
         return existingSweep;
     } else {
-        const sweep = buildSequenceItem(target, 'DRAWING', null, buildPath)
+        const sweep: SequenceSweep = buildSequenceItem(target, 'DRAWING', null, { emanationId: emanation.id }, buildPath()
             .position({ x: 0, y: 0 })
             .commands([])
             .strokeWidth(emanation.style.strokeWidth)
@@ -174,9 +183,7 @@ export async function getOrCreateSweep(target: Item, emanation: Emanation, exist
             .strokeOpacity(0)
             .fillColor(emanation.style.fillColor)
             .fillOpacity(emanation.style.fillOpacity)
-            .fillRule('nonzero')
-            .build() as SequenceSweep; // todo how to typecheck this?
-        sweep.metadata[METADATA_KEY].emanationId = emanation.id;
+            .fillRule('nonzero')); // todo how to typecheck this?
         return sweep;
     }
 }

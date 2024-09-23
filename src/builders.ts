@@ -82,7 +82,7 @@ export function buildEmanation(
 
   const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
   emanation.metadata = { [METADATA_KEY]: metadata };
-  const returnValue = emanation as typeof emanation & { metadata: { [METADATA_KEY]: EmanationMetadata } };
+  const returnValue = emanation as typeof emanation & { metadata: { [METADATA_KEY]: EmanationMetadata } }; // typescript can't figure out this key is set now
   return returnValue;
 }
 
@@ -177,7 +177,7 @@ function buildCircleEmanation(position: Vector2, diameter: number): Circle {
     .height(diameter)
     .position(position)
     .shapeType('CIRCLE')
-    .build() as Circle;
+    .build() as Circle; // typescript doesn't know about builders
 }
 
 /**
