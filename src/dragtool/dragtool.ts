@@ -54,7 +54,7 @@ function createDragMode(readAndClearScalingJustClicked: () => boolean) {
             },
         ],
         async onToolDragStart(context, event) {
-            if (!isDraggableItem(event.target) || dragState != null) {
+            if (event.transformer || !isDraggableItem(event.target) || dragState != null) {
                 return;
             }
             if (typeof context.metadata.distanceScaling !== 'number') {
@@ -100,7 +100,7 @@ function createMeasureMode(privateMode: boolean, readAndClearScalingJustClicked:
     let dragState: DragState | null = null;
     OBR.tool.createMode({
         id: `${PLUGIN_ID}/measure-path-mode${privateMode ? '-private' : ''}`,
-        shortcut: privateMode ? 'P' : 'Z',
+        shortcut: privateMode ? 'P' : 'R',
         icons: [
             {
                 icon: privateMode ? rulerPrivate : ruler,
@@ -209,7 +209,7 @@ async function deleteInvalidatedSequences(items: Item[], api: ItemApi) {
     // Remove sequence items whose target was moved
     items.filter(isSequenceTarget).forEach((item) => {
         if (itemMovedOutsideItsSequence(item, items)) {
-            console.log('item moved out of its sequence', item.id, 'items are', items);
+            // console.log('item moved out of its sequence', item.id, 'items are', items);
             deleteSequence(item, api)
         }
     });
