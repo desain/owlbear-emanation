@@ -39,7 +39,7 @@ export function buildSequenceItem<
         .visible(target.visible)
         .layer(layer)
         .attachedTo(target.id)
-        .disableAttachmentBehavior(['LOCKED', 'POSITION', 'ROTATION', 'SCALE'])
+        .disableAttachmentBehavior(['LOCKED', 'POSITION', 'ROTATION', 'SCALE', 'COPY'])
         .metadata({
             // assuming this is all that's needed to create a MetadataType - don't manually pass in a type param more restrictive
             [METADATA_KEY]: { ...metadata, ...createSequenceItemMetadata() }
