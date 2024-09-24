@@ -103,3 +103,7 @@ input.emanation-color {
         }
     }
 }
+
+.no-edit-warning {
+    color: var(--text-disabled);
+}

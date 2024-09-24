@@ -1,4 +1,4 @@
-import OBR, { GridMeasurement, GridScale, Item, Math2, PathCommand, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { GridMeasurement, GridScale, GridType, Item, Math2, PathCommand, Vector2, isImage } from "@owlbear-rodeo/sdk";
 import { AbstractInteraction, createLocalInteraction, wrapRealInteraction } from "./AbstractInteraction";
 import { METADATA_KEY } from "./constants";
 import { createDragMarker } from "./Sequence/DragMarker";
@@ -25,8 +25,24 @@ type SweepData = {
     baseOffset: Vector2,
 };
 
-function getSnappingSensitivity(measurement: GridMeasurement) {
-    return measurement === 'EUCLIDEAN' ? 0 : 1;
+type SnapSettings = {
+    snappingSensitivity: number,
+    snapToCorners: boolean,
+    snapToCenter: boolean,
+}
+
+function getSnapSettings(item: Item | null, measurement: GridMeasurement, gridType: GridType, gridDpi: number) {
+    const snappingSensitivity = measurement === 'EUCLIDEAN' ? 0 : 1;
+    if (item && isImage(item) && gridType === 'SQUARE') {
+        const itemSizeInGridUnits = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) / item.grid.dpi;
+        const sizeIsOdd = (Math.round(itemSizeInGridUnits) & 1) === 1;
+        return { snappingSensitivity, snapToCorners: !sizeIsOdd, snapToCenter: sizeIsOdd };
+    }
+    return { snappingSensitivity, snapToCorners: false, snapToCenter: true };
+}
+
+async function snap(position: Vector2, snapSettings: SnapSettings) {
+    return OBR.scene.grid.snapPosition(position, snapSettings.snappingSensitivity, snapSettings.snapToCorners, snapSettings.snapToCenter);
 }
 
 function getMeasurementText(numGridUnits: number, scale: GridScale) {
@@ -59,7 +75,7 @@ export default class DragState {
     private end: Vector2;
     private readonly sweepData: SweepData[];
     private readonly interaction: AbstractInteraction<Item[]>;
-    private readonly snappingSensitivity: number;
+    private readonly snapSettings: SnapSettings;
     private readonly distanceScaling: number;
     /**
      * Distance the target has traveled before the current drag.
@@ -69,10 +85,6 @@ export default class DragState {
      * Whether the target was created just for this drag (e.g it's a marker for a measurement).
      */
     private readonly targetIsNew: boolean;
-
-    static async snapPosition(position: Vector2, snappingSensitivity: number): Promise<Vector2> {
-        return OBR.scene.grid.snapPosition(position, snappingSensitivity, false, true);
-    }
 
     /**
      * Create a new drag state and create all necessary items.
@@ -89,20 +101,21 @@ export default class DragState {
         privateMode: boolean,
         aboveCharacters: boolean,
     ): Promise<DragState | null> {
-        const [measurement, dpi, playerColor] = await Promise.all([
+        const [measurement, gridType, dpi, playerColor] = await Promise.all([
             OBR.scene.grid.getMeasurement(),
+            OBR.scene.grid.getType(),
             OBR.scene.grid.getDpi(),
             OBR.player.getColor(),
         ]);
 
-        const snappingSensitivity = getSnappingSensitivity(measurement);
+        const snapSettings = getSnapSettings(targetArg, measurement, gridType, dpi);
         const layer = aboveCharacters ? 'RULER' : 'DRAWING';
 
         let target: Item;
         let targetIsNew = targetArg === null;
         if (targetArg === null) {
             target = createDragMarker(
-                await DragState.snapPosition(pointerPosition, snappingSensitivity),
+                await snap(pointerPosition, snapSettings),
                 dpi,
                 playerColor,
                 layer,
@@ -113,7 +126,7 @@ export default class DragState {
         }
 
         const { sweeps, sweepData } = await getSweeps(target);
-        const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
+        const end = await snap(pointerPosition, snapSettings);
         const ruler = createSegment(target, end, layer, distanceScaling);
         const waypoint = createWaypoint(target, layer, dpi, playerColor);
         const label = createWaypointLabel(target);
@@ -130,7 +143,7 @@ export default class DragState {
             distanceScaling,
             interaction,
             sweepData,
-            snappingSensitivity,
+            snapSettings,
             targetIsNew,
         );
     }
@@ -142,14 +155,14 @@ export default class DragState {
         distanceScaling: number,
         interaction: AbstractInteraction<Item[]>,
         sweepData: SweepData[],
-        snappingSensitivity: number,
+        snapSettings: SnapSettings,
         targetIsNew: boolean,
     ) {
         this.start = start;
         this.baseDistance = baseDistance;
         this.distanceScaling = distanceScaling;
         this.interaction = interaction;
-        this.snappingSensitivity = snappingSensitivity;
+        this.snapSettings = snapSettings;
         this.targetIsNew = targetIsNew;
         this.sweepData = sweepData;
         this.end = end; // make compiler happy that we're assigning this
@@ -163,7 +176,7 @@ export default class DragState {
      */
     private async setEnd(end: Vector2) {
         const oldEnd = this.end;
-        this.end = await DragState.snapPosition(end, this.snappingSensitivity);
+        this.end = await snap(end, this.snapSettings);
         return oldEnd.x != this.end.x || oldEnd.y != this.end.y;
     }
 

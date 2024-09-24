@@ -74,7 +74,7 @@ async function renderContextMenu() {
       .sort(({ metadata: { size: sizeA } }, { metadata: { size: sizeB } }) => sizeA - sizeB)
       .map(({ emanation, metadata: { size } }) =>
         emanationRow(emanation.id, emanation.style.strokeColor, size, multiplier, unit))
-    : ['<p class=">(Selection is more than 1 item)</p>']
+    : ['<p class="no-edit-warning">(Selection is more than 1 item)</p>']
 
   let size = playerEmanationMetadata.size;
   let color = playerEmanationMetadata.color;
