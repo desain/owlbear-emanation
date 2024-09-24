@@ -5,10 +5,15 @@ import clear from "../assets/clear.svg";
 import ruler from "../assets/ruler.svg";
 import rulerPrivate from "../assets/rulerPrivate.svg";
 import walk from "../assets/walk.svg";
+import { DRAG_MODE_ID, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./constants";
+import { DRAGGABLE_CHARACTER_FILTER, DRAGGABLE_CHARACTER_FILTER_INVERSE, isDraggableCharacter } from "./DraggableCharacter.ts";
 import DragState from "./DragState";
-import { DRAG_MODE_ID, DragToolMetadata, isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
-import { withBothItemApis } from "./interactionUtils";
-import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceUtils";
+import { DragToolMetadata, setToolMetadata } from "./DragToolMetadata.ts";
+import { ItemApi, withBothItemApis } from "./ItemApi";
+import { DRAG_MARKER_FILTER, isDragMarker } from "./Sequence/DragMarker";
+import { isSequenceItem } from "./Sequence/SequenceItem";
+import { isSequenceTarget } from "./Sequence/SequenceTarget";
+import { deleteAllSequencesForCurrentPlayer, deleteSequence, itemMovedOutsideItsSequence } from "./Sequence/utils.ts";
 
 export default async function installDragTool() {
     const defaultMetadata: DragToolMetadata = { distanceScaling: 1 };
@@ -19,7 +24,7 @@ export default async function installDragTool() {
             label: "Drag path",
         }],
         shortcut: 'Z',
-        defaultMetadata: defaultMetadata,
+        defaultMetadata,
         defaultMode: DRAG_MODE_ID,
         async onClick() {
             await setToolMetadata({ distanceScaling: 1 });
@@ -48,10 +53,6 @@ export default async function installDragTool() {
     return () => unsubscribeFunctions.forEach((unsubscribe) => unsubscribe());
 }
 
-async function setToolMetadata(update: Partial<DragToolMetadata>) {
-    await OBR.tool.setMetadata(TOOL_ID, update);
-}
-
 function createDragMode(readAndClearScalingJustClicked: () => boolean) {
     let dragState: DragState | null = null;
     OBR.tool.createMode({
@@ -67,20 +68,20 @@ function createDragMode(readAndClearScalingJustClicked: () => boolean) {
             }
         ],
         preventDrag: {
-            target: NOT_DRAGGABLE_ITEM_FILTER,
+            target: DRAGGABLE_CHARACTER_FILTER_INVERSE,
         },
         cursors: [
             {
                 cursor: 'grabbing',
                 filter: {
                     dragging: true,
-                    target: DRAGGABLE_ITEM_FILTER,
+                    target: DRAGGABLE_CHARACTER_FILTER,
                 }
             },
             {
                 cursor: 'grab',
                 filter: {
-                    target: DRAGGABLE_ITEM_FILTER,
+                    target: DRAGGABLE_CHARACTER_FILTER,
                 }
             },
             {
@@ -88,7 +89,7 @@ function createDragMode(readAndClearScalingJustClicked: () => boolean) {
             },
         ],
         async onToolDragStart(context, event) {
-            if (event.transformer || !isDraggableItem(event.target) || dragState != null) {
+            if (event.transformer || !isDraggableCharacter(event.target) || dragState != null) {
                 return;
             }
             if (typeof context.metadata.distanceScaling !== 'number') {
@@ -115,7 +116,7 @@ function createDragMode(readAndClearScalingJustClicked: () => boolean) {
             dragState = null;
         },
         async onToolDoubleClick(_, event) {
-            if (isDraggableItem(event.target, false)) {
+            if (isDraggableCharacter(event.target, false)) {
                 return true;
             } else {
                 await deleteAllSequencesForCurrentPlayer();
@@ -172,10 +173,10 @@ function createMeasureMode(privateMode: boolean, readAndClearScalingJustClicked:
 
             let startPosition: Vector2;
             let target: Item | null;
-            if (isIndependentDragMarker(event.target)) {
+            if (isDragMarker(event.target)) {
                 startPosition = event.target.position;
                 target = event.target;
-            } else if (isDraggableItem(event.target)) {
+            } else if (isDraggableCharacter(event.target)) {
                 startPosition = event.target.position;
                 target = null;
             } else {
@@ -203,7 +204,7 @@ function createMeasureMode(privateMode: boolean, readAndClearScalingJustClicked:
             dragState = null;
         },
         async onToolDoubleClick(_, event) {
-            if (isIndependentDragMarker(event.target)) {
+            if (isDragMarker(event.target)) {
                 return true;
             } else {
                 await deleteAllSequencesForCurrentPlayer();
