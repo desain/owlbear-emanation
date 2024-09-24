@@ -1,5 +1,5 @@
 import OBR, { isImage, Item } from "@owlbear-rodeo/sdk";
-import { buildEmanation } from "./builders";
+import buildEmanation from "./Builders/buildEmanation";
 import { METADATA_KEY } from "./constants";
 import { EmanationMetadata, isEmanation } from "./Emanation";
 import { getSceneMetadata } from "./SceneMetadata";
@@ -7,7 +7,7 @@ import { getSceneMetadata } from "./SceneMetadata";
 type Predicate = (_: { metadata: EmanationMetadata, sourceItem: Item, id: string }) => boolean;
 
 
-export async function rebuildEmanations(updateFilter: Predicate | string) {
+export default async function rebuildEmanations(updateFilter: Predicate | string) {
   const idFilter = Array.isArray(updateFilter) ? updateFilter : undefined;
   const filterFunction = typeof updateFilter === 'function'
     ? updateFilter

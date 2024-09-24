@@ -2,6 +2,7 @@ import OBR from "@owlbear-rodeo/sdk";
 import "../assets/style.css";
 import { getPlayerMetadata, updatePlayerMetadata } from "./PlayerMetadata";
 import { getSceneMetadata, updateSceneMetadata } from "./SceneMetadata";
+import applyTheme from "./applyTheme";
 
 OBR.onReady(async () => {
     const ready = await OBR.scene.isReady();
@@ -26,7 +27,9 @@ async function setupSettings() {
         ? `<label for="grid-mode">Grid Mode</label><input type="checkbox" id="grid-mode" name="grid-mode" ${gridModeChecked} />`
         : '';
 
-    document.getElementById('app')!.innerHTML = `
+    const app = document.getElementById('app')!!;
+    await applyTheme(app);
+    app.innerHTML = `
         ${gmControls}
         <label for="default-opacity">Default Opacity</label>: <span id="opacity-value">${startingOpacity}</span>
         <input type="range" id="default-opacity" name="default-opacity" min="0" max="1" step="0.1" value="${startingOpacity}" />

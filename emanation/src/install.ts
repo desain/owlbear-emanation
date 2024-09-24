@@ -3,7 +3,7 @@ import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import AwaitLock from "await-lock";
 import icon from "../assets/emanations.svg";
 import { MENU_ID } from "./constants";
-import { rebuildEmanations } from "./rebuildEmanations";
+import rebuildEmanations from "./rebuildEmanations";
 import { updateSceneMetadata } from "./SceneMetadata";
 
 /**
