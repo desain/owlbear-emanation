@@ -2,12 +2,12 @@ import OBR, { Image, Theme, } from "@owlbear-rodeo/sdk";
 import "../assets/style.css";
 import { buildEmanation } from "./builders";
 import { METADATA_KEY } from "./constants";
+import { Emanation, isEmanation } from "./Emanation";
 import { getPlayerMetadata, PlayerMetadata, updatePlayerMetadata } from "./PlayerMetadata";
 import {
   rebuildEmanations,
 } from "./rebuildEmanations";
 import { getSceneMetadata } from "./SceneMetadata";
-import { Emanation, isEmanation } from "./types";
 
 /**
  * This file represents the HTML of the popover that is shown once
@@ -55,6 +55,10 @@ function parseSizeOrWarn(newSize: string): number | null {
     OBR.notification.show('Emanation size must be greater than 0', 'WARNING');
     return null;
   }
+}
+
+function installChangeListener<ElementType extends HTMLElement>(querySelector: string, listener: (element: ElementType) => void) {
+  document.querySelectorAll<ElementType>(querySelector).forEach((element) => element.addEventListener('change', () => listener(element)));
 }
 
 async function renderContextMenu() {
@@ -129,15 +133,15 @@ async function renderContextMenu() {
     }
   }));
 
-  document.querySelectorAll(`.${REMOVE_EMANATION}`).forEach((button) => button.addEventListener('click', async (event) => {
-    const emanationId = (event.target as HTMLButtonElement).dataset.id;
+  document.querySelectorAll<HTMLButtonElement>(`.${REMOVE_EMANATION}`).forEach((button) => button.addEventListener('click', async () => {
+    const emanationId = button.dataset.id;
     if (emanationId) {
       await OBR.scene.items.deleteItems([emanationId]);
       await renderContextMenu();
     }
   }));;
 
-  document.getElementById('remove-emanations')?.addEventListener('click', () => removeAllEmanations());
+  document.getElementById('remove-emanations')?.addEventListener('click', removeAllEmanations);
 }
 
 function setupTheme(app: HTMLElement, theme: Theme) {

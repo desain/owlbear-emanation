@@ -9,9 +9,7 @@ export type Emanation = (Circle | Curve) & {
 }
 
 export function isEmanation(item: Item): item is Emanation {
-    return typeof item === 'object'
-        && item !== null
-        && (isCurve(item) || isShape(item))
+    return (isCurve(item) || (isShape(item) && item.shapeType === 'CIRCLE'))
         && METADATA_KEY in item.metadata
         && typeof item.metadata[METADATA_KEY] === 'object';
 }
@@ -22,13 +20,4 @@ export type EmanationMetadata = {
      */
     sourceScale: Vector2,
     size: number,
-}
-
-export interface EmanationStyle {
-    fillColor: string;
-    fillOpacity: number;
-    strokeColor: string;
-    strokeOpacity: number;
-    strokeWidth: number;
-    strokeDash: number[];
 }
