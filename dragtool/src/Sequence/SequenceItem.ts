@@ -5,11 +5,10 @@ import { ItemWithMetadata } from "../metadataUtils";
 
 export type SequenceItemMetadata = {
     type: 'SEQUENCE_ITEM',
-    targetId: string,
 }
 
-export function createSequenceItemMetadata(targetId: string): SequenceItemMetadata {
-    return { type: 'SEQUENCE_ITEM', targetId };
+function createSequenceItemMetadata(): SequenceItemMetadata {
+    return { type: 'SEQUENCE_ITEM' };
 }
 
 export type SequenceItem = ItemWithMetadata<Item, SequenceItemMetadata>;
@@ -39,10 +38,11 @@ export function buildSequenceItem<
         .locked(true)
         .visible(target.visible)
         .layer(layer)
-        .attachedTo('omg')
+        .attachedTo(target.id)
+        .disableAttachmentBehavior(['LOCKED', 'POSITION', 'ROTATION', 'SCALE'])
         .metadata({
             // assuming this is all that's needed to create a MetadataType - don't manually pass in a type param more restrictive
-            [METADATA_KEY]: { ...metadata, ...createSequenceItemMetadata(target.id) }
+            [METADATA_KEY]: { ...metadata, ...createSequenceItemMetadata() }
         }) as Builder & { build(): ReturnType<Builder['build']> & { metadata: { [METADATA_KEY]: MetadataType; }; }; };
     return builder2.build() as ReturnType<(typeof builder2)['build']>;
 }

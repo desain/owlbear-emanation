@@ -1,7 +1,6 @@
 import { buildLabel, Item, Label } from "@owlbear-rodeo/sdk";
 import { ZIndex } from "../constants";
-import { SequenceItem } from "../metadataUtils";
-import { buildSequenceItem } from "./SequenceItem";
+import { buildSequenceItem, SequenceItem } from "./SequenceItem";
 
 export type WaypointLabel = Label & SequenceItem;
 
