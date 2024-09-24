@@ -1,9 +1,9 @@
 import OBR, { Image } from "@owlbear-rodeo/sdk";
 import "../assets/style.css";
-import applyTheme from "./applyTheme";
 import buildEmanation from "./Builders/buildEmanation";
 import { METADATA_KEY } from "./constants";
 import { Emanation, isEmanation } from "./Emanation";
+import installTheme from "./installTheme";
 import { getPlayerMetadata, PlayerMetadata, updatePlayerMetadata } from "./PlayerMetadata";
 import rebuildEmanations from "./rebuildEmanations";
 import { getSceneMetadata } from "./SceneMetadata";
@@ -81,7 +81,7 @@ async function renderContextMenu() {
 
   // Setup the document with an emanation size input and create button
   const app = document.getElementById('app')!;
-  await applyTheme(app);
+  await installTheme(app, false);
   app.innerHTML = `
     ${emanationRow(null, color, size, multiplier, unit)}
     ${extantEmanations.join('')}

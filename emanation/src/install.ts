@@ -12,7 +12,7 @@ import { updateSceneMetadata } from "./SceneMetadata";
  */
 
 export default async function installEmanations() {
-  console.log("Emanations version 0.0.6");
+  console.log("Emanations version 0.0.7");
   createContextMenu();
 
   const uninstallers: (() => void)[] = [];

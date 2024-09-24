@@ -1,27 +1,13 @@
 import OBR from "@owlbear-rodeo/sdk";
+import ready from "../../ready";
 import "../assets/style.css";
 import { getPlayerMetadata, updatePlayerMetadata } from "./PlayerMetadata";
 import { getSceneMetadata, updateSceneMetadata } from "./SceneMetadata";
-import applyTheme from "./applyTheme";
+import installTheme from "./installTheme";
 
-OBR.onReady(async () => {
-    let uninstallAll: (() => void) | null = null;
-    if (await OBR.scene.isReady()) {
-        uninstallAll = await setupSettings();
-    }
-    OBR.scene.onReadyChange(async (ready) => {
-        if (ready) {
-            uninstallAll = await setupSettings();
-        } else {
-            if (uninstallAll) {
-                uninstallAll();
-            }
-        }
-    });
-});
+ready(setupSettings);
 
 async function setupSettings() {
-    console.log('rendering');
     const sceneEmanationMetadata = await getSceneMetadata();
     const playerMetadata = await getPlayerMetadata();
     const gridModeChecked = sceneEmanationMetadata.gridMode ? 'checked' : '';
@@ -32,7 +18,7 @@ async function setupSettings() {
         : '';
 
     const app = document.getElementById('app')!!;
-    const uninstallThemeHandler = await applyTheme(app);
+    const uninstallThemeHandler = await installTheme(app, true);
     app.innerHTML = `
         ${gmControls}
         <label for="default-opacity">Default Opacity</label>: <span id="opacity-value">${startingOpacity}</span>

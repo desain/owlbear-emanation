@@ -1,8 +1,12 @@
 import OBR, { Theme } from "@owlbear-rodeo/sdk";
 
-export default async function applyTheme(app: HTMLElement) {
+export default async function installTheme(app: HTMLElement, watch: boolean) {
     addThemeValues(app, await OBR.theme.getTheme());
-    return OBR.theme.onChange((theme) => addThemeValues(app, theme));
+    if (watch) {
+        return OBR.theme.onChange((theme) => addThemeValues(app, theme));
+    } else {
+        return () => { };
+    }
 }
 
 function addThemeValues(app: HTMLElement, theme: Theme) {
