@@ -1,6 +1,6 @@
 import OBR from "@owlbear-rodeo/sdk";
+import "../assets/style.css";
 import { getPlayerMetadata, getSceneEmanationMetadata, updatePlayerMetadata, updateSceneMetadata } from "./helpers";
-import "./style.css";
 
 OBR.onReady(async () => {
     const ready = await OBR.scene.isReady();

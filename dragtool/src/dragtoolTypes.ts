@@ -10,11 +10,6 @@ export type SequenceItemMetadata = {
     targetId: string,
 }
 
-export type SequenceTargetMetadata = {
-    type: 'SEQUENCE_TARGET',
-    playerId: string,
-}
-
 export type SequenceSweepMetadata = SequenceItemMetadata & {
     /**
      * Which emanation the item is for, if it's for one (e.g it's a sweep).
@@ -33,9 +28,13 @@ type SequenceItemWithMetadata<ItemType, MetadataType> = ItemType & {
 };
 
 export type SequenceItem = SequenceItemWithMetadata<Item, SequenceItemMetadata>;
-
 export type SequenceSweep = SequenceItemWithMetadata<Path, SequenceSweepMetadata>;
 export type SequenceRuler = SequenceItemWithMetadata<Ruler, SequenceRulerMetadata>;
+
+export type SequenceTargetMetadata = {
+    type: 'SEQUENCE_TARGET',
+    playerId: string,
+}
 
 export type SequenceTarget = Item & {
     metadata: Metadata & {

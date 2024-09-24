@@ -12,7 +12,7 @@ import { Command, Curve, isCurve, isShape, Math2, PathCommand, Shape, Vector2 } 
 
 export type Sweeper = (position: Vector2, movementVector: Vector2) => PathCommand[];
 
-export function getSweeper(emanation: Curve | Shape): Sweeper {
+export function getSweeper(emanation: Curve | (Shape & { shapeType: 'CIRCLE' })): Sweeper {
     if (isCurve(emanation)) {
         const convex = isConvex(emanation.points);
         const sweeperFunc = convex ? getConvexPolygonSweep : getConcavePolygonSweep;
@@ -29,7 +29,7 @@ export function getSweeper(emanation: Curve | Shape): Sweeper {
     }
 }
 
-export function isConvex(points: Vector2[]): boolean {
+function isConvex(points: Vector2[]): boolean {
     const n = points.length;
     if (n < 3) return true; // A single point or two points are always convex
 
@@ -50,7 +50,7 @@ export function isConvex(points: Vector2[]): boolean {
 }
 
 
-export function getConcavePolygonSweep(position: Vector2, points: Vector2[], vector: Vector2): PathCommand[] {
+function getConcavePolygonSweep(position: Vector2, points: Vector2[], vector: Vector2): PathCommand[] {
     const commands: PathCommand[] = [
         [Command.MOVE, position.x + points[0].x, position.y + points[0].y],
         ...points.slice(1).map((point: Vector2): PathCommand => [Command.LINE, position.x + point.x, position.y + point.y]),
@@ -78,7 +78,7 @@ export function getConcavePolygonSweep(position: Vector2, points: Vector2[], vec
  * @param radius Circle radius
  * @param vector Vector to sweep along
  */
-export function getCircleSweep(position: Vector2, radius: number, vector: Vector2): PathCommand[] {
+function getCircleSweep(position: Vector2, radius: number, vector: Vector2): PathCommand[] {
     const radiusSizedVector = Math2.multiply(Math2.normalize(vector), radius);
     const leftPerpendicular = Math2.rotate(radiusSizedVector, { x: 0, y: 0 }, -90);
     const rightPerpendicular = Math2.rotate(radiusSizedVector, { x: 0, y: 0 }, 90);
@@ -129,7 +129,7 @@ export function getCircleSweep(position: Vector2, radius: number, vector: Vector
  * @param points Convex polygon in clockwise order.
  * @param vector Vector to sweep along
  */
-export function getConvexPolygonSweep(position: Vector2, points: Vector2[], vector: Vector2): PathCommand[] {
+function getConvexPolygonSweep(position: Vector2, points: Vector2[], vector: Vector2): PathCommand[] {
     const leftPerpendicular = Math2.rotate(vector, { x: 0, y: 0 }, -90);
 
     const leftness = (p: Vector2) => Math2.dot(p, leftPerpendicular);
