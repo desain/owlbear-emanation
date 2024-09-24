@@ -137,7 +137,7 @@ function getConvexPolygonSweep(position: Vector2, points: Vector2[], vector: Vec
     const left = maxIndexBy(points, leftness);
     const right = maxIndexBy(points, rightness);
 
-    const sweepPoints = [];
+    const sweepPoints: Vector2[] = [];
     sweepPoints.push(points[left]);
     for (let i = left; i != right; i = (i + 1) % points.length) {
         sweepPoints.push(Math2.add(points[i], vector));
