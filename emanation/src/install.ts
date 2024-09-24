@@ -1,7 +1,6 @@
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { installTool } from "../../dragtool/src/dragtool";
 import icon from "../assets/emanations.svg";
 import { rebuildEmanations, updateSceneMetadata } from "./helpers";
 import { PLUGIN_ID } from "./types";
@@ -11,23 +10,7 @@ import { PLUGIN_ID } from "./types";
  * It creates the context menu item for the emanation.
  */
 
-function vectorsAreCloseEnough(a: Vector2, b: Vector2) {
-  return Math2.compare(a, b, 0.01);
-}
-
-OBR.onReady(async () => {
-  if (await OBR.scene.isReady()) {
-    await install();
-  } else {
-    OBR.scene.onReadyChange(async (ready) => {
-      if (ready) {
-        await install();
-      }
-    });
-  }
-});
-
-async function install() {
+export default async function installEmanations() {
   console.log("Emanations version 0.0.6");
   createContextMenu();
 
@@ -44,8 +27,33 @@ async function install() {
       }
     });
   }
+}
 
-  installTool();
+function createContextMenu() {
+  OBR.contextMenu.create({
+    id: `${PLUGIN_ID}/menu`,
+    icons: [
+      {
+        icon,
+        label: "Emanations",
+        filter: {
+          every: [
+            { key: "type", value: "IMAGE" },
+            { key: "layer", value: "CHARACTER" },
+          ],
+          permissions: ["UPDATE"],
+        },
+      },
+    ],
+    embed: {
+      url: "/emanation/contextmenu.html",
+      // height: 88,
+    },
+  });
+}
+
+function vectorsAreCloseEnough(a: Vector2, b: Vector2) {
+  return Math2.compare(a, b, 0.01);
 }
 
 function installItemHandler(emanationReplaceLock: AwaitLock) {
@@ -74,28 +82,5 @@ function installGridHandler(emanationReplaceLock: AwaitLock) {
     } finally {
       emanationReplaceLock.release();
     }
-  });
-}
-
-function createContextMenu() {
-  OBR.contextMenu.create({
-    id: `${PLUGIN_ID}/menu`,
-    icons: [
-      {
-        icon,
-        label: "Emanations",
-        filter: {
-          every: [
-            { key: "type", value: "IMAGE" },
-            { key: "layer", value: "CHARACTER" },
-          ],
-          permissions: ["UPDATE"],
-        },
-      },
-    ],
-    embed: {
-      url: "/emanation/contextmenu.html",
-      // height: 88,
-    },
   });
 }

@@ -6,7 +6,7 @@
   "author": "desain",
   "homepage_url": "https://github.com/desain/owlbear-emanation",
   "icon": "/logo.png",
-  "background_url": "/emanation/background.html",
+  "background_url": "/background.html",
   "action": {
     "title": "Emanations Settings",
     "icon": "/logo.png",
