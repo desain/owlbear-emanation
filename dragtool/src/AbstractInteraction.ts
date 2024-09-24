@@ -1,12 +1,5 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
-import { ItemApi } from "./dragtoolTypes";
-
-export async function withBothItemApis(f: (api: ItemApi) => Promise<void>) {
-    await Promise.all([
-        f(OBR.scene.items),
-        f(OBR.scene.local),
-    ]);
-}
+import { ItemApi } from "./ItemApi";
 
 /**
  * Type that abstracts over a network interaction or a local item interaction

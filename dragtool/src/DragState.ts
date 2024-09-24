@@ -1,26 +1,14 @@
-import OBR, { GridMeasurement, GridScale, Item, Label, Math2, PathCommand, Shape, Vector2, buildLabel, buildRuler, buildShape } from "@owlbear-rodeo/sdk";
-import { METADATA_KEY, SequenceItem, SequenceRuler, SequenceSweep, isSequenceSweep } from "./dragtoolTypes";
-import { Sweeper, getSweeper } from "./getSweeper";
-import { AbstractInteraction, createLocalInteraction, wrapRealInteraction } from "./interactionUtils";
-import { belongsToSequenceForTarget, buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweep, getSequenceLength } from "./sequenceUtils";
-
-const RULER_Z_INDEX = 0;
-const WAYPOINT_Z_INDEX = 1;
-const MARKER_Z_INDEX = 2;
-const LABEL_Z_INDEX = 3;
-
-export function getSnappingSensitivity(measurement: GridMeasurement) {
-    return measurement === 'EUCLIDEAN' ? 0 : 1;
-}
-
-function getMeasurementText(numGridUnits: number, scale: GridScale) {
-    return `${Math.round(numGridUnits * scale.parsed.multiplier).toString()}${scale.parsed.unit}`
-}
-
-function getRulerText(numGridUnits: number, scale: GridScale, scalingFactor: number) {
-    const xFactorText = scalingFactor === 1 ? '' : `x${scalingFactor}`;
-    return `${Math.round(numGridUnits * scale.parsed.multiplier)}${xFactorText}${scale.parsed.unit}`;
-}
+import OBR, { GridMeasurement, GridScale, Item, Math2, PathCommand, Vector2 } from "@owlbear-rodeo/sdk";
+import { AbstractInteraction, createLocalInteraction, wrapRealInteraction } from "./AbstractInteraction";
+import { METADATA_KEY } from "./constants";
+import { createDragMarker } from "./Sequence/DragMarker";
+import { Segment, createSegment } from "./Sequence/Segment";
+import { SequenceSweep, isSequenceSweep } from "./Sequence/SequenceSweep";
+import { createSequenceTargetMetadata } from "./Sequence/SequenceTarget";
+import { belongsToSequenceForTarget, getEmanations, getOrCreateSweep, getSequenceLength } from "./Sequence/utils";
+import { Waypoint, createWaypoint } from "./Sequence/Waypoint";
+import { WaypointLabel, createWaypointLabel } from "./Sequence/WaypointLabel";
+import { Sweeper, getSweeper } from "./Sweeper";
 
 /**
  * Type that represents the data needed to sweep a path.
@@ -37,6 +25,35 @@ type SweepData = {
     baseOffset: Vector2,
 };
 
+function getSnappingSensitivity(measurement: GridMeasurement) {
+    return measurement === 'EUCLIDEAN' ? 0 : 1;
+}
+
+function getMeasurementText(numGridUnits: number, scale: GridScale) {
+    return `${Math.round(numGridUnits * scale.parsed.multiplier).toString()}${scale.parsed.unit}`
+}
+
+function getRulerText(numGridUnits: number, scale: GridScale, scalingFactor: number) {
+    const xFactorText = scalingFactor === 1 ? '' : `x${scalingFactor}`;
+    return `${Math.round(numGridUnits * scale.parsed.multiplier)}${xFactorText}${scale.parsed.unit}`;
+}
+
+async function getSweeps(target: Item) {
+    const emanations = await getEmanations(target.id, OBR.scene.items);
+    const existingSweeps: SequenceSweep[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
+        .filter(isSequenceSweep);
+    const sweeps = await Promise.all(emanations.map((emanation) => getOrCreateSweep(target, emanation, existingSweeps)));
+    const sweepData: SweepData[] = [];
+    for (let i = 0; i < emanations.length; i++) {
+        sweepData.push({
+            sweeper: getSweeper(emanations[i]),
+            baseCommands: sweeps[i].commands,
+            baseOffset: Math2.subtract(emanations[i].position, target.position),
+        });
+    }
+    return { sweeps, sweepData };
+}
+
 export default class DragState {
     private readonly start: Vector2;
     private end: Vector2;
@@ -52,6 +69,10 @@ export default class DragState {
      * Whether the target was created just for this drag (e.g it's a marker for a measurement).
      */
     private readonly targetIsNew: boolean;
+
+    static async snapPosition(position: Vector2, snappingSensitivity: number): Promise<Vector2> {
+        return OBR.scene.grid.snapPosition(position, snappingSensitivity, false, true);
+    }
 
     /**
      * Create a new drag state and create all necessary items.
@@ -73,65 +94,29 @@ export default class DragState {
             OBR.scene.grid.getDpi(),
             OBR.player.getColor(),
         ]);
+
         const snappingSensitivity = getSnappingSensitivity(measurement);
-        const markerStrokeWidth = dpi / 20;
         const layer = aboveCharacters ? 'RULER' : 'DRAWING';
 
         let target: Item;
         let targetIsNew = targetArg === null;
         if (targetArg === null) {
             target = createDragMarker(
-                await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity),
+                await DragState.snapPosition(pointerPosition, snappingSensitivity),
                 dpi,
                 playerColor,
-                markerStrokeWidth,
                 layer,
-                MARKER_Z_INDEX,
                 privateMode,
             );
         } else {
             target = targetArg;
         }
 
-
-        const emanations = await getEmanations(target.id, OBR.scene.items);
-        const existingSweeps: SequenceSweep[] = (await OBR.scene.items.getItems(belongsToSequenceForTarget(target.id)))
-            .filter(isSequenceSweep);
-        const sweeps = await Promise.all(emanations.map((emanation) => getOrCreateSweep(target, emanation, existingSweeps)));
-        const sweepData: SweepData[] = [];
-        for (let i = 0; i < emanations.length; i++) {
-            sweepData.push({
-                sweeper: getSweeper(emanations[i]),
-                baseCommands: sweeps[i].commands,
-                baseOffset: Math2.subtract(emanations[i].position, target.position),
-            });
-        }
-
+        const { sweeps, sweepData } = await getSweeps(target);
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);
-        const ruler: SequenceRuler = buildSequenceItem(target, layer, RULER_Z_INDEX, { scalingFactor: distanceScaling }, buildRuler()
-            .name(`Path Ruler for ${target.name}`)
-            .startPosition(target.position)
-            .endPosition(end)
-            .variant('DASHED'));
-        ruler.metadata[METADATA_KEY].scalingFactor = distanceScaling;
-        const waypoint: Shape & SequenceItem = buildSequenceItem(target, layer, WAYPOINT_Z_INDEX, {}, buildShape()
-            .name(`Path Waypoint for ${target.name}`)
-            .position(target.position)
-            .shapeType('CIRCLE')
-            .width(dpi / 4)
-            .height(dpi / 4)
-            .fillColor(playerColor)
-            .strokeColor('gray')
-            .strokeWidth(markerStrokeWidth));
-        // Labels always go above characters so put them on the ruler layer
-        const label: Label & SequenceItem = buildSequenceItem(target, 'RULER', LABEL_Z_INDEX, {}, buildLabel()
-            .name(`Path Label for ${target.name}`)
-            .position(target.position)
-            .backgroundColor('black')
-            .backgroundOpacity(0.6)
-            .pointerDirection('DOWN')
-            .pointerWidth(20)
-            .pointerHeight(40));
+        const ruler = createSegment(target, end, layer, distanceScaling);
+        const waypoint = createWaypoint(target, layer, dpi, playerColor);
+        const label = createWaypointLabel(target);
 
         const interactionItems = DragState.composeItems({ target, sweeps, ruler, label, waypoint });
         const interaction: AbstractInteraction<Item[]> = privateMode
@@ -178,7 +163,7 @@ export default class DragState {
      */
     private async setEnd(end: Vector2) {
         const oldEnd = this.end;
-        this.end = await OBR.scene.grid.snapPosition(end, this.snappingSensitivity, false, true);
+        this.end = await DragState.snapPosition(end, this.snappingSensitivity);
         return oldEnd.x != this.end.x || oldEnd.y != this.end.y;
     }
 
@@ -200,9 +185,9 @@ export default class DragState {
         const numSweeps = this.sweepData.length;
         const sweeps = items.slice(idx, idx += numSweeps) as SequenceSweep[];
 
-        const ruler = items[idx++] as SequenceRuler;
-        const label = items[idx++] as Label & SequenceItem;
-        const waypoint = items[idx++] as Shape & SequenceItem;
+        const ruler = items[idx++] as Segment;
+        const label = items[idx++] as WaypointLabel;
+        const waypoint = items[idx++] as Waypoint;
         return { target, sweeps, ruler, label, waypoint };
     }
 
