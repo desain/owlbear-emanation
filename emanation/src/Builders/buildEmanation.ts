@@ -113,10 +113,11 @@ export default function buildEmanation(
 
   emanation.locked = true;
   emanation.name = `Emanation ${item.name} ${size}`;
-  emanation.attachedTo = item.id;
   emanation.layer = 'PROP';
   emanation.disableHit = true;
   emanation.visible = item.visible;
+  emanation.attachedTo = item.id;
+  emanation.disableAttachmentBehavior = ['ROTATION', 'LOCKED'];
 
   emanation.style.fillColor = style.fillColor;
   emanation.style.fillOpacity = style.fillOpacity;
