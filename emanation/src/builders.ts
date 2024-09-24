@@ -1,6 +1,8 @@
 import OBR, { buildCurve, buildShape, Curve, Image, Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import { METADATA_KEY } from "./constants";
 import { getHexGridUtils, HexGridType } from "./hexUtils";
-import { Circle, Emanation, EmanationMetadata, EmanationStyle, METADATA_KEY, SceneEmanationMetadata } from "./types";
+import { SceneMetadata } from "./SceneMetadata";
+import { Circle, Emanation, EmanationMetadata, EmanationStyle } from "./types";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
   return Math2.rotate(point, { x: 0, y: 0 }, degrees);
@@ -22,7 +24,7 @@ export function buildEmanation(
   item: Image,
   style: EmanationStyle,
   size: number,
-  { gridDpi, gridMeasurement, gridMultiplier, gridType, gridMode }: SceneEmanationMetadata,
+  { gridDpi, gridMeasurement, gridMultiplier, gridType, gridMode }: SceneMetadata,
 ): Emanation {
   const dpiScale = gridDpi / item.grid.dpi;
   const numUnits = size / gridMultiplier;
@@ -141,7 +143,7 @@ function buildHexagonGridEmanation(position: Vector2, numHexes: number, hexSize:
   const topLeftPointyTop = Math2.add(topLeftHexOffset, pointyTopOffset);
   const topLeftPointyRight = Math2.add(topLeftHexOffset, clockwiseAroundOrigin(pointyTopOffset, 60));
 
-  const points = [];
+  const points: Vector2[] = [];
   for (let i = 0; i < radius; i++) {
     const acrossOffset = Math2.multiply(rightHexOffset, i);
     points.push(Math2.add(topLeftPointyTop, acrossOffset));
@@ -219,7 +221,7 @@ function octantToEmanation(octantPoints: Vector2[], scaleFactor: number, cornerO
  * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
  */
 function buildAlternatingSquareOctant(radius: number) {
-  const points = [];
+  const points: Vector2[] = [];
   let x = radius;
   let y = 0;
   let alternateDiagonal = true;
@@ -263,7 +265,7 @@ function buildAlternatingPreciseOctant(radius: number) {
  * @returns List of points in the first octant, centered on (0,0). Last point will have x=y.
  */
 function buildManhattanSquareOctant(radius: number) {
-  const points = [];
+  const points: Vector2[] = [];
   let x = radius;
   let y = 0;
   let moveX = true;

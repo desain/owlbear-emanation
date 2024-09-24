@@ -1,13 +1,13 @@
 import OBR, { Image, Theme, } from "@owlbear-rodeo/sdk";
 import "../assets/style.css";
 import { buildEmanation } from "./builders";
+import { METADATA_KEY } from "./constants";
+import { getPlayerMetadata, PlayerMetadata, updatePlayerMetadata } from "./PlayerMetadata";
 import {
-  getPlayerMetadata,
-  getSceneEmanationMetadata,
   rebuildEmanations,
-  updatePlayerMetadata
-} from "./helpers";
-import { Emanation, isEmanation, METADATA_KEY, PlayerMetadata } from "./types";
+} from "./rebuildEmanations";
+import { getSceneMetadata } from "./SceneMetadata";
+import { Emanation, isEmanation } from "./types";
 
 /**
  * This file represents the HTML of the popover that is shown once
@@ -73,9 +73,9 @@ async function renderContextMenu() {
       .filter((emanation) => emanation.attachedTo == selection[0])
       .map((emanation) => ({ emanation, metadata: emanation.metadata[METADATA_KEY] }))
       .sort(({ metadata: { size: sizeA } }, { metadata: { size: sizeB } }) => sizeA - sizeB)
-      .map(({ emanation, metadata: { size } }) => emanationRow(
-        emanation.id, emanation.style.strokeColor, size, multiplier, unit))
-    : ['<p>(Selection is more than 1 item)</p>']
+      .map(({ emanation, metadata: { size } }) =>
+        emanationRow(emanation.id, emanation.style.strokeColor, size, multiplier, unit))
+    : ['<p class=">(Selection is more than 1 item)</p>']
 
   let size = playerEmanationMetadata.size;
   let color = playerEmanationMetadata.color;
@@ -83,7 +83,6 @@ async function renderContextMenu() {
   // Setup the document with an emanation size input and create button
   const app = document.getElementById('app')!;
   setupTheme(app, await OBR.theme.getTheme());
-  console.log();
   app.innerHTML = `
     ${emanationRow(null, color, size, multiplier, unit)}
     ${extantEmanations.join('')}
@@ -103,7 +102,7 @@ async function renderContextMenu() {
 
   document.querySelectorAll<HTMLButtonElement>(`.${EXTANT_EMANATION}.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', async () => {
     const id = colorButton.dataset.id!!;
-    await OBR.scene.items.updateItems<Emanation>([id], (emanations) => emanations.forEach((emanation) => {
+    await OBR.scene.items.updateItems([id], (emanations) => emanations.forEach((emanation: Emanation) => {
       emanation.style.strokeColor = colorButton.value;
       emanation.style.fillColor = colorButton.value;
       emanation.metadata[METADATA_KEY].style.strokeColor = colorButton.value;
@@ -120,7 +119,7 @@ async function renderContextMenu() {
     await OBR.scene.items.updateItems([id], (emanations) => emanations.forEach((emanation: Emanation) => {
       emanation.metadata[METADATA_KEY].size = size;
     }));
-    await rebuildEmanations(({ id: otherId }) => otherId === id);
+    await rebuildEmanations(id);
     await renderContextMenu();
   }));
 
@@ -169,7 +168,7 @@ async function createEmanations({ size, color, defaultOpacity }: PlayerMetadata)
   if (!selection) {
     return;
   }
-  const sceneEmanationMetadata = await getSceneEmanationMetadata();
+  const sceneMetadata = await getSceneMetadata();
   const items = await OBR.scene.items.getItems<Image>(selection);
   const toAdd = items.map((item) => buildEmanation(
     item,
@@ -182,7 +181,7 @@ async function createEmanations({ size, color, defaultOpacity }: PlayerMetadata)
       strokeDash: [],
     },
     size,
-    sceneEmanationMetadata,
+    sceneMetadata,
   ));
 
   if (toAdd.length > 0) {

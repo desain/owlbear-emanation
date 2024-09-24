@@ -1,6 +1,7 @@
 import OBR from "@owlbear-rodeo/sdk";
 import "../assets/style.css";
-import { getPlayerMetadata, getSceneEmanationMetadata, updatePlayerMetadata, updateSceneMetadata } from "./helpers";
+import { getPlayerMetadata, updatePlayerMetadata } from "./PlayerMetadata";
+import { getSceneMetadata, updateSceneMetadata } from "./SceneMetadata";
 
 OBR.onReady(async () => {
     const ready = await OBR.scene.isReady();
@@ -16,7 +17,7 @@ OBR.onReady(async () => {
 });
 
 async function setupSettings() {
-    const sceneEmanationMetadata = await getSceneEmanationMetadata();
+    const sceneEmanationMetadata = await getSceneMetadata();
     const playerMetadata = await getPlayerMetadata();
     const gridModeChecked = sceneEmanationMetadata.gridMode ? 'checked' : '';
     const startingOpacity = playerMetadata.defaultOpacity;
