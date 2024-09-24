@@ -1,14 +1,14 @@
 import OBR, { Item, Player, Vector2 } from "@owlbear-rodeo/sdk";
-import icon1x from "./1x.svg";
-import icon2x from "./2x.svg";
-import clear from "./clear.svg";
+import icon1x from "../assets/1x.svg";
+import icon2x from "../assets/2x.svg";
+import clear from "../assets/clear.svg";
+import ruler from "../assets/ruler.svg";
+import rulerPrivate from "../assets/rulerPrivate.svg";
+import walk from "../assets/walk.svg";
 import DragState from "./DragState";
 import { DRAG_MODE_ID, isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
 import { withBothItemApis } from "./interactionUtils";
-import ruler from "./ruler.svg";
-import rulerPrivate from "./rulerPrivate.svg";
 import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceUtils";
-import walk from "./walk.svg";
 
 type DragToolMetadata = {
     distanceScaling: number,

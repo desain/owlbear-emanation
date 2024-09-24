@@ -1,5 +1,4 @@
-import { Command, isCurve, isShape, Math2, PathCommand, Vector2 } from "@owlbear-rodeo/sdk";
-import { Emanation } from "../types";
+import { Command, Curve, isCurve, isShape, Math2, PathCommand, Shape, Vector2 } from "@owlbear-rodeo/sdk";
 
 // export function circ(centers: Vector2[], position: Vector2 = { x: 0, y: 0 }) {
 //     let redness = 0;
@@ -13,7 +12,7 @@ import { Emanation } from "../types";
 
 export type Sweeper = (position: Vector2, movementVector: Vector2) => PathCommand[];
 
-export function getSweeper(emanation: Emanation): Sweeper {
+export function getSweeper(emanation: Curve | Shape): Sweeper {
     if (isCurve(emanation)) {
         const convex = isConvex(emanation.points);
         const sweeperFunc = convex ? getConvexPolygonSweep : getConcavePolygonSweep;
