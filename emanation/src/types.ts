@@ -17,9 +17,11 @@ export function isEmanation(item: Item): item is Emanation {
 }
 
 export type EmanationMetadata = {
+    /**
+     * Scale of the emanation source item. Kept so that when a source changes size, we know to rebuild.
+     */
     sourceScale: Vector2,
     size: number,
-    style: EmanationStyle,
 }
 
 export interface EmanationStyle {
