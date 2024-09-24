@@ -45,7 +45,7 @@ export default async function installDragTool() {
             }));
         });
     }
-    // TODO on scene ready change to not ready call unsubscribe?
+    return () => unsubscribeFunctions.forEach((unsubscribe) => unsubscribe());
 }
 
 async function setToolMetadata(update: Partial<DragToolMetadata>) {
