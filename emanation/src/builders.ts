@@ -1,8 +1,8 @@
 import OBR, { buildCurve, buildShape, Curve, Image, Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "./constants";
+import { Circle, Emanation, EmanationMetadata } from "./Emanation";
 import { getHexGridUtils, HexGridType } from "./hexUtils";
 import { SceneMetadata } from "./SceneMetadata";
-import { Circle, Emanation, EmanationMetadata, EmanationStyle } from "./types";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
   return Math2.rotate(point, { x: 0, y: 0 }, degrees);
@@ -22,10 +22,11 @@ function clockwiseAroundOrigin(point: Vector2, degrees: number) {
  */
 export function buildEmanation(
   item: Image,
-  style: EmanationStyle,
+  style: Emanation['style'],
   size: number,
   { gridDpi, gridMeasurement, gridMultiplier, gridType, gridMode }: SceneMetadata,
 ): Emanation {
+
   const dpiScale = gridDpi / item.grid.dpi;
   const numUnits = size / gridMultiplier;
   const absoluteSize = numUnits * gridDpi;
