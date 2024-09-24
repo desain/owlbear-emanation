@@ -1,7 +1,7 @@
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { installTool } from "./dragtool/dragtool";
+import { installTool } from "../dragtool/src/dragtool";
 import icon from "./emanations.svg";
 import { rebuildEmanations, updateSceneMetadata } from "./helpers";
 import { PLUGIN_ID } from "./types";

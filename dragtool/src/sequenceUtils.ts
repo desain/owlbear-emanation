@@ -1,6 +1,6 @@
 import OBR, { Image, Item, KeyFilter, Layer, Math2, Ruler, Shape, Vector2, buildPath, buildShape, isImage, isRuler, isShape } from "@owlbear-rodeo/sdk";
 import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemBuilder";
-import { Emanation, isEmanation, } from "../types";
+import { Emanation, isEmanation, } from "../../src/types";
 import { ItemApi, METADATA_KEY, SequenceItem, SequenceItemMetadata, SequenceSweep, SequenceTargetMetadata, isSequenceItem, isSequenceRuler, isSequenceTarget } from "./dragtoolTypes";
 import { withBothItemApis } from "./interactionUtils";
 
