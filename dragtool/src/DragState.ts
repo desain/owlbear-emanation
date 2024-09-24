@@ -1,8 +1,8 @@
 import OBR, { GridMeasurement, GridScale, Item, Label, Math2, PathCommand, Shape, Vector2, buildLabel, buildRuler, buildShape } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY, SequenceItem, SequenceRuler, SequenceSweep, isSequenceSweep } from "./dragtoolTypes";
+import { Sweeper, getSweeper } from "./getSweeper";
 import { AbstractInteraction, createLocalInteraction, wrapRealInteraction } from "./interactionUtils";
 import { belongsToSequenceForTarget, buildSequenceItem, createDragMarker, createSequenceTargetMetadata, getEmanations, getOrCreateSweep, getSequenceLength } from "./sequenceUtils";
-import { Sweeper, getSweeper } from "./sweepUtils";
 
 const RULER_Z_INDEX = 0;
 const WAYPOINT_Z_INDEX = 1;
@@ -105,7 +105,6 @@ export default class DragState {
                 baseCommands: sweeps[i].commands,
                 baseOffset: Math2.subtract(emanations[i].position, target.position),
             });
-            console.log(sweepData[i]);
         }
 
         const end = await OBR.scene.grid.snapPosition(pointerPosition, snappingSensitivity);

@@ -1,8 +1,8 @@
 import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { installTool } from "../dragtool/src/dragtool";
-import icon from "./emanations.svg";
+import { installTool } from "../../dragtool/src/dragtool";
+import icon from "../assets/emanations.svg";
 import { rebuildEmanations, updateSceneMetadata } from "./helpers";
 import { PLUGIN_ID } from "./types";
 
@@ -94,7 +94,7 @@ function createContextMenu() {
       },
     ],
     embed: {
-      url: "/contextmenu.html",
+      url: "/emanation/contextmenu.html",
       // height: 88,
     },
   });

@@ -1,4 +1,5 @@
 import OBR, { Image, } from "@owlbear-rodeo/sdk";
+import "../assets/style.css";
 import { buildEmanation } from "./builders";
 import {
   getPlayerMetadata,
@@ -6,7 +7,6 @@ import {
   rebuildEmanations,
   updatePlayerMetadata
 } from "./helpers";
-import "./style.css";
 import { Emanation, isEmanation, METADATA_KEY, PlayerMetadata } from "./types";
 
 /**
@@ -67,8 +67,8 @@ async function renderContextMenu() {
         emanation.id, emanation.style.strokeColor, size, multiplier, unit))
     : ['<p>(Selection is more than 1 item)</p>']
 
-  let size = playerEmanationMetadata?.size ?? multiplier;
-  let color = playerEmanationMetadata?.color ?? await OBR.player.getColor();
+  let size = playerEmanationMetadata.size;
+  let color = playerEmanationMetadata.color;
 
   // Setup the document with an emanation size input and create button
   document.getElementById('app')!.innerHTML = `

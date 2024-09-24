@@ -6,11 +6,11 @@
   "author": "desain",
   "homepage_url": "https://github.com/desain/owlbear-emanation",
   "icon": "/logo.png",
-  "background_url": "/background.html",
+  "background_url": "/emanation/background.html",
   "action": {
     "title": "Emanations Settings",
     "icon": "/logo.png",
-    "popover": "/action.html",
+    "popover": "/emanation/action.html",
     "height": "100",
     "width": "150"
   }
