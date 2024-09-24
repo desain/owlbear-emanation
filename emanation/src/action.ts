@@ -19,26 +19,28 @@ async function setupSettings() {
     const sceneEmanationMetadata = await getSceneEmanationMetadata();
     const playerMetadata = await getPlayerMetadata();
     const gridModeChecked = sceneEmanationMetadata.gridMode ? 'checked' : '';
-
     const startingOpacity = playerMetadata.defaultOpacity;
+
+    const gmControls = await OBR.player.getRole() === 'GM'
+        ? `<label for="grid-mode">Grid Mode</label><input type="checkbox" id="grid-mode" name="grid-mode" ${gridModeChecked} />`
+        : '';
+
     document.getElementById('app')!.innerHTML = `
-        <label for="grid-mode">Grid Mode</label>
-        <input type="checkbox" id="grid-mode" name="grid-mode" ${gridModeChecked} />
+        ${gmControls}
         <label for="default-opacity">Default Opacity</label>: <span id="opacity-value">${startingOpacity}</span>
         <input type="range" id="default-opacity" name="default-opacity" min="0" max="1" step="0.1" value="${startingOpacity}" />
     `
-    const gridModeCheckbox = <HTMLInputElement>document.getElementById('grid-mode');
+    const gridModeCheckbox = <HTMLInputElement | null>document.getElementById('grid-mode');
     gridModeCheckbox?.addEventListener('change', async () => {
         const gridMode = gridModeCheckbox.checked;
         await updateSceneMetadata({ gridMode });
     });
 
-    const valueDisplay = <HTMLSpanElement>document.getElementById('opacity-value');
-
-    const opacitySlider = <HTMLInputElement>document.getElementById('default-opacity');
+    const opacityValueDisplay = <HTMLSpanElement>document.getElementById('opacity-value');
+    const opacitySlider = <HTMLInputElement | null>document.getElementById('default-opacity');
     opacitySlider?.addEventListener('change', async () => {
         const opacity = parseFloat(opacitySlider.value);
-        valueDisplay.textContent = opacity.toString();
+        opacityValueDisplay.textContent = opacity.toString();
         await updatePlayerMetadata({ defaultOpacity: opacity });
     });
 }
