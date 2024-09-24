@@ -69,9 +69,9 @@ export function buildEmanation(
   }
 
   emanation.locked = true;
-  emanation.name = `${item.name} ${size} emanation`;
+  emanation.name = `Emanation ${item.name} ${size}`;
   emanation.attachedTo = item.id;
-  emanation.layer = 'DRAWING';
+  emanation.layer = 'PROP';
   emanation.disableHit = true;
   emanation.visible = item.visible;
 
@@ -82,7 +82,7 @@ export function buildEmanation(
   emanation.style.strokeWidth = style.strokeWidth;
   emanation.style.strokeDash = style.strokeDash;
 
-  const metadata: EmanationMetadata = { sourceScale: item.scale, size, style };
+  const metadata: EmanationMetadata = { sourceScale: item.scale, size };
   emanation.metadata = { [METADATA_KEY]: metadata };
   const returnValue = emanation as typeof emanation & { metadata: { [METADATA_KEY]: EmanationMetadata } }; // typescript can't figure out this key is set now
   return returnValue;

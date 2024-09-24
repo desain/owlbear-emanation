@@ -105,8 +105,6 @@ async function renderContextMenu() {
     await OBR.scene.items.updateItems([id], (emanations) => emanations.forEach((emanation: Emanation) => {
       emanation.style.strokeColor = colorButton.value;
       emanation.style.fillColor = colorButton.value;
-      emanation.metadata[METADATA_KEY].style.strokeColor = colorButton.value;
-      emanation.metadata[METADATA_KEY].style.fillColor = colorButton.value;
     }));
   }));
 
@@ -144,6 +142,7 @@ async function renderContextMenu() {
 
 function setupTheme(app: HTMLElement, theme: Theme) {
   app.style.setProperty('--text-primary', theme.text.primary);
+  app.style.setProperty('--text-disabled', theme.text.disabled);
   app.style.setProperty('--text-secondary', theme.text.secondary);
   app.style.setProperty('--primary-main', theme.primary.main);
 }
