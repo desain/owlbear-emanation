@@ -3,6 +3,7 @@ import { METADATA_KEY, ZIndex } from "../constants";
 import { ItemWithMetadata } from "../metadataUtils";
 import { buildSequenceItem, isSequenceItem, SequenceItemMetadata } from "./SequenceItem";
 
+
 type SegmentMetadata = SequenceItemMetadata & {
     scalingFactor: number,
 };

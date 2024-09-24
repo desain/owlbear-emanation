@@ -20,6 +20,6 @@
     "skipLibCheck": true
   },
   "include": [
-    "vite-env.d.ts"
+    "*.ts"
   ]
 }

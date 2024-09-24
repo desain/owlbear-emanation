@@ -6,13 +6,13 @@ import ruler from "../assets/ruler.svg";
 import rulerPrivate from "../assets/rulerPrivate.svg";
 import walk from "../assets/walk.svg";
 import { DRAG_MODE_ID, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./constants";
-import { DRAGGABLE_CHARACTER_FILTER, DRAGGABLE_CHARACTER_FILTER_INVERSE, isDraggableCharacter } from "./DraggableCharacter.ts";
+import { DRAGGABLE_CHARACTER_FILTER, DRAGGABLE_CHARACTER_FILTER_INVERSE, isDraggableCharacter } from "./DraggableCharacter";
 import DragState from "./DragState";
-import { DragToolMetadata, setToolMetadata } from "./DragToolMetadata.ts";
+import { DragToolMetadata, setToolMetadata } from "./DragToolMetadata";
 import { ItemApi, withBothItemApis } from "./ItemApi";
 import { DRAG_MARKER_FILTER, isDragMarker } from "./Sequence/DragMarker";
 import { isSequenceTarget } from "./Sequence/SequenceTarget";
-import { deleteAllSequencesForCurrentPlayer, deleteSequence, itemMovedOutsideItsSequence } from "./Sequence/utils.ts";
+import { deleteAllSequencesForCurrentPlayer, deleteSequence, itemMovedOutsideItsSequence } from "./Sequence/utils";
 
 export default async function installDragTool() {
     const defaultMetadata: DragToolMetadata = { distanceScaling: 1 };
