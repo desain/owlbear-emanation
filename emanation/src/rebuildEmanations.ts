@@ -8,8 +8,7 @@ type Predicate = (_: { metadata: EmanationMetadata, sourceItem: Item, id: string
 
 
 export default async function rebuildEmanations(updateFilter: Predicate | string) {
-  const idFilter = Array.isArray(updateFilter) ? updateFilter : undefined;
-  const filterFunction = typeof updateFilter === 'function'
+  const filterFunction: Predicate = typeof updateFilter === 'function'
     ? updateFilter
     : ({ id }) => id === updateFilter;
 

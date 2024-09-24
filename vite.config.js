@@ -5,8 +5,8 @@ export default defineConfig({
   build: {
     assetsInlineLimit: 0, // disable inlining assets since that doesn't work for OBR
     rollupOptions: {
-      input: {
-        background: resolve(__dirname, "/background.html"),
+      input: { // must have a 'main' entry point
+        main: resolve(__dirname, "/background.html"),
         contextmenu: resolve(__dirname, "/emanation/contextmenu.html"),
         action: resolve(__dirname, "/emanation/action.html"),
       },

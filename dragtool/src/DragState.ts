@@ -31,7 +31,7 @@ type SnapSettings = {
     snapToCenter: boolean,
 }
 
-function getSnapSettings(item: Item | null, measurement: GridMeasurement, gridType: GridType, gridDpi: number) {
+function getSnapSettings(item: Item | null, measurement: GridMeasurement, gridType: GridType) {
     const snappingSensitivity = measurement === 'EUCLIDEAN' ? 0 : 1;
     if (item && isImage(item) && gridType === 'SQUARE') {
         const itemSizeInGridUnits = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) / item.grid.dpi;
@@ -108,7 +108,7 @@ export default class DragState {
             OBR.player.getColor(),
         ]);
 
-        const snapSettings = getSnapSettings(targetArg, measurement, gridType, dpi);
+        const snapSettings = getSnapSettings(targetArg, measurement, gridType);
         const layer = aboveCharacters ? 'RULER' : 'DRAWING';
 
         let target: Item;
