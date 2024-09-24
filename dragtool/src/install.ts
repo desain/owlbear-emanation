@@ -11,7 +11,6 @@ import DragState from "./DragState";
 import { DragToolMetadata, setToolMetadata } from "./DragToolMetadata.ts";
 import { ItemApi, withBothItemApis } from "./ItemApi";
 import { DRAG_MARKER_FILTER, isDragMarker } from "./Sequence/DragMarker";
-import { isSequenceItem } from "./Sequence/SequenceItem";
 import { isSequenceTarget } from "./Sequence/SequenceTarget";
 import { deleteAllSequencesForCurrentPlayer, deleteSequence, itemMovedOutsideItsSequence } from "./Sequence/utils.ts";
 
@@ -235,12 +234,6 @@ async function deleteSequencesFromVanishedPlayers(players: Player[]) {
 }
 
 async function deleteInvalidatedSequences(items: Item[], api: ItemApi) {
-    // Remove sequence items whose target was removed
-    const ownerlessItems = items.filter(isSequenceItem)
-        .filter((item) => !items.find((potentialOwner) => item.metadata[METADATA_KEY].targetId === potentialOwner.id))
-        .map((item) => item.id);
-    // console.log('deleting ownerless', ownerlessItems);
-    api.deleteItems(ownerlessItems);
     // Remove sequence items whose target was moved
     items.filter(isSequenceTarget).forEach((item) => {
         if (itemMovedOutsideItsSequence(item, items)) {

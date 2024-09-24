@@ -1,9 +1,9 @@
-import OBR, { buildPath, isRuler, Item, Math2, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { buildPath, isRuler, Item, Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import { Emanation, isEmanation, } from "../../../emanation/src/Emanation";
 import { METADATA_KEY } from "../constants";
 import { ItemApi, withBothItemApis } from "../ItemApi";
 import { isDragMarker } from "./DragMarker";
-import { isSegment } from "./Segment";
+import { isSegment, Segment } from "./Segment";
 import { buildSequenceItem, isSequenceItem, SequenceItem } from "./SequenceItem";
 import { SequenceSweep } from "./SequenceSweep";
 import { isSequenceTarget } from "./SequenceTarget";
@@ -14,7 +14,7 @@ export async function getEmanations(id: string, api: ItemApi): Promise<Emanation
 
 export function itemMovedOutsideItsSequence(item: Item, items: Item[]): boolean {
     const rulers = items.filter(belongsToSequenceForTarget(item.id))
-        .filter(isRuler) as (SequenceItem & Ruler)[]; // Typescript can't figure out that isRuler guarantees ruler here for some reason
+        .filter(isRuler) as Segment[]; // Typescript can't figure out that isRuler guarantees ruler here for some reason
     const previousPositions: Vector2[] = rulers.flatMap((ruler) => [ruler.startPosition, ruler.endPosition]);
     for (const position of previousPositions) {
         if (Math2.compare(item.position, position, 0.01)) {
@@ -81,5 +81,5 @@ export async function getOrCreateSweep(target: Item, emanation: Emanation, exist
 }
 
 export function belongsToSequenceForTarget(targetId: string): (item: Item) => item is SequenceItem {
-    return (item): item is SequenceItem => isSequenceItem(item) && item.metadata[METADATA_KEY].targetId === targetId;
+    return (item): item is SequenceItem => isSequenceItem(item) && item.attachedTo === targetId;
 }
