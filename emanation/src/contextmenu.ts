@@ -1,12 +1,11 @@
-import OBR, { Image, Theme, } from "@owlbear-rodeo/sdk";
+import OBR, { Image } from "@owlbear-rodeo/sdk";
 import "../assets/style.css";
-import { buildEmanation } from "./builders";
+import applyTheme from "./applyTheme";
+import buildEmanation from "./Builders/buildEmanation";
 import { METADATA_KEY } from "./constants";
 import { Emanation, isEmanation } from "./Emanation";
 import { getPlayerMetadata, PlayerMetadata, updatePlayerMetadata } from "./PlayerMetadata";
-import {
-  rebuildEmanations,
-} from "./rebuildEmanations";
+import rebuildEmanations from "./rebuildEmanations";
 import { getSceneMetadata } from "./SceneMetadata";
 
 /**
@@ -57,10 +56,6 @@ function parseSizeOrWarn(newSize: string): number | null {
   }
 }
 
-function installChangeListener<ElementType extends HTMLElement>(querySelector: string, listener: (element: ElementType) => void) {
-  document.querySelectorAll<ElementType>(querySelector).forEach((element) => element.addEventListener('change', () => listener(element)));
-}
-
 async function renderContextMenu() {
   const [
     playerEmanationMetadata,
@@ -86,7 +81,7 @@ async function renderContextMenu() {
 
   // Setup the document with an emanation size input and create button
   const app = document.getElementById('app')!;
-  setupTheme(app, await OBR.theme.getTheme());
+  await applyTheme(app);
   app.innerHTML = `
     ${emanationRow(null, color, size, multiplier, unit)}
     ${extantEmanations.join('')}
@@ -142,13 +137,6 @@ async function renderContextMenu() {
   }));;
 
   document.getElementById('remove-emanations')?.addEventListener('click', removeAllEmanations);
-}
-
-function setupTheme(app: HTMLElement, theme: Theme) {
-  app.style.setProperty('--text-primary', theme.text.primary);
-  app.style.setProperty('--text-disabled', theme.text.disabled);
-  app.style.setProperty('--text-secondary', theme.text.secondary);
-  app.style.setProperty('--primary-main', theme.primary.main);
 }
 
 async function removeAllEmanations() {
