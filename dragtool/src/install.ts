@@ -6,12 +6,46 @@ import ruler from "../assets/ruler.svg";
 import rulerPrivate from "../assets/rulerPrivate.svg";
 import walk from "../assets/walk.svg";
 import DragState from "./DragState";
-import { DRAG_MODE_ID, isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
+import { DRAG_MODE_ID, DragToolMetadata, isSequenceItem, isSequenceTarget, ItemApi, METADATA_KEY, PLUGIN_ID, TOOL_ID } from "./dragtoolTypes";
 import { withBothItemApis } from "./interactionUtils";
 import { deleteAllSequencesForCurrentPlayer, deleteSequence, DRAG_MARKER_FILTER, DRAGGABLE_ITEM_FILTER, isDraggableItem, isIndependentDragMarker, itemMovedOutsideItsSequence, NOT_DRAGGABLE_ITEM_FILTER } from "./sequenceUtils";
 
-type DragToolMetadata = {
-    distanceScaling: number,
+export default async function installDragTool() {
+    const defaultMetadata: DragToolMetadata = { distanceScaling: 1 };
+    OBR.tool.create({
+        id: TOOL_ID,
+        icons: [{
+            icon: walk,
+            label: "Drag path",
+        }],
+        shortcut: 'Z',
+        defaultMetadata: defaultMetadata,
+        defaultMode: DRAG_MODE_ID,
+        async onClick() {
+            await setToolMetadata({ distanceScaling: 1 });
+            return true;
+        },
+    });
+
+    const readAndClearScalingJustClicked = createChangeScalingAction();
+    createDragMode(readAndClearScalingJustClicked);
+    createMeasureMode(false, readAndClearScalingJustClicked);
+    createMeasureMode(true, readAndClearScalingJustClicked);
+    createClearAction();
+
+    const unsubscribeFunctions: (() => void)[] = [];
+    if (await OBR.player.getRole() === 'GM') {
+        // Delete a player's sequence when they leave
+        unsubscribeFunctions.push(OBR.party.onChange(deleteSequencesFromVanishedPlayers));
+
+        // Delete a sequence when an item moves sout of it
+        await withBothItemApis(async (api) => {
+            unsubscribeFunctions.push(api.onChange((items) => {
+                deleteInvalidatedSequences(items, api);
+            }));
+        });
+    }
+    // TODO on scene ready change to not ready call unsubscribe?
 }
 
 async function setToolMetadata(update: Partial<DragToolMetadata>) {
@@ -272,42 +306,4 @@ function createChangeScalingAction() {
         scalingJustClicked = false;
         return result;
     };
-}
-
-export async function installTool() {
-    const defaultMetadata: DragToolMetadata = { distanceScaling: 1 };
-    OBR.tool.create({
-        id: TOOL_ID,
-        icons: [{
-            icon: walk,
-            label: "Drag path",
-        }],
-        shortcut: 'Z',
-        defaultMetadata: defaultMetadata,
-        defaultMode: DRAG_MODE_ID,
-        async onClick() {
-            await setToolMetadata({ distanceScaling: 1 });
-            return true;
-        },
-    });
-
-    const readAndClearScalingJustClicked = createChangeScalingAction();
-    createDragMode(readAndClearScalingJustClicked);
-    createMeasureMode(false, readAndClearScalingJustClicked);
-    createMeasureMode(true, readAndClearScalingJustClicked);
-    createClearAction();
-
-    const unsubscribeFunctions = [];
-    if (await OBR.player.getRole() === 'GM') {
-        // Delete a player's sequence when they leave
-        unsubscribeFunctions.push(OBR.party.onChange(deleteSequencesFromVanishedPlayers));
-
-        // Delete a sequence when an item moves sout of it
-        await withBothItemApis(async (api) => {
-            unsubscribeFunctions.push(api.onChange((items) => {
-                deleteInvalidatedSequences(items, api);
-            }));
-        });
-    }
-    // TODO on scene ready change to not ready call unsubscribe?
 }

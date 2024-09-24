@@ -5,6 +5,10 @@ export const TOOL_ID = `${PLUGIN_ID}/tool`;
 export const DRAG_MODE_ID = `${PLUGIN_ID}/mode-drag-item`;
 export const METADATA_KEY = `${PLUGIN_ID}/metadata`;
 
+export type DragToolMetadata = {
+    distanceScaling: number,
+}
+
 export type SequenceItemMetadata = {
     type: 'SEQUENCE_ITEM',
     targetId: string,
