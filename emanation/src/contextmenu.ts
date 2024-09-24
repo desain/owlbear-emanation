@@ -1,4 +1,4 @@
-import OBR, { Image, } from "@owlbear-rodeo/sdk";
+import OBR, { Image, Theme, } from "@owlbear-rodeo/sdk";
 import "../assets/style.css";
 import { buildEmanation } from "./builders";
 import {
@@ -81,7 +81,10 @@ async function renderContextMenu() {
   let color = playerEmanationMetadata.color;
 
   // Setup the document with an emanation size input and create button
-  document.getElementById('app')!.innerHTML = `
+  const app = document.getElementById('app')!;
+  setupTheme(app, await OBR.theme.getTheme());
+  console.log();
+  app.innerHTML = `
     ${emanationRow(null, color, size, multiplier, unit)}
     ${extantEmanations.join('')}
     <button class="action" id="remove-emanations" ${extantEmanations.length === 0 ? 'disabled' : ''}>- Remove All</button>
@@ -138,6 +141,12 @@ async function renderContextMenu() {
   }));;
 
   document.getElementById('remove-emanations')?.addEventListener('click', () => removeAllEmanations());
+}
+
+function setupTheme(app: HTMLElement, theme: Theme) {
+  app.style.setProperty('--text-primary', theme.text.primary);
+  app.style.setProperty('--text-secondary', theme.text.secondary);
+  app.style.setProperty('--primary-main', theme.primary.main);
 }
 
 async function removeAllEmanations() {
