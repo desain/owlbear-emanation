@@ -2,8 +2,9 @@ import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
 import icon from "../assets/emanations.svg";
-import { rebuildEmanations, updateSceneMetadata } from "./helpers";
-import { PLUGIN_ID } from "./types";
+import { MENU_ID } from "./constants";
+import { rebuildEmanations } from "./rebuildEmanations";
+import { updateSceneMetadata } from "./SceneMetadata";
 
 /**
  * This file represents the background script run when the plugin loads.
@@ -26,7 +27,7 @@ export default async function installEmanations() {
 
 function createContextMenu() {
   OBR.contextMenu.create({
-    id: `${PLUGIN_ID}/menu`,
+    id: MENU_ID,
     icons: [
       {
         icon,
