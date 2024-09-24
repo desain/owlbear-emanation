@@ -5,19 +5,23 @@ import { getSceneMetadata, updateSceneMetadata } from "./SceneMetadata";
 import applyTheme from "./applyTheme";
 
 OBR.onReady(async () => {
-    const ready = await OBR.scene.isReady();
-    if (ready) {
-        await setupSettings();
-    } else {
-        OBR.scene.onReadyChange(async (ready) => {
-            if (ready) {
-                await setupSettings();
-            }
-        });
+    let uninstallAll: (() => void) | null = null;
+    if (await OBR.scene.isReady()) {
+        uninstallAll = await setupSettings();
     }
+    OBR.scene.onReadyChange(async (ready) => {
+        if (ready) {
+            uninstallAll = await setupSettings();
+        } else {
+            if (uninstallAll) {
+                uninstallAll();
+            }
+        }
+    });
 });
 
 async function setupSettings() {
+    console.log('rendering');
     const sceneEmanationMetadata = await getSceneMetadata();
     const playerMetadata = await getPlayerMetadata();
     const gridModeChecked = sceneEmanationMetadata.gridMode ? 'checked' : '';
@@ -28,7 +32,7 @@ async function setupSettings() {
         : '';
 
     const app = document.getElementById('app')!!;
-    await applyTheme(app);
+    const uninstallThemeHandler = await applyTheme(app);
     app.innerHTML = `
         ${gmControls}
         <label for="default-opacity">Default Opacity</label>: <span id="opacity-value">${startingOpacity}</span>
@@ -47,4 +51,6 @@ async function setupSettings() {
         opacityValueDisplay.textContent = opacity.toString();
         await updatePlayerMetadata({ defaultOpacity: opacity });
     });
+
+    return uninstallThemeHandler;
 }
