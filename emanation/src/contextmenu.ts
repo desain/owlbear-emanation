@@ -47,6 +47,16 @@ function emanationRow(id: string | null, color: string, size: number, multiplier
     </div>`;
 }
 
+function parseSizeOrWarn(newSize: string): number | null {
+  const parsed = parseFloat(newSize);
+  if (Number.isSafeInteger(parsed) && parsed > 0) {
+    return parsed;
+  } else {
+    OBR.notification.show('Emanation size must be greater than 0', 'WARNING');
+    return null;
+  }
+}
+
 async function renderContextMenu() {
   const [
     playerEmanationMetadata,
@@ -84,7 +94,7 @@ async function renderContextMenu() {
   }));
 
   document.querySelectorAll<HTMLInputElement>(`.${NEW_EMANATION}.${EMANATION_SIZE}`).forEach((sizeInput) => sizeInput.addEventListener('change', async () => {
-    size = parseFloat(sizeInput.value);
+    size = parseSizeOrWarn(sizeInput.value) ?? size;
     await updatePlayerMetadata({ size });
   }));
 
@@ -100,8 +110,11 @@ async function renderContextMenu() {
 
   document.querySelectorAll<HTMLInputElement>(`.${EXTANT_EMANATION}.${EMANATION_SIZE}`).forEach((sizeInput) => sizeInput.addEventListener('change', async () => {
     const id = sizeInput.dataset.id!!;
-    const size = parseFloat(sizeInput.value);
-    await OBR.scene.items.updateItems<Emanation>([id], (emanations) => emanations.forEach((emanation) => {
+    const size = parseSizeOrWarn(sizeInput.value);
+    if (size === null) {
+      return;
+    }
+    await OBR.scene.items.updateItems([id], (emanations) => emanations.forEach((emanation: Emanation) => {
       emanation.metadata[METADATA_KEY].size = size;
     }));
     await rebuildEmanations(({ id: otherId }) => otherId === id);
@@ -113,7 +126,6 @@ async function renderContextMenu() {
       const newPlayerMetadata: PlayerMetadata = await updatePlayerMetadata({ size, color });
       await createEmanations(newPlayerMetadata);
     } else {
-      await OBR.notification.show('Emanation size must be greater than 0', 'WARNING');
     }
   }));
 

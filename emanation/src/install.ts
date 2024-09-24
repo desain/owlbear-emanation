@@ -14,19 +14,14 @@ export default async function installEmanations() {
   console.log("Emanations version 0.0.6");
   createContextMenu();
 
+  const uninstallers: (() => void)[] = [];
   // Only install global listeners that can change items for one instance
   if (await OBR.player.getRole() === 'GM') {
     const emanationReplaceLock = new AwaitLock();
-    const uninstallItemHandler = installItemHandler(emanationReplaceLock);
-    const uninstallGridHandler = installGridHandler(emanationReplaceLock);
-    const uninstallReadyHandler = OBR.scene.onReadyChange((ready) => {
-      if (!ready) {
-        uninstallItemHandler();
-        uninstallGridHandler();
-        uninstallReadyHandler();
-      }
-    });
+    uninstallers.push(installItemHandler(emanationReplaceLock));
+    uninstallers.push(installGridHandler(emanationReplaceLock));
   }
+  return () => uninstallers.forEach((uninstaller) => uninstaller());
 }
 
 function createContextMenu() {
