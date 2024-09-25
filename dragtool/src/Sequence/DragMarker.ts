@@ -1,6 +1,6 @@
 import { Item, KeyFilter, Layer, Shape, Vector2, buildShape, isShape } from "@owlbear-rodeo/sdk";
 import { MARKER_STROKE_WIDTH_DPI_SCALING, METADATA_KEY, ZIndex } from "../constants";
-import { assertHasMetadata } from "../metadataUtils";
+import { assertHasMetadata } from "./metadataUtils";
 import { SequenceTarget, createSequenceTargetMetadata, isSequenceTarget } from "./SequenceTarget";
 
 type DragMarker = Shape & SequenceTarget;

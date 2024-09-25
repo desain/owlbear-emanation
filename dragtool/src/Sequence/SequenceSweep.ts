@@ -1,6 +1,6 @@
 import { isPath, Item, Path } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
-import { ItemWithMetadata } from "../metadataUtils";
+import { ItemWithMetadata } from "./metadataUtils";
 import { isSequenceItem, SequenceItemMetadata } from "./SequenceItem";
 
 export type SequenceSweepMetadata = SequenceItemMetadata & {

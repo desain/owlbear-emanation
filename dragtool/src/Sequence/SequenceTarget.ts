@@ -1,6 +1,6 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
-import { ItemWithMetadata } from "../metadataUtils";
+import { ItemWithMetadata } from "./metadataUtils";
 
 export type SequenceTargetMetadata = {
     type: 'SEQUENCE_TARGET',

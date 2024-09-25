@@ -100,7 +100,7 @@ export default class DragState {
         distanceScaling: number,
         privateMode: boolean,
         aboveCharacters: boolean,
-    ): Promise<DragState | null> {
+    ): Promise<DragState> {
         const [measurement, gridType, dpi, playerColor] = await Promise.all([
             OBR.scene.grid.getMeasurement(),
             OBR.scene.grid.getType(),
