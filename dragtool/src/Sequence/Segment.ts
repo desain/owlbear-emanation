@@ -1,6 +1,6 @@
 import { buildRuler, isRuler, Item, Layer, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY, ZIndex } from "../constants";
-import { ItemWithMetadata } from "../metadataUtils";
+import { ItemWithMetadata } from "./metadataUtils";
 import { buildSequenceItem, isSequenceItem, SequenceItemMetadata } from "./SequenceItem";
 
 

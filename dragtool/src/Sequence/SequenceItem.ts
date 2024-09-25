@@ -1,7 +1,7 @@
 import { Item, Layer } from "@owlbear-rodeo/sdk";
 import { GenericItemBuilder } from "@owlbear-rodeo/sdk/lib/builders/GenericItemBuilder";
 import { METADATA_KEY } from "../constants";
-import { ItemWithMetadata } from "../metadataUtils";
+import { ItemWithMetadata } from "./metadataUtils";
 
 export type SequenceItemMetadata = {
     type: 'SEQUENCE_ITEM',
@@ -21,28 +21,31 @@ export function isSequenceItem(item: Item): item is SequenceItem {
         && metadata.type === 'SEQUENCE_ITEM';
 }
 
+type Builds<Result extends Item> = { build(): Result };
+type BuildResult<Builder extends Builds<Item>> = ReturnType<Builder['build']>;
+
 export function buildSequenceItem<
     MetadataType extends SequenceItemMetadata,
-    Builder extends GenericItemBuilder<Builder> & { build(): Item; }
+    Builder extends GenericItemBuilder<Builder> & Builds<Item>,
 >(
     target: Item,
     layer: Layer,
     zIndex: number | null,
     metadata: Omit<MetadataType, keyof SequenceItemMetadata>,
     builder: Builder
-): ReturnType<Builder['build']> & { metadata: { [METADATA_KEY]: MetadataType; }; } {
+): ItemWithMetadata<BuildResult<Builder>, MetadataType> {
     const builder2 = builder
-        .disableHit(true)
-        .disableAutoZIndex(zIndex !== null)
-        .zIndex(zIndex!)
-        .locked(true)
+        .attachedTo(target.id)
         .visible(target.visible)
         .layer(layer)
-        .attachedTo(target.id)
+        .disableAutoZIndex(zIndex !== null)
+        .zIndex(zIndex ?? 0)
+        .disableHit(true)
+        .locked(true)
         .disableAttachmentBehavior(['LOCKED', 'POSITION', 'ROTATION', 'SCALE', 'COPY'])
         .metadata({
             // assuming this is all that's needed to create a MetadataType - don't manually pass in a type param more restrictive
             [METADATA_KEY]: { ...metadata, ...createSequenceItemMetadata() }
-        }) as Builder & { build(): ReturnType<Builder['build']> & { metadata: { [METADATA_KEY]: MetadataType; }; }; };
-    return builder2.build() as ReturnType<(typeof builder2)['build']>;
+        }) as Builder & Builds<ItemWithMetadata<BuildResult<Builder>, MetadataType>>;
+    return builder2.build() as BuildResult<typeof builder2>;
 }
