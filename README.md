@@ -9,12 +9,14 @@ Add emanations to any character.
 - Emanations will automatically resize after tokens are scaled.
 - Manage any number of emanations with any color.
 
+![Example](./docs/menu.png)
+
 ### Dragtool
-- Drag items around (mobile friendly)
+- Drag items around (mobile friendly) to create 'drag sequences' of multiple waypoints, which keep track of how far the item has moved in total.
 - Sequences for an item delete if another player moves them
 - Sequences for an item delete if their player leaves
+- Set the scaling of movement to 2x to simulate 5e difficult terrain, or 0x to simulate teleportation.
 - Emanations become sweeps
-- Undo and restart sequences
 
 Font: Acme
 
@@ -23,6 +25,10 @@ Font: Acme
 The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.
 
 Eventually on [store page](https://extensions.owlbear.rodeo/owlbear-emanation).
+
+## Development
+
+After checkout, run `yarn dlx @yarnpkg/sdks vscode` to set up development in VS Code.
 
 ## How it Works
 
@@ -49,16 +55,14 @@ To make a production build run:
 `yarn build`
 
 ## To do
-- Light and dark mode
 - Update emanations when image alignment changes
 - Debounce rebuilds
 - Refocus size after rebuild
-- Clockwise polygons
 
 ### Grabtool
 - Key to drop a point at current spot?
 - Allow measure on non token
-- check only visible when there are segments
+- Make 'clear' action only show up when there are active segments
 
 ## License
 

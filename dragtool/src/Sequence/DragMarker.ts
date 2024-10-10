@@ -1,7 +1,7 @@
-import { Item, KeyFilter, Layer, Shape, Vector2, buildShape, isShape } from "@owlbear-rodeo/sdk";
+import { Item, KeyFilter, Shape, Vector2, buildShape, isShape } from "@owlbear-rodeo/sdk";
 import { MARKER_STROKE_WIDTH_DPI_SCALING, METADATA_KEY, ZIndex } from "../constants";
 import { assertHasMetadata } from "./metadataUtils";
-import { SequenceTarget, createSequenceTargetMetadata, isSequenceTarget } from "./SequenceTarget";
+import { SequenceTarget, createDraggingSequenceTargetMetadata, isSequenceTarget } from "./SequenceTarget";
 
 type DragMarker = Shape & SequenceTarget;
 
@@ -9,7 +9,6 @@ export function createDragMarker(
     position: Vector2,
     dpi: number,
     playerColor: string,
-    layer: Layer,
     privateMode: boolean,
 ): DragMarker {
     const shape = buildShape()
@@ -27,8 +26,8 @@ export function createDragMarker(
         .strokeDash(privateMode ? [30, 10] : [])
         .strokeWidth(dpi * MARKER_STROKE_WIDTH_DPI_SCALING)
         .locked(true)
-        .layer(layer)
-        .metadata({ [METADATA_KEY]: createSequenceTargetMetadata() })
+        .layer('CONTROL')
+        .metadata({ [METADATA_KEY]: createDraggingSequenceTargetMetadata() })
         .build();
     return assertHasMetadata(shape);
 }

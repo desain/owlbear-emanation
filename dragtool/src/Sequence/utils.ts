@@ -1,21 +1,21 @@
-import OBR, { buildPath, isRuler, Item, Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { buildPath, Item, Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import { Emanation, isEmanation, } from "../../../emanation/src/Emanation";
 import { METADATA_KEY } from "../constants";
 import { ItemApi, withBothItemApis } from "../ItemApi";
 import { isDragMarker } from "./DragMarker";
 import { isSegment, Segment } from "./Segment";
 import { buildSequenceItem, isSequenceItem, SequenceItem } from "./SequenceItem";
-import { SequenceSweep } from "./SequenceSweep";
 import { isSequenceTarget } from "./SequenceTarget";
+import { Sweep } from "./Sweep";
 
 export async function getEmanations(id: string, api: ItemApi): Promise<Emanation[]> {
     return (await api.getItemAttachments([id])).filter(isEmanation);
 }
 
 export function itemMovedOutsideItsSequence(item: Item, items: Item[]): boolean {
-    const rulers = items.filter(belongsToSequenceForTarget(item.id))
-        .filter(isRuler) as Segment[]; // Typescript can't figure out that isRuler guarantees ruler here for some reason
-    const previousPositions: Vector2[] = rulers.flatMap((ruler) => [ruler.startPosition, ruler.endPosition]);
+    const segments = items.filter(belongsToSequenceForTarget(item.id))
+        .filter(isSegment) as Segment[]; // Typescript can't figure out that isSegment guarantees ruler here for some reason
+    const previousPositions: Vector2[] = segments.flatMap((segment) => [segment.startPosition, segment.endPosition]);
     for (const position of previousPositions) {
         if (Math2.compare(item.position, position, 0.01)) {
             return false;
@@ -61,12 +61,12 @@ export async function getSequenceLength(targetId: string, api: ItemApi) {
     )).reduce((a, b) => a + b, 0);
 }
 
-export async function getOrCreateSweep(target: Item, emanation: Emanation, existingSweeps: SequenceSweep[]): Promise<SequenceSweep> {
+export async function getOrCreateSweep(target: Item, emanation: Emanation, existingSweeps: Sweep[]): Promise<Sweep> {
     const existingSweep = existingSweeps.find((sweep) => sweep.metadata[METADATA_KEY].emanationId === emanation.id);
     if (existingSweep) {
         return existingSweep;
     } else {
-        const sweep: SequenceSweep = buildSequenceItem(target, 'DRAWING', null, { emanationId: emanation.id }, buildPath()
+        const sweep: Sweep = buildSequenceItem(target, 'DRAWING', null, { emanationId: emanation.id }, buildPath()
             .position({ x: 0, y: 0 })
             .commands([])
             .strokeWidth(emanation.style.strokeWidth)
