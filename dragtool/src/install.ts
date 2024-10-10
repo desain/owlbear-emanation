@@ -49,6 +49,10 @@ async function deleteSequencesFromVanishedPlayers(players: Player[]) {
     });
 }
 
+function isStationarySequenceTarget(item: Item) {
+    return isSequenceTarget(item) && !item.metadata[METADATA_KEY].activelyDragging;
+}
+
 /**
  * Delete a sequence when an item moves sout of it.
  * @param items Current set of items
@@ -56,10 +60,10 @@ async function deleteSequencesFromVanishedPlayers(players: Player[]) {
  */
 async function deleteInvalidatedSequences(items: Item[], api: ItemApi) {
     // Remove sequence items whose target was moved
-    items.filter(isSequenceTarget).forEach((item) => {
-        if (itemMovedOutsideItsSequence(item, items)) {
-            // console.log('item moved out of its sequence', item.id, 'items are', items);
+    for (const item of items) {
+        if (isStationarySequenceTarget(item) && itemMovedOutsideItsSequence(item, items)) {
+            console.log('item moved out of its sequence', item.id, 'items are', items);
             deleteSequence(item, api)
         }
-    });
+    }
 }

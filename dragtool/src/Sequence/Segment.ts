@@ -1,4 +1,4 @@
-import { buildRuler, isRuler, Item, Layer, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
+import { buildRuler, GridScale, isRuler, Item, Layer, Ruler, Vector2 } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY, ZIndex } from "../constants";
 import { ItemWithMetadata } from "./metadataUtils";
 import { buildSequenceItem, isSequenceItem, SequenceItemMetadata } from "./SequenceItem";
@@ -21,4 +21,9 @@ export function createSegment(target: Item, end: Vector2, layer: Layer, scalingF
         .startPosition(target.position)
         .endPosition(end)
         .variant('DASHED'));
+}
+
+export function getSegmentText(numGridUnits: number, scale: GridScale, scalingFactor: number) {
+    const xFactorText = scalingFactor === 1 ? '' : `x${scalingFactor}`;
+    return `${Math.round(numGridUnits * scale.parsed.multiplier)}${xFactorText}${scale.parsed.unit}`;
 }
