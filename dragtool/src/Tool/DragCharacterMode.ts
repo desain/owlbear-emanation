@@ -16,7 +16,7 @@ export default class DragCharacterMode extends BaseDragMode implements ToolMode 
             icon: walk,
             label: 'Move Character',
             filter: {
-                activeTools: [TOOL_ID],
+                activeTools: [TOOL_ID, /*'rodeo.owlbear.tool/move'*/],
             },
         },
     ];

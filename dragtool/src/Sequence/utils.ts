@@ -1,6 +1,6 @@
 import OBR, { buildPath, Item, Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import { Emanation, isEmanation, } from "../../../emanation/src/Emanation";
-import { METADATA_KEY } from "../constants";
+import { METADATA_KEY, VECTOR2_COMPARE_EPSILON } from "../constants";
 import { ItemApi, withBothItemApis } from "../ItemApi";
 import { isDragMarker } from "./DragMarker";
 import { isSegment, Segment } from "./Segment";
@@ -17,7 +17,7 @@ export function itemMovedOutsideItsSequence(item: Item, items: Item[]): boolean 
         .filter(isSegment) as Segment[]; // Typescript can't figure out that isSegment guarantees ruler here for some reason
     const previousPositions: Vector2[] = segments.flatMap((segment) => [segment.startPosition, segment.endPosition]);
     for (const position of previousPositions) {
-        if (Math2.compare(item.position, position, 0.01)) {
+        if (Math2.compare(item.position, position, VECTOR2_COMPARE_EPSILON)) {
             return false;
         }
     }

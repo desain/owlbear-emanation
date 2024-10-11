@@ -1,8 +1,8 @@
-import OBR, { Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import OBR, { Math2 } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
 import icon from "../assets/emanations.svg";
-import { MENU_ID } from "./constants";
+import { MENU_ID, VECTOR2_COMPARE_EPSILON } from "./constants";
 import rebuildEmanations from "./rebuildEmanations";
 import { updateSceneMetadata } from "./SceneMetadata";
 
@@ -12,7 +12,7 @@ import { updateSceneMetadata } from "./SceneMetadata";
  */
 
 export default async function installEmanations() {
-  console.log("Emanations version 0.0.7");
+  console.log("Emanations version 0.0.8");
   createContextMenu();
 
   const uninstallers: (() => void)[] = [];
@@ -48,16 +48,12 @@ function createContextMenu() {
   });
 }
 
-function vectorsAreCloseEnough(a: Vector2, b: Vector2) {
-  return Math2.compare(a, b, 0.01);
-}
-
 function installItemHandler(emanationReplaceLock: AwaitLock) {
   return OBR.scene.items.onChange(async () => {
     await emanationReplaceLock.acquireAsync();
     try {
       await rebuildEmanations(({ metadata, sourceItem }) => {
-        return !vectorsAreCloseEnough(sourceItem.scale, metadata.sourceScale)
+        return !Math2.compare(sourceItem.scale, metadata.sourceScale, VECTOR2_COMPARE_EPSILON)
       });
     } finally {
       emanationReplaceLock.release();

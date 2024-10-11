@@ -11,3 +11,5 @@ export enum ZIndex {
 }
 
 export const MARKER_STROKE_WIDTH_DPI_SCALING = 1 / 20;
+
+export const VECTOR2_COMPARE_EPSILON = 0.01;
