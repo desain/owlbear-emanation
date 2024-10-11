@@ -12,7 +12,7 @@ export function createDraggingSequenceTargetMetadata(): SequenceTargetMetadata {
     return { type: 'SEQUENCE_TARGET', playerId: OBR.player.id, activelyDragging: true };
 }
 
-export type SequenceTarget = ItemWithMetadata<Item, SequenceTargetMetadata>;
+export type SequenceTarget = ItemWithMetadata<Item, typeof METADATA_KEY, SequenceTargetMetadata>;
 
 export function isSequenceTarget(item: Item): item is SequenceTarget {
     const metadata = item.metadata[METADATA_KEY];

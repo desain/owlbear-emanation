@@ -12,7 +12,7 @@ export type SweepMetadata = SequenceItemMetadata & {
     emanationId: string;
 }
 
-export type Sweep = ItemWithMetadata<Path, SweepMetadata>;
+export type Sweep = ItemWithMetadata<Path, typeof METADATA_KEY, SweepMetadata>;
 
 export function isSweep(item: Item): item is Sweep {
     return isPath(item) && isSequenceItem(item)

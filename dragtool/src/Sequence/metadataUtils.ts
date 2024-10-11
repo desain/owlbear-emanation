@@ -1,15 +1,14 @@
 import { Item, Metadata } from "@owlbear-rodeo/sdk";
-import { METADATA_KEY } from "../constants";
 
 /**
- * An item with metadata of a specific type.
+ * An item of a specific type with metadata of a specific type.
  */
-export type ItemWithMetadata<ItemType extends Item, MetadataType> = ItemType & {
+export type ItemWithMetadata<ItemType extends Item, MetadataKey extends string, MetadataType> = ItemType & {
     metadata: Metadata & {
-        [METADATA_KEY]: MetadataType,
+        [Property in MetadataKey]: MetadataType;
     },
 };
 
-export function assertHasMetadata<ItemType extends Item, MetadataType>(item: ItemType): ItemWithMetadata<ItemType, MetadataType> {
-    return item as ItemWithMetadata<ItemType, MetadataType>;
+export function assertHasMetadata<ItemType extends Item, MetadataKey extends string, MetadataType>(item: ItemType): ItemWithMetadata<ItemType, MetadataKey, MetadataType> {
+    return item as ItemWithMetadata<ItemType, MetadataKey, MetadataType>;
 }

@@ -11,7 +11,7 @@ function createSequenceItemMetadata(): SequenceItemMetadata {
     return { type: 'SEQUENCE_ITEM' };
 }
 
-export type SequenceItem = ItemWithMetadata<Item, SequenceItemMetadata>;
+export type SequenceItem = ItemWithMetadata<Item, typeof METADATA_KEY, SequenceItemMetadata>;
 
 export function isSequenceItem(item: Item): item is SequenceItem {
     const metadata = item.metadata[METADATA_KEY];
@@ -33,7 +33,7 @@ export function buildSequenceItem<
     zIndex: number | null,
     metadata: Omit<MetadataType, keyof SequenceItemMetadata>,
     builder: Builder
-): ItemWithMetadata<BuildResult<Builder>, MetadataType> {
+): ItemWithMetadata<BuildResult<Builder>, typeof METADATA_KEY, MetadataType> {
     const builder2 = builder
         .attachedTo(target.id)
         .visible(target.visible)
@@ -46,6 +46,6 @@ export function buildSequenceItem<
         .metadata({
             // assuming this is all that's needed to create a MetadataType - don't manually pass in a type param more restrictive
             [METADATA_KEY]: { ...metadata, ...createSequenceItemMetadata() }
-        }) as Builder & Builds<ItemWithMetadata<BuildResult<Builder>, MetadataType>>;
+        }) as Builder & Builds<ItemWithMetadata<BuildResult<Builder>, typeof METADATA_KEY, MetadataType>>;
     return builder2.build() as BuildResult<typeof builder2>;
 }
