@@ -8,7 +8,7 @@ type SegmentMetadata = SequenceItemMetadata & {
     scalingFactor: number,
 };
 
-export type Segment = ItemWithMetadata<Ruler, SegmentMetadata>;
+export type Segment = ItemWithMetadata<Ruler, typeof METADATA_KEY, SegmentMetadata>;
 
 export function isSegment(item: Item): item is Segment {
     return isRuler(item) && isSequenceItem(item)
