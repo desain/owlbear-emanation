@@ -7,7 +7,7 @@ icon: https://github.com/desain/owlbear-emanation/blob/main/public/logo.png
 tags:
   - tool
   - combat
-manifest: http://localhost:5173/manifest.json
+manifest: https://owlbear-emanation.pages.dev/manifest.json
 learn-more: https://github.com/desain/owlbear-emanation
 ---
 
