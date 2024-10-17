@@ -1,24 +1,17 @@
 # Emanations
 
-Add emanations to any character.
+Add emanations / auras to any character token.
 
 ![Interface](./docs/header.jpg)
 
 ## Features
+- Adds a context menu item to character and mount token images.
 - Emanations will display the correct shape for the current grid type and grid measurement type.
 - Emanations will automatically resize after tokens are scaled.
 - Manage any number of emanations with any color.
 
+Example:
 ![Example](./docs/menu.png)
-
-### Dragtool
-- Drag items around (mobile friendly) to create 'drag sequences' of multiple waypoints, which keep track of how far the item has moved in total.
-- Sequences for an item delete if another player moves them
-- Sequences for an item delete if their player leaves
-- Set the scaling of movement to 2x to simulate 5e difficult terrain, or 0x to simulate teleportation.
-- Emanations become sweeps
-
-Font: Acme
 
 ## Installing
 
@@ -58,11 +51,6 @@ To make a production build run:
 - Update emanations when image alignment changes
 - Debounce rebuilds
 - Refocus size after rebuild
-
-### Grabtool
-- Key to drop a point at current spot?
-- Allow measure on non token
-- Make 'clear' action only show up when there are active segments
 
 ## License
 

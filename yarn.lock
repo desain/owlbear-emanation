@@ -1031,7 +1031,7 @@ __metadata:
     "@owlbear-rodeo/sdk": "npm:^2.4.0"
     await-lock: "npm:^2.2.0"
     typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.4"
+    vite: "npm:^5.4.8"
   languageName: unknown
   linkType: soft
 
@@ -1364,9 +1364,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.4":
-  version: 5.4.4
-  resolution: "vite@npm:5.4.4"
+"vite@npm:^5.4.8":
+  version: 5.4.9
+  resolution: "vite@npm:5.4.9"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -1403,7 +1403,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/2752e7dd5584ea7cc057742e8f5cbf2f2bd3a2bceb8794fbd3d52f1e88d362b5ac7f1c70be7a3d01b3d768320c8a8ad0df287fd72f253bf040423c36c67a3e89
+  checksum: 10c0/e9c59f2c639047e37c79bbbb151c7a55a3dc27932957cf4cf0447ee0bdcc1ddfd9b1fb3ba0465371c01ba3616d62561327855794c2d652213c3a10a32e6d369d
   languageName: node
   linkType: hard
 

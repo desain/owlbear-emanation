@@ -1,7 +1,7 @@
 {
   "name": "owlbear-emanation",
   "private": true,
-  "version": "0.0.8",
+  "version": "0.0.9",
   "type": "module",
   "license": "GPL-3.0",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "devDependencies": {
     "typescript": "^5.6.2",
-    "vite": "^5.4.4"
+    "vite": "^5.4.8"
   },
   "dependencies": {
     "@owlbear-rodeo/sdk": "^2.4.0",
