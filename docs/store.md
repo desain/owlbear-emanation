@@ -21,4 +21,4 @@ Select your character token and then click the emanations icon that appears on t
 
 **Support**
 
-If you need support for this extension you can email no one.
+If you need support for this extension, create a Github issue.
