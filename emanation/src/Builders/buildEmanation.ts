@@ -1,7 +1,7 @@
 import OBR, { buildCurve, Curve, GridMeasurement, GridType, Image, Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import { Circle, Emanation, EmanationMetadata } from "../Emanation";
-import { SceneMetadata } from "../SceneMetadata";
+import { SceneMetadata } from "../metadata/SceneMetadata";
 import { buildAlternatingPreciseOctant, buildAlternatingSquareOctant } from "./alternating";
 import buildChebyshevSquareEmanation from "./chebyshev";
 import buildEuclideanEmanation from "./euclidean";

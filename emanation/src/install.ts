@@ -1,10 +1,13 @@
-import OBR, { Math2 } from "@owlbear-rodeo/sdk";
+import OBR, { Image, Math2 } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import icon from "../assets/emanations.svg";
-import { MENU_ID, VECTOR2_COMPARE_EPSILON } from "./constants";
+import add from "../assets/add.svg";
+import edit from "../assets/edit.svg";
+import { CONTEXTMENU_CREATE_ID, CONTEXTMENU_EDIT_ID, METADATA_KEY, VECTOR2_COMPARE_EPSILON } from "./constants";
+import { createEmanations } from "./Emanation";
+import { ItemMetadata } from "./metadata/ItemMetadata";
+import { updateSceneMetadata } from "./metadata/SceneMetadata";
 import rebuildEmanations from "./rebuildEmanations";
-import { updateSceneMetadata } from "./SceneMetadata";
 
 /**
  * This file represents the background script run when the plugin loads.
@@ -12,7 +15,7 @@ import { updateSceneMetadata } from "./SceneMetadata";
  */
 
 export default async function installEmanations() {
-  console.log("Emanations version 0.0.9");
+  console.log("Emanations version 0.0.10");
   createContextMenu();
 
   const uninstallers: (() => void)[] = [];
@@ -26,16 +29,39 @@ export default async function installEmanations() {
 }
 
 function createContextMenu() {
+  const hasEmanations: keyof ItemMetadata = 'hasEmanations';
   OBR.contextMenu.create({
-    id: MENU_ID,
+    id: CONTEXTMENU_CREATE_ID,
+    shortcut: 'E',
+    icons: [{
+      icon: add,
+      label: "Add Aura/Emanation",
+      filter: {
+        every: [
+          { key: "type", value: "IMAGE" },
+          { key: "layer", value: "CHARACTER" },
+          { key: ['metadata', METADATA_KEY], value: undefined }
+        ],
+        permissions: ["UPDATE"],
+      },
+    }],
+    async onClick(context, _) {
+      await createEmanations(context.items as Image[]);
+    },
+  });
+  OBR.contextMenu.create({
+    id: CONTEXTMENU_EDIT_ID,
     icons: [
       {
-        icon,
-        label: "Emanations",
+        icon: edit,
+        label: "Edit Auras/Emanations",
         filter: {
           every: [
             { key: "type", value: "IMAGE" },
             { key: "layer", value: "CHARACTER" },
+          ],
+          some: [
+            { key: ['metadata', METADATA_KEY, hasEmanations], value: true },
           ],
           permissions: ["UPDATE"],
         },
