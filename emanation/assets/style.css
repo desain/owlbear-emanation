@@ -8,16 +8,24 @@ body {
 }
 
 #app {
-    padding-left: 10px;
-    padding-right: 10px;
-
     color: var(--text-primary);
+
+    &.context-menu {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    &.action {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
 }
 
 .emanation-row {
     display: flex;
     margin-block: 5px;
     align-items: stretch;
+    line-height: 1.75;
 
     .action {
         margin-left: auto;
@@ -38,12 +46,11 @@ input.emanation-color {
 
 .emanation-size,
 .emanation-unit,
-.action {
+.btn {
     border-color: color(from var(--text-primary) srgb r g b / 0.23);
     border-width: 1px;
     border-style: solid;
 }
-
 
 .emanation-size {
     background-color: transparent;
@@ -79,7 +86,7 @@ input.emanation-color {
     color: var(--text-secondary);
 }
 
-.action {
+.btn {
     border-width: 1px;
     border-style: solid;
     background: transparent;
@@ -88,8 +95,20 @@ input.emanation-color {
     text-transform: uppercase;
     font-weight: 600;
     line-height: 1.75;
-    padding: 5px 15px;
+
+    padding-inline: 15px;
+    padding-block: 5px;
+
     min-width: 100px;
+
+    &.remove {
+        border-color: transparent;
+        color: rgba(255, 50, 50, 0.9);
+
+        &:hover {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+    }
 
     &:hover {
         background-color: color(from var(--text-primary) srgb r g b / 0.08);
@@ -104,6 +123,8 @@ input.emanation-color {
     }
 }
 
-.no-edit-warning {
+.items-emanation-header {
+    font-variant-caps: all-small-caps;
     color: var(--text-disabled);
+    margin-block: 5px;
 }

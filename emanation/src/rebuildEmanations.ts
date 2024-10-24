@@ -2,7 +2,7 @@ import OBR, { isImage, Item } from "@owlbear-rodeo/sdk";
 import buildEmanation from "./Builders/buildEmanation";
 import { METADATA_KEY } from "./constants";
 import { EmanationMetadata, isEmanation } from "./Emanation";
-import { getSceneMetadata } from "./SceneMetadata";
+import { getSceneMetadata } from "./metadata/SceneMetadata";
 
 type Predicate = (_: { metadata: EmanationMetadata, sourceItem: Item, id: string }) => boolean;
 
