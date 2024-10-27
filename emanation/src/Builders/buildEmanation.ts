@@ -128,6 +128,9 @@ export default function buildEmanation(
 
   const metadata: EmanationMetadata = { sourceScale: item.scale, size };
   emanation.metadata = { [METADATA_KEY]: metadata };
-  const returnValue = emanation as typeof emanation & { metadata: { [METADATA_KEY]: EmanationMetadata } }; // typescript can't figure out this key is set now
+  const returnValue = emanation as typeof emanation & {
+    attachedTo: string,
+    metadata: { [METADATA_KEY]: EmanationMetadata },
+  }; // typescript can't figure out these keys are set now
   return returnValue;
 }
