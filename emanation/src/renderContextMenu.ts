@@ -5,6 +5,7 @@ import { createEmanations, Emanation, isEmanation } from "./Emanation";
 import installTheme from "./installTheme";
 import rebuildEmanations from "./rebuildEmanations";
 import { createColorInput, installColorChangeHandler } from "./ui/colorInput";
+import { createControlRow } from './ui/controlRow';
 import { createNewEmanationButton, installNewEmanationHandler } from "./ui/newEmanationButton";
 import { createOpacityInput, installOpacityChangeHandler } from "./ui/opacityInput";
 import { createRemoveAllButton, installRemoveAllHandler } from "./ui/removeAllButton";
@@ -41,12 +42,12 @@ function getExtantEmanationHtml(items: Item[], scale: GridScale, selection: stri
         ...onlyOneSelection ? [] : [`<h5 class="items-emanation-header">${name}</h5>`],
         ...emanationsByAttachedTo[id]
           .sort(compareEmanationSize)
-          .map((emanation) => emanationRow(
-            emanation.id,
-            emanation.style.strokeColor,
-            emanation.metadata[METADATA_KEY].size,
-            emanation.style.fillOpacity,
-            scale))
+          .map((emanation) => createControlRow(
+            createColorInput(emanation.id, emanation.style.strokeColor),
+            createSizeInput(emanation.id, emanation.metadata[METADATA_KEY].size, scale),
+            createRemoveEmanationButton(emanation.id),
+          ) + createOpacityInput(emanation.id, emanation.style.fillOpacity)
+          )
       ]
     );
 }
@@ -57,16 +58,6 @@ function getExtantEmanationHtml(items: Item[], scale: GridScale, selection: stri
  */
 
 OBR.onReady(renderContextMenu);
-
-function emanationRow(id: string, color: string, size: number, opacity: number, scale: GridScale) {
-  return `
-    <div class="emanation-row">
-      ${createColorInput(id, color)}
-      ${createSizeInput(id, size, scale)}
-      ${createRemoveEmanationButton(id)}
-    </div>
-    ${createOpacityInput(id, opacity)}`;
-}
 
 async function renderContextMenu() {
   const [
@@ -84,12 +75,12 @@ async function renderContextMenu() {
   // Setup the document with an emanation size input and create button
   const app = document.getElementById('app')!;
   await installTheme(app, false);
-  app.innerHTML = `
-    ${extantEmanations.join('')}
-    <div class="emanation-row">
-      ${createNewEmanationButton()}
-      ${createRemoveAllButton(extantEmanations.length === 0)}
-    </div>`;
+  app.innerHTML =
+    extantEmanations.join('')
+    + createControlRow(
+      createNewEmanationButton(),
+      createRemoveAllButton(extantEmanations.length === 0),
+    );
 
   installColorChangeHandler(async (color, id) => {
     await OBR.scene.items.updateItems([id!!], (emanations) => emanations.forEach((emanation: Emanation) => {
@@ -136,7 +127,7 @@ async function removeEmanation(id: string) {
 
   await OBR.scene.items.deleteItems([id]);
   if (otherEmanations.length === 0) {
-    await markAsNoEmanations([attachedTo]);
+    await removeItemMetadata([attachedTo]);
   }
 
   await renderContextMenu();
@@ -153,12 +144,12 @@ async function removeAllEmanations() {
 
   if (emanationsToDelete.length > 0) {
     await OBR.scene.items.deleteItems(emanationsToDelete.map((emanation) => emanation.id));
-    await markAsNoEmanations(selection);
+    await removeItemMetadata(selection);
     await renderContextMenu();
   }
 }
 
-async function markAsNoEmanations(ids: string[]) {
+async function removeItemMetadata(ids: string[]) {
   await OBR.scene.items.updateItems(ids, (items) => items.forEach((item) => {
     item.metadata[METADATA_KEY] = undefined;
   }));

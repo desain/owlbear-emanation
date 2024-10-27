@@ -9,7 +9,7 @@ export function createSizeInput(id: string | null, size: number, scale: GridScal
                 data-id="${id}"
                 step="${scale.parsed.multiplier}"
                 />
-             <span class="emanation-unit">${scale.parsed.unit}.</span>`
+             <span class="emanation-unit">${scale.parsed.unit}</span>`
 }
 
 export function installSizeChangeHandler(handler: (size: number, id: string | null) => void) {

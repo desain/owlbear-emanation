@@ -5,6 +5,7 @@ import installTheme from "./installTheme";
 import { getPlayerMetadata, updatePlayerMetadata } from "./metadata/PlayerMetadata";
 import { getSceneMetadata, updateSceneMetadata } from "./metadata/SceneMetadata";
 import { createColorInput, installColorChangeHandler } from "./ui/colorInput";
+import { createControlRow } from './ui/controlRow';
 import { createOpacityInput, installOpacityChangeHandler } from "./ui/opacityInput";
 import { createSizeInput, installSizeChangeHandler } from "./ui/sizeInput";
 
@@ -39,10 +40,7 @@ async function renderAction() {
 
     app.innerHTML = `
         <h4>Defaults</h4>
-        <div class="emanation-row">
-            ${createColorInput(null, playerMetadata.color)}
-            ${createSizeInput(null, playerMetadata.size, scale)}
-        </div>
+        ${createControlRow(createColorInput(null, playerMetadata.color), createSizeInput(null, playerMetadata.size, scale))}
         ${createOpacityInput(null, playerMetadata.opacity)}
         ${globalSettings}
     `;
@@ -53,17 +51,17 @@ async function renderAction() {
         await updateSceneMetadata({ gridMode });
     });
 
-    installOpacityChangeHandler(async (opacity) => {
-        await updatePlayerMetadata({ opacity });
-    })
+    installOpacityChangeHandler((opacity) =>
+        updatePlayerMetadata({ opacity })
+    )
 
-    installColorChangeHandler(async (color) => {
-        await updatePlayerMetadata({ color });
-    });
+    installColorChangeHandler((color) =>
+        updatePlayerMetadata({ color })
+    );
 
-    installSizeChangeHandler(async (size) => {
-        await updatePlayerMetadata({ size });
-    });
+    installSizeChangeHandler((size) =>
+        updatePlayerMetadata({ size })
+    );
 
     return uninstallThemeHandler;
 }
