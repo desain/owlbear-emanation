@@ -1,4 +1,6 @@
 import OBR, { GridScale, Image, Item } from "@owlbear-rodeo/sdk";
+import * as mdc from "material-components-web";
+import 'material-components-web/dist/material-components-web.min.css';
 import "../assets/style.css";
 import { METADATA_KEY } from "./constants";
 import { createEmanations, Emanation, isEmanation } from "./Emanation";
@@ -79,7 +81,7 @@ async function renderContextMenu() {
     extantEmanations.join('')
     + createControlRow(
       createNewEmanationButton(),
-      createRemoveAllButton(extantEmanations.length === 0),
+      createRemoveAllButton(),
     );
 
   installColorChangeHandler(async (color, id) => {
@@ -112,6 +114,8 @@ async function renderContextMenu() {
 
   installRemoveEmanationHandler(removeEmanation);
   installRemoveAllHandler(removeAllEmanations);
+
+  mdc.autoInit();
 }
 
 async function removeEmanation(id: string) {

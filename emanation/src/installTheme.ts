@@ -10,8 +10,14 @@ export default async function installTheme(app: HTMLElement, watch: boolean) {
 }
 
 function addThemeValues(app: HTMLElement, theme: Theme) {
-    app.style.setProperty('--text-primary', theme.text.primary);
+    // console.log(theme);
     app.style.setProperty('--text-disabled', theme.text.disabled);
-    app.style.setProperty('--text-secondary', theme.text.secondary);
-    app.style.setProperty('--primary-main', theme.primary.main);
+
+    // material
+    // https://github.com/material-components/material-components-web/blob/master/docs/theming.md
+    app.style.setProperty('--mdc-theme-primary', theme.primary.main);
+    app.style.setProperty('--mdc-theme-secondary', theme.secondary.main);
+    app.style.setProperty('--mdc-theme-background', theme.background.default);
+    app.style.setProperty('--mdc-theme-text-primary-on-background', theme.text.primary);
+    app.style.setProperty('--mdc-checkbox-unchecked-color', theme.text.primary);
 }

@@ -69,7 +69,7 @@ function createContextMenu() {
     ],
     embed: {
       url: "/emanation/contextmenu.html",
-      // height: 88,
+      height: 200,
     },
   });
 }

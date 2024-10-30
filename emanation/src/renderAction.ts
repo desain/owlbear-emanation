@@ -1,4 +1,6 @@
 import OBR from "@owlbear-rodeo/sdk";
+import * as mdc from 'material-components-web';
+import 'material-components-web/dist/material-components-web.min.css';
 import ready from "../../ready";
 import "../assets/style.css";
 import installTheme from "./installTheme";
@@ -6,6 +8,7 @@ import { getPlayerMetadata, updatePlayerMetadata } from "./metadata/PlayerMetada
 import { getSceneMetadata, updateSceneMetadata } from "./metadata/SceneMetadata";
 import { createColorInput, installColorChangeHandler } from "./ui/colorInput";
 import { createControlRow } from './ui/controlRow';
+import { createGridModeCheckbox, installGridModeChangeHandler } from './ui/gridModeCheckbox';
 import { createOpacityInput, installOpacityChangeHandler } from "./ui/opacityInput";
 import { createSizeInput, installSizeChangeHandler } from "./ui/sizeInput";
 
@@ -28,40 +31,20 @@ async function renderAction() {
         OBR.scene.grid.getScale(),
     ]);
 
-    const globalSettings = role === 'GM' ? `
-        <h4>Global Settings</h4>
-        <label for="grid-mode">Grid Mode</label>
-        <input
-            type="checkbox"
-            id="grid-mode"
-            name="grid-mode"
-            ${sceneEmanationMetadata.gridMode ? 'checked' : ''} />
-    ` : '';
-
     app.innerHTML = `
         <h4>Defaults</h4>
         ${createControlRow(createColorInput(null, playerMetadata.color), createSizeInput(null, playerMetadata.size, scale))}
         ${createOpacityInput(null, playerMetadata.opacity)}
-        ${globalSettings}
+        <h4>Global Settings</h4>
+        ${createGridModeCheckbox(role, sceneEmanationMetadata.gridMode)}
     `;
 
-    const gridModeCheckbox = <HTMLInputElement | null>document.getElementById('grid-mode');
-    gridModeCheckbox?.addEventListener('change', async () => {
-        const gridMode = gridModeCheckbox.checked;
-        await updateSceneMetadata({ gridMode });
-    });
+    installGridModeChangeHandler((gridMode) => updateSceneMetadata({ gridMode }));
+    installOpacityChangeHandler((opacity) => updatePlayerMetadata({ opacity }));
+    installColorChangeHandler((color) => updatePlayerMetadata({ color }));
+    installSizeChangeHandler((size) => updatePlayerMetadata({ size }));
 
-    installOpacityChangeHandler((opacity) =>
-        updatePlayerMetadata({ opacity })
-    )
-
-    installColorChangeHandler((color) =>
-        updatePlayerMetadata({ color })
-    );
-
-    installSizeChangeHandler((size) =>
-        updatePlayerMetadata({ size })
-    );
+    mdc.autoInit();
 
     return uninstallThemeHandler;
 }

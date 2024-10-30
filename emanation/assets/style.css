@@ -8,7 +8,7 @@ body {
 }
 
 #app {
-    color: var(--text-primary);
+    color: var(--mdc-theme-text-primary-on-background);
 
     &.context-menu {
         padding-left: 10px;
@@ -19,19 +19,27 @@ body {
         padding-left: 15px;
         padding-right: 15px;
     }
+
+    --mdc-shape-small: 16px;
+    --mdc-outlined-button-outline-color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.23);
+    --mdc-ripple-color: var(--mdc-theme-primary);
 }
 
 .control-row {
     display: flex;
+    align-items: flex-end;
     margin-block: 5px;
-    /* vertical margin */
-    line-height: 1.75;
-    /* stretch vertically */
-    align-items: stretch;
+}
 
-    .remove-emanation {
-        margin-left: auto;
-    }
+.form-control-label {
+    font-size: 0.75rem;
+    font-family: Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+    color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.7);
+
+    margin-left: 5px;
 }
 
 input.emanation-color {
@@ -40,104 +48,12 @@ input.emanation-color {
     padding: 0;
     block-size: auto;
     cursor: pointer;
+    min-height: 40px;
+    height: 30px;
+    margin-right: 10px;
 
     &:hover {
         transform: scale(1.1);
-    }
-}
-
-.emanation-size,
-.emanation-unit,
-.btn {
-    border-color: color(from var(--text-primary) srgb r g b / 0.23);
-    border-width: 1px;
-    border-style: solid;
-}
-
-.emanation-size {
-    background-color: transparent;
-    color: inherit;
-
-    max-inline-size: 3em;
-    padding-inline: 5px;
-
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 16px;
-    border-right: 0;
-
-    &:hover,
-    &:hover+.emanation-unit {
-        border-color: var(--text-primary);
-    }
-
-    /* TODO fix middle purple line (MORE DIVS) */
-    &:focus-visible,
-    &:focus-visible+.emanation-unit {
-        outline-color: var(--primary-main);
-        outline-style: solid;
-        outline-width: 2px;
-        border-color: transparent;
-    }
-}
-
-.emanation-unit {
-    display: flex;
-    align-items: center;
-    padding-inline: 5px;
-
-    border-left: 0;
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
-
-    color: var(--text-secondary);
-}
-
-.btn {
-    border-width: 1px;
-    border-style: solid;
-    background: transparent;
-    color: inherit;
-    border-radius: 16px;
-    text-transform: uppercase;
-    font-weight: 600;
-    line-height: 1.75;
-
-    padding-inline: 15px;
-    padding-block: 5px;
-
-    min-width: 100px;
-
-    /* &.remove {
-        border-color: transparent;
-        color: rgba(255, 50, 50, 0.9);
-
-        &:hover {
-            background-color: rgba(255, 0, 0, 0.1);
-        }
-    } */
-
-    &:hover {
-        background-color: color(from var(--text-primary) srgb r g b / 0.08);
-    }
-
-    &:disabled {
-        color: var(--text-disabled);
-
-        &:hover {
-            background-color: inherit;
-        }
-    }
-
-    &:first-of-type:has(+ .btn) {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-
-    /* second of 2 */
-    &:last-child:nth-child(2) {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        border-left: 0;
     }
 }
 
@@ -145,4 +61,45 @@ input.emanation-color {
     font-variant-caps: all-small-caps;
     color: var(--text-disabled);
     margin-block: 5px;
+}
+
+/* Fixing how MDC hardcodes dark colors rather than using CSS vars */
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+    border-color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.23);
+}
+
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__leading,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__notch,
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__trailing {
+    border-color: var(--mdc-theme-text-primary-on-background);
+}
+
+#app .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
+    color: var(--mdc-theme-text-primary-on-background);
+}
+
+#app .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__affix--suffix {
+    color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.6);
+}
+
+/* Changing MDC values */
+.mdc-text-field--outlined {
+    height: 40px;
+}
+
+/* Buttons */
+#new-emanation,
+#new-emanation .mdc-button__ripple {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#remove-emanations,
+#remove-emanations .mdc-button__ripple {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-width: 0;
 }
