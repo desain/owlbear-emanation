@@ -31,12 +31,15 @@ body {
     margin-block: 5px;
 }
 
+.form-control {
+    min-height: 55px;
+}
+
 .form-control-label {
+    display: block;
+    height: 15px;
+
     font-size: 0.75rem;
-    font-family: Roboto,
-        Helvetica,
-        Arial,
-        sans-serif;
     color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.7);
 
     margin-left: 5px;
@@ -48,7 +51,6 @@ input.emanation-color {
     padding: 0;
     block-size: auto;
     cursor: pointer;
-    min-height: 40px;
     height: 30px;
     margin-right: 10px;
 
@@ -102,4 +104,8 @@ input.emanation-color {
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
     border-left-width: 0;
+}
+
+#remove-emanations {
+    --mdc-theme-primary: rgb(200, 0, 0);
 }
