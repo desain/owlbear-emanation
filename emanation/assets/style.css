@@ -51,7 +51,7 @@ input.emanation-color {
     padding: 0;
     block-size: auto;
     cursor: pointer;
-    height: 30px;
+    height: 40px;
     margin-right: 10px;
 
     &:hover {
