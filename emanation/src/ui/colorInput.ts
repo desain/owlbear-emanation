@@ -4,11 +4,14 @@ const EMANATION_COLOR = 'emanation-color';
 
 export function createColorInput(id: string | null, color: string) {
     return createFormControl('Color', `
-        <input type="color"
-            class="${EMANATION_COLOR}"
-            data-id="${id}"
-            value="${color}"
-            />
+        <label class="color-label" style="background: ${color}">
+            <input type="color"
+                class="${EMANATION_COLOR}"
+                data-id="${id}"
+                value="${color}"
+                oninput="this.parentElement.style.background = this.value"
+                />
+        </label>
     `);
 }
 
