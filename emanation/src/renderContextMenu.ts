@@ -77,12 +77,14 @@ async function renderContextMenu() {
   // Setup the document with an emanation size input and create button
   const app = document.getElementById('app')!;
   await installTheme(app, false);
-  app.innerHTML =
-    extantEmanations.join('')
-    + createControlRow(
-      createNewEmanationButton(),
-      createRemoveAllButton(),
-    );
+  app.innerHTML = `
+    ${extantEmanations.join('')}
+    <div style="display: flex">
+      ${createNewEmanationButton()}
+      ${createRemoveAllButton()}
+    </div>
+  `;
+
 
   installColorChangeHandler(async (color, id) => {
     await OBR.scene.items.updateItems([id!!], (emanations) => emanations.forEach((emanation: Emanation) => {

@@ -29,6 +29,7 @@ body {
     display: flex;
     align-items: flex-end;
     margin-block: 5px;
+    gap: 10px;
 }
 
 .form-control {
@@ -45,17 +46,25 @@ body {
     margin-left: 5px;
 }
 
-input.emanation-color {
-    background: transparent;
-    border: none;
-    padding: 0;
-    block-size: auto;
+.color-label {
+    background: none;
+    display: block;
+    box-sizing: border-box;
+    width: 30px;
+    height: 30px;
+    margin: 5px;
+
+    border-radius: 15px;
+
     cursor: pointer;
-    height: 40px;
-    margin-right: 10px;
 
     &:hover {
         transform: scale(1.1);
+    }
+
+    /* browsers don't accept styling this element very well, so just hide it and style the label */
+    &>input[type=color] {
+        display: none;
     }
 }
 
