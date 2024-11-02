@@ -79,7 +79,7 @@ async function renderContextMenu() {
   await installTheme(app, false);
   app.innerHTML = `
     ${extantEmanations.join('')}
-    <div style="display: flex">
+    <div style="display: flex; justify-content: center">
       ${createNewEmanationButton()}
       ${createRemoveAllButton()}
     </div>
