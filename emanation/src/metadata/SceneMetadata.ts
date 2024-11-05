@@ -1,6 +1,5 @@
 import OBR, { GridMeasurement, GridType } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
-import rebuildEmanations from "../rebuildEmanations";
 
 export type SceneMetadata = {
     gridMode: boolean,
@@ -21,13 +20,13 @@ export async function getSceneMetadata(): Promise<SceneMetadata> {
     };
 }
 
+export function sceneMetadataChanged(newMetadata: Partial<SceneMetadata>, oldMetadata: SceneMetadata): boolean {
+    return (Object.keys(newMetadata) as (keyof SceneMetadata)[])
+        .some((key: keyof SceneMetadata) => newMetadata[key] !== oldMetadata[key]);
+}
+
 export async function updateSceneMetadata(metadata: Partial<SceneMetadata>) {
     const currentMetadata = await getSceneMetadata();
-    const metadataChanged = (Object.keys(metadata) as (keyof SceneMetadata)[])
-        .some((key: keyof SceneMetadata) => metadata[key] !== currentMetadata[key]);
-    if (metadataChanged) {
-        const newMetadata: SceneMetadata = { ...currentMetadata, ...metadata };
-        await OBR.scene.setMetadata({ [METADATA_KEY]: newMetadata });
-        await rebuildEmanations(() => true);
-    }
+    const newMetadata: SceneMetadata = { ...currentMetadata, ...metadata };
+    await OBR.scene.setMetadata({ [METADATA_KEY]: newMetadata });
 }

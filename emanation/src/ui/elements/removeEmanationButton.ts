@@ -1,10 +1,12 @@
+import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
+
 const REMOVE_EMANATION = 'remove-emanation';
 
-export function createRemoveEmanationButton(id: string) {
+export function createRemoveEmanationButton(specifier: Specifier) {
     return `
     <button
         class="mdc-icon-button ${REMOVE_EMANATION}"
-        data-id="${id}"
+        ${specifierToHtml(specifier)}
         data-mdc-auto-init="MDCRipple"
     >
         <div class="mdc-icon-button__ripple"></div>
@@ -14,11 +16,9 @@ export function createRemoveEmanationButton(id: string) {
     `;
 }
 
-export function installRemoveEmanationHandler(handler: (id: string) => void) {
+export function installRemoveEmanationHandler(handler: (specifier: Specifier) => void) {
     document.querySelectorAll<HTMLButtonElement>(`.${REMOVE_EMANATION}`).forEach((button) => button.addEventListener('click', async () => {
-        const emanationId = button.dataset.id;
-        if (emanationId) {
-            handler(emanationId);
-        }
+        const specifier = attrsToSpecifier(button.dataset)!!;
+        handler(specifier);
     }));
 }

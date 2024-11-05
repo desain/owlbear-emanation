@@ -1,18 +1,21 @@
 import OBR from "@owlbear-rodeo/sdk";
 
-type Installer = () => Promise<() => void>;
+type Installer = () => Promise<VoidFunction>;
 export default function ready(install: Installer) {
-    let uninstall: () => void = () => { };
+    let uninstall: VoidFunction = () => { };
     OBR.onReady(async () => {
+        console.log('onready');
+        uninstall();
         if (await OBR.scene.isReady()) {
+            console.log('scene isready');
             uninstall = await install();
         }
-        const uninstallReadyChange = OBR.scene.onReadyChange(async (ready) => {
+        OBR.scene.onReadyChange(async (ready) => {
+            console.log('readychange', ready);
             uninstall();
+            uninstall = () => { };
             if (ready) {
                 uninstall = await install();
-            } else {
-                uninstallReadyChange();
             }
         });
     });

@@ -1,7 +1,7 @@
 {
   "name": "owlbear-emanation",
   "private": true,
-  "version": "0.0.10",
+  "version": "0.1.0",
   "type": "module",
   "license": "GPL-3.0",
   "scripts": {
@@ -10,12 +10,12 @@
     "preview": "vite preview"
   },
   "devDependencies": {
-    "typescript": "^5.6.2",
-    "vite": "^5.4.8"
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
   },
   "dependencies": {
-    "@owlbear-rodeo/sdk": "^2.4.0",
-    "await-lock": "^2.2.0",
+    "@owlbear-rodeo/sdk": "^3.0.0",
+    "await-lock": "^2.2.2",
     "material-components-web": "^14.0.0"
   },
   "packageManager": "yarn@4.4.1"

@@ -1,5 +1,5 @@
 import { Math2, Vector2, buildCurve } from "@owlbear-rodeo/sdk";
-import { HexGridType, getHexGridUtils } from "../HexGridUtils";
+import { HexGridType, getHexGridUtils } from "../utils/HexGridUtils";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
     return Math2.rotate(point, { x: 0, y: 0 }, degrees);

@@ -1,9 +1,10 @@
 import OBR, { GridScale } from "@owlbear-rodeo/sdk";
 import * as mdc from "material-components-web";
 import createFormControl from './formControl';
+import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
 const EMANATION_SIZE = 'emanation-size';
 
-export function createSizeInput(id: string | null, size: number, scale: GridScale) {
+export function createSizeInput(specifier: Specifier | null, size: number, scale: GridScale) {
     return createFormControl('Size', `
         <label class="mdc-text-field mdc-text-field--outlined mdc-text-field--no-label ${EMANATION_SIZE}">
             <span class="mdc-notched-outline">
@@ -12,7 +13,7 @@ export function createSizeInput(id: string | null, size: number, scale: GridScal
             </span>
             <input
                 class="mdc-text-field__input"
-                data-id="${id}"
+                ${specifierToHtml(specifier)}
                 type="number"
                 inputmode="numeric"
                 aria-label="Size"
@@ -25,13 +26,13 @@ export function createSizeInput(id: string | null, size: number, scale: GridScal
     `);
 }
 
-export function installSizeChangeHandler(handler: (size: number, id: string | null) => void) {
+export function installSizeChangeHandler(handler: (size: number, specifier: Specifier | null) => void) {
     document.querySelectorAll(`.${EMANATION_SIZE}`).forEach((elem) => {
         const field = mdc.textField.MDCTextField.attachTo(elem);
         field.listen('change', (event) => {
             const size = parseSizeOrWarn(field.value);
             if (size !== null) {
-                handler(size, (event.target as HTMLElement).dataset.id ?? null);
+                handler(size, attrsToSpecifier((event.target as HTMLElement).dataset));
             }
         });
     });
