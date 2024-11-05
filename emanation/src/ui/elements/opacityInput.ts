@@ -1,12 +1,13 @@
 import * as mdc from "material-components-web";
 import createFormControl from './formControl';
+import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
 const EMANATION_OPACITY = 'emanation-opacity';
 
-export function createOpacityInput(id: string | null, opacity: number) {
+export function createOpacityInput(specifier: Specifier | null, opacity: number) {
     return createFormControl('Opacity', `
         <div
             class="mdc-slider mdc-slider--discrete ${EMANATION_OPACITY}"
-            data-id="${id}"
+            ${specifierToHtml(specifier)}
         >
             <div class="mdc-slider__track">
                 <div class="mdc-slider__track--inactive"></div>
@@ -34,15 +35,15 @@ export function createOpacityInput(id: string | null, opacity: number) {
                     >
             </div>
         </div>
-    `);
+    `, 'flex-grow: 1');
 }
 
-export function installOpacityChangeHandler(handler: (opacity: number, id: string | null) => void) {
+export function installOpacityChangeHandler(handler: (opacity: number, specifier: Specifier | null) => void) {
     document.querySelectorAll(`.${EMANATION_OPACITY}`).forEach(elem => {
         const slider = mdc.slider.MDCSlider.attachTo(elem);
         slider.listen('MDCSlider:change', (event) => {
-            const id = (event.target as HTMLElement).dataset.id ?? null;
-            handler(slider.getValue() / 100, id);
+            const specifier = attrsToSpecifier((event.target as HTMLElement).dataset);
+            handler(slider.getValue() / 100, specifier);
         });
     });
 }

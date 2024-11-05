@@ -1,5 +1,5 @@
 import { Vector2, buildShape } from "@owlbear-rodeo/sdk";
-import { Circle } from "../Emanation";
+import { Circle } from "../types/Emanation";
 
 /**
  * Build basic shape.
@@ -8,7 +8,12 @@ import { Circle } from "../Emanation";
  * @param shapeType Type of shape.
  * @returns Shape item.
  */
-export default function buildEuclideanEmanation(position: Vector2, numUnits: number, unitSize: number, absoluteItemSize: number): Circle {
+export default function buildEuclideanEmanation(
+    position: Vector2,
+    numUnits: number,
+    unitSize: number,
+    absoluteItemSize: number,
+): Circle {
     const diameter = numUnits * unitSize * 2 + absoluteItemSize;
     return buildShape()
         .width(diameter)

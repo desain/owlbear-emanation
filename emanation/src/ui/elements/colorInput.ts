@@ -1,13 +1,14 @@
 import createFormControl from './formControl';
+import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
 
 const EMANATION_COLOR = 'emanation-color';
 
-export function createColorInput(id: string | null, color: string) {
+export function createColorInput(specifier: Specifier | null, color: string) {
     return createFormControl('Color', `
         <label class="color-label" style="background: ${color}">
             <input type="color"
                 class="${EMANATION_COLOR}"
-                data-id="${id}"
+                ${specifierToHtml(specifier)}
                 value="${color}"
                 oninput="this.parentElement.style.background = this.value"
                 />
@@ -15,8 +16,8 @@ export function createColorInput(id: string | null, color: string) {
     `);
 }
 
-export function installColorChangeHandler(handler: (color: string, id: string | null) => void) {
+export function installColorChangeHandler(handler: (color: string, specifier: Specifier | null) => void) {
     document.querySelectorAll<HTMLButtonElement>(`.${EMANATION_COLOR}`).forEach((colorButton) => colorButton.addEventListener('change', () => {
-        handler(colorButton.value, colorButton.dataset.id ?? null);
+        handler(colorButton.value, attrsToSpecifier(colorButton.dataset));
     }));
 }

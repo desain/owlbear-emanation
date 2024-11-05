@@ -1,7 +1,7 @@
 {
   "name": "Auras and Emanations",
   "description": "Add auras and emanations to any character",
-  "version": "0.0.10",
+  "version": "0.1.0",
   "manifest_version": 1,
   "author": "desain",
   "homepage_url": "https://github.com/desain/owlbear-emanation",

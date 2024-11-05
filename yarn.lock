@@ -986,15 +986,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@owlbear-rodeo/sdk@npm:^2.4.0":
-  version: 2.4.0
-  resolution: "@owlbear-rodeo/sdk@npm:2.4.0"
+"@owlbear-rodeo/sdk@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "@owlbear-rodeo/sdk@npm:3.0.0"
   dependencies:
     events: "npm:^3.3.0"
-    immer: "npm:^9.0.15"
+    immer: "npm:^10.1.1"
     js-base64: "npm:^3.7.5"
     uuid: "npm:^9.0.0"
-  checksum: 10c0/d7cbdac35e7c8a15012783096f68b06de91a16038692f01c9adec3f4d4a1f61111ff331ae42f547b4383ec55081624aff7caa0ef1709506d16e2a8904edea253
+  checksum: 10c0/38f7eb632912eea23d4ac96bb3f5676ca99a380f75dea774324474d622a657326da91f853b61639874d158ddbd9a4e2aa499e69169d9209d25c33e59d3ae4291
   languageName: node
   linkType: hard
 
@@ -1180,7 +1180,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"await-lock@npm:^2.2.0":
+"await-lock@npm:^2.2.2":
   version: 2.2.2
   resolution: "await-lock@npm:2.2.2"
   checksum: 10c0/bedf00dad44c6325a655bf3bd523ab9e1ce41023da6a8c379990c76ac1d942ac7e5301627ab84ba37917ab5247506ba429b7f6e4bf77074093f255571b9ad5ee
@@ -1539,10 +1539,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immer@npm:^9.0.15":
-  version: 9.0.16
-  resolution: "immer@npm:9.0.16"
-  checksum: 10c0/38f3b463051b0be66e786bdb313eb3fc5b801efbf83deb64729a032ebf64fda91b44e3ad1401dcc0f6a1fcabf285ca860fbc98c136731dfddf9695277108f4f3
+"immer@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "immer@npm:10.1.1"
+  checksum: 10c0/b749e10d137ccae91788f41bd57e9387f32ea6d6ea8fd7eb47b23fd7766681575efc7f86ceef7fe24c3bc9d61e38ff5d2f49c2663b2b0c056e280a4510923653
   languageName: node
   linkType: hard
 
@@ -1869,11 +1869,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "owlbear-emanation@workspace:."
   dependencies:
-    "@owlbear-rodeo/sdk": "npm:^2.4.0"
-    await-lock: "npm:^2.2.0"
+    "@owlbear-rodeo/sdk": "npm:^3.0.0"
+    await-lock: "npm:^2.2.2"
     material-components-web: "npm:^14.0.0"
-    typescript: "npm:^5.6.2"
-    vite: "npm:^5.4.8"
+    typescript: "npm:^5.6.3"
+    vite: "npm:^5.4.10"
   languageName: unknown
   linkType: soft
 
@@ -2166,23 +2166,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.6.2":
-  version: 5.6.2
-  resolution: "typescript@npm:5.6.2"
+"typescript@npm:^5.6.3":
+  version: 5.6.3
+  resolution: "typescript@npm:5.6.3"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/3ed8297a8c7c56b7fec282532503d1ac795239d06e7c4966b42d4330c6cf433a170b53bcf93a130a7f14ccc5235de5560df4f1045eb7f3550b46ebed16d3c5e5
+  checksum: 10c0/44f61d3fb15c35359bc60399cb8127c30bae554cd555b8e2b46d68fa79d680354b83320ad419ff1b81a0bdf324197b29affe6cc28988cd6a74d4ac60c94f9799
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.6.2#optional!builtin<compat/typescript>":
-  version: 5.6.2
-  resolution: "typescript@patch:typescript@npm%3A5.6.2#optional!builtin<compat/typescript>::version=5.6.2&hash=8c6c40"
+"typescript@patch:typescript@npm%3A^5.6.3#optional!builtin<compat/typescript>":
+  version: 5.6.3
+  resolution: "typescript@patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>::version=5.6.3&hash=8c6c40"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/94eb47e130d3edd964b76da85975601dcb3604b0c848a36f63ac448d0104e93819d94c8bdf6b07c00120f2ce9c05256b8b6092d23cf5cf1c6fa911159e4d572f
+  checksum: 10c0/7c9d2e07c81226d60435939618c91ec2ff0b75fbfa106eec3430f0fcf93a584bc6c73176676f532d78c3594fe28a54b36eb40b3d75593071a7ec91301533ace7
   languageName: node
   linkType: hard
 
@@ -2213,9 +2213,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^5.4.8":
-  version: 5.4.9
-  resolution: "vite@npm:5.4.9"
+"vite@npm:^5.4.10":
+  version: 5.4.10
+  resolution: "vite@npm:5.4.10"
   dependencies:
     esbuild: "npm:^0.21.3"
     fsevents: "npm:~2.3.3"
@@ -2252,7 +2252,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/e9c59f2c639047e37c79bbbb151c7a55a3dc27932957cf4cf0447ee0bdcc1ddfd9b1fb3ba0465371c01ba3616d62561327855794c2d652213c3a10a32e6d369d
+  checksum: 10c0/4ef4807d2fd166a920de244dbcec791ba8a903b017a7d8e9f9b4ac40d23f8152c1100610583d08f542b47ca617a0505cfc5f8407377d610599d58296996691ed
   languageName: node
   linkType: hard
 

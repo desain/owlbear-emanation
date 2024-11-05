@@ -34,6 +34,7 @@ body {
 
 .form-control {
     min-height: 55px;
+    margin-bottom: auto;
 }
 
 .form-control-label {
@@ -41,7 +42,7 @@ body {
     height: 15px;
 
     font-size: 0.75rem;
-    color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.7);
+    color: var(--mdc-theme-text-secondary-on-background);
 
     margin-left: 5px;
 }
@@ -74,30 +75,62 @@ body {
     margin-block: 5px;
 }
 
+.emanation-style {
+    max-width: 120px;
+}
+
+.emanation-opacity {
+    /* width: 100px; */
+}
+
 /* Fixing how MDC hardcodes dark colors rather than using CSS vars */
 
 .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
 .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
-.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing,
+.mdc-select--outlined:not(.mdc-select--disabled) .mdc-notched-outline__leading,
+.mdc-select--outlined:not(.mdc-select--disabled) .mdc-notched-outline__notch,
+.mdc-select--outlined:not(.mdc-select--disabled) .mdc-notched-outline__trailing {
     border-color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.23);
 }
 
 .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__leading,
 .mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__notch,
-.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__trailing {
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused):hover .mdc-notched-outline .mdc-notched-outline__trailing,
+.mdc-select--outlined:not(.mdc-select--disabled):not(.mdc-select--focused) .mdc-select__anchor:hover .mdc-notched-outline .mdc-notched-outline__leading,
+.mdc-select--outlined:not(.mdc-select--disabled):not(.mdc-select--focused) .mdc-select__anchor:hover .mdc-notched-outline .mdc-notched-outline__notch,
+.mdc-select--outlined:not(.mdc-select--disabled):not(.mdc-select--focused) .mdc-select__anchor:hover .mdc-notched-outline .mdc-notched-outline__trailing {
     border-color: var(--mdc-theme-text-primary-on-background);
+}
+
+.mdc-select:not(.mdc-select--disabled) .mdc-select__selected-text,
+.mdc-select:not(.mdc-select--disabled) .mdc-floating-label {
+    color: var(--mdc-theme-text-secondary-on-background);
+}
+
+.mdc-select:not(.mdc-select--disabled).mdc-select--focused .mdc-floating-label {
+    color: var(--mdc-theme-primary);
+}
+
+.mdc-select:not(.mdc-select--disabled) .mdc-select__dropdown-icon {
+    fill: var(--mdc-theme-text-secondary-on-background);
 }
 
 #app .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input {
     color: var(--mdc-theme-text-primary-on-background);
 }
 
-#app .mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__affix--suffix {
-    color: color(from var(--mdc-theme-text-primary-on-background) srgb r g b / 0.6);
+.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__affix--suffix {
+    color: var(--mdc-theme-text-secondary-on-background);
+}
+
+.mdc-menu .mdc-deprecated-list {
+    color: var(--mdc-theme-text-primary-on-background);
 }
 
 /* Changing MDC values */
-.mdc-text-field--outlined {
+.mdc-text-field--outlined,
+.mdc-select--outlined .mdc-select__anchor {
     height: 40px;
 }
 
@@ -116,5 +149,5 @@ body {
 }
 
 #remove-emanations {
-    --mdc-theme-primary: rgb(200, 0, 0);
+    --mdc-theme-primary: var(--mdc-theme-error);
 }

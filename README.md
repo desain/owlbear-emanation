@@ -51,6 +51,8 @@ To make a production build run:
 - Update emanations when image alignment changes
 - Debounce rebuilds
 - Refocus size after rebuild
+- More effects!
+- https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
 
 ## License
 
