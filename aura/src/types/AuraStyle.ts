@@ -8,8 +8,8 @@ export interface SimpleStyle {
     itemStyle: ShapeStyle | CurveStyle;
 }
 
-export interface BubbleStyle {
-    type: 'Bubble';
+export interface ColorOpacityShaderStyle {
+    type: 'Bubble' | 'Fade';
     color: Vector3;
     opacity: number;
 }
@@ -18,11 +18,16 @@ export interface SpiritsStyle {
     type: 'Spirits';
 }
 
-export type EffectStyle = BubbleStyle | SpiritsStyle;
+export type EffectStyle = ColorOpacityShaderStyle | SpiritsStyle;
 export type EffectStyleType = EffectStyle['type'];
 export type AuraStyle = SimpleStyle | EffectStyle;
 export type AuraStyleType = AuraStyle['type'];
-export const STYLE_TYPES: AuraStyleType[] = ['Simple', 'Bubble', 'Spirits'];
+export const STYLE_TYPES: AuraStyleType[] = [
+    'Simple',
+    'Bubble',
+    'Fade',
+    'Spirits',
+];
 
 export function createStyle(styleType: AuraStyleType, color: string, opacity: number): AuraStyle {
     return styleType === 'Simple'
@@ -36,7 +41,7 @@ export function createStyle(styleType: AuraStyleType, color: string, opacity: nu
                 strokeWidth: 10,
                 strokeDash: [],
             },
-        } : styleType === 'Bubble' ? {
+        } : styleType === 'Bubble' || styleType === 'Fade' ? {
             type: styleType,
             color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
             opacity: opacity,
@@ -48,6 +53,7 @@ export function createStyle(styleType: AuraStyleType, color: string, opacity: nu
 export function getColor(style: AuraStyle, playerMetadata: PlayerMetadata): string {
     switch (style.type) {
         case 'Bubble':
+        case 'Fade':
             return rgbToHex(style.color);
         case 'Simple':
             return style.itemStyle.fillColor;
@@ -62,6 +68,7 @@ export function getColor(style: AuraStyle, playerMetadata: PlayerMetadata): stri
 export function getOpacity(style: AuraStyle, playerMetadata: PlayerMetadata): number {
     switch (style.type) {
         case 'Bubble':
+        case 'Fade':
             return style.opacity;
         case 'Simple':
             return style.itemStyle.fillOpacity;
