@@ -1,5 +1,5 @@
 import { SceneMetadata } from "../metadata/SceneMetadata";
-import { createDistanceFunction, DECLARE_UNIFORMS, QUADRATIC_BEZIER } from '../utils/skslUtils';
+import { createDistanceFunction, QUADRATIC_BEZIER } from '../utils/skslUtils';
 
 const DISTANCE = 'distance';
 
@@ -11,7 +11,6 @@ export function getBubbleSksl(sceneMetadata: SceneMetadata) {
     const distanceAdjustment = anchoredAtCorner ? '0.0' : 'halfItemSizeInUnits';
 
     return `
-${DECLARE_UNIFORMS}
 ${QUADRATIC_BEZIER}
 
 ${createDistanceFunction(sceneMetadata, 'distance')}
