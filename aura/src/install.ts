@@ -25,16 +25,16 @@ export default async function installAuras() {
     // Only install global listeners that can change network items for one instance
     const isGm = await OBR.player.getRole() === 'GM';
     uninstallers.push(installItemHandler(auraReplaceLock, fixer, isGm));
-    uninstallers.push(installGridHandler(auraReplaceLock, fixer, isGm));
+    uninstallers.push(installSceneMetadataWatcher(auraReplaceLock, fixer));
 
-    await fixer.fix();
     if (isGm) {
+        uninstallers.push(installGridHandler());
         await updateSceneMetadata(await getSceneMetadata());
     }
-    return () => {
-        console.log('uninstalling plugin');
-        uninstallers.forEach((uninstaller) => uninstaller());
-    }
+    await fixer.fix();
+
+
+    return () => uninstallers.forEach((uninstaller) => uninstaller());
 }
 
 async function handleSizeChanges() {
@@ -75,32 +75,35 @@ function installItemHandler(auraReplaceLock: AwaitLock, fixer: LocalItemFixer, i
     });
 }
 
-function installGridHandler(auraReplaceLock: AwaitLock, fixer: LocalItemFixer, isGm: boolean) {
-    return OBR.scene.grid.onChange(async (grid) => {
+function installSceneMetadataWatcher(auraReplaceLock: AwaitLock, fixer: LocalItemFixer) {
+    let oldMetadata: SceneMetadata | null = null;
+    return OBR.scene.onMetadataChange(async (metadata) => {
         await auraReplaceLock.acquireAsync();
         try {
-            const sceneMetadata = await getSceneMetadata();
-            const newSceneMetadata: Partial<SceneMetadata> = {
-                gridDpi: grid.dpi,
-                gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
-                gridMeasurement: grid.measurement,
-                gridType: grid.type,
-            };
-
-            if (sceneMetadataChanged(newSceneMetadata, sceneMetadata)) {
-                // one player's instance of this extension updates global values
-                if (isGm) {
-                    await updateSceneMetadata(newSceneMetadata);
-                }
-
+            const newMetadata = metadata[METADATA_KEY] as SceneMetadata | undefined;
+            if (newMetadata !== undefined && (oldMetadata === null || sceneMetadataChanged(newMetadata, oldMetadata))) {
                 // clear out local auras so they can be recreated
                 const localItems = await OBR.scene.local.getItems();
                 const toDelete = localItems.filter(isAura).map(getId);
                 await OBR.scene.local.deleteItems(toDelete);
                 await fixer.fix()
+                oldMetadata = newMetadata;
             }
         } finally {
             auraReplaceLock.release();
         }
+    });
+}
+
+function installGridHandler() {
+    return OBR.scene.grid.onChange(async (grid) => {
+        const newSceneMetadata: Partial<SceneMetadata> = {
+            gridDpi: grid.dpi,
+            gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
+            gridMeasurement: grid.measurement,
+            gridType: grid.type,
+        };
+
+        await updateSceneMetadata(newSceneMetadata);
     });
 }
