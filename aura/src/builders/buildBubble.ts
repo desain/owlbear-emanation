@@ -1,47 +1,18 @@
 import { SceneMetadata } from "../metadata/SceneMetadata";
-import { createSignedDistanceFunction } from "./signedDistanceFunctions";
+import { createSignedDistanceFunction, DECLARE_UNIFORMS, QUADRATIC_BEZIER } from '../utils/skslUtils';
 
 const SDF = 'sdf';
 
 export function getBubbleSksl(sceneMetadata: SceneMetadata) {
     return `
-uniform vec2 size;
-uniform vec3 color;
-uniform float dpi;
-uniform float opacity;
-
-//  Function from Iñigo Quiles
-//  www.iquilezles.org/www/articles/functions/functions.htm
-//float pcurve( float x, float a, float b ){
-//    float k = pow(a+b,a+b) / (pow(a,a)*pow(b,b));
-//    return k * pow( x, a ) * pow( 1.0-x, b );
-//}
-
-// https://thebookofshaders.com/05/
-float quadraticBezier (float x, vec2 a){
-  // adapted from BEZMATH.PS (1993)
-  // by Don Lancaster, SYNERGETICS Inc.
-  // http://www.tinaja.com/text/bezmath.html
-
-  float epsilon = 0.00001;
-  a.x = clamp(a.x,0.0,1.0);
-  a.y = clamp(a.y,0.0,1.0);
-  if (a.x == 0.5){
-    a += epsilon;
-  }
-
-  // solve t from x (an inverse operation)
-  float om2a = 1.0 - 2.0 * a.x;
-  float t = (sqrt(a.x*a.x + om2a*x) - a.x)/om2a;
-  float y = (1.0-2.0*a.y)*(t*t) + (2.0*a.y)*t;
-  return y;
-}
-
-float getOpacity(float d) {
-    return quadraticBezier(d*2.+1., vec2(1., .001)) * .95 + .05;
-}
+${DECLARE_UNIFORMS}
+${QUADRATIC_BEZIER}
 
 ${createSignedDistanceFunction(sceneMetadata, SDF)}
+
+float getOpacity(float d) { // opacity from distance
+    return quadraticBezier(d * 2.0 + 1.0, vec2(1., .001)) * 0.95 + 0.05;
+}
 
 vec4 main(in vec2 fragCoord) {
     vec2 uv = (fragCoord / size) * 2.0 - 1.0;
