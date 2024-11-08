@@ -165,6 +165,7 @@ function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
     switch (auraEntry.style.type) {
         case 'Bubble':
         case 'Fade':
+        case 'Fuzzy':
             if (isEffect(aura)) {
                 setColorUniform(aura, auraEntry.style.color);
                 setOpacityUniform(aura, auraEntry.style.opacity);
