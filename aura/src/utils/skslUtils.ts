@@ -15,21 +15,13 @@ float ${functionName}(vec2 ${PARAM}) {
 `;
 }
 
-export function createSignedDistanceFunction(
-    sceneMetadata: SceneMetadata,
-    functionName: string,
-) {
-    return `
-float ${functionName}(vec2 ${PARAM}) {
-    ${getSignedDistanceFunction(sceneMetadata)}
-}
-`;
-}
-
 function getMeasurementExpression(sceneMetadata: SceneMetadata) {
     if (sceneMetadata.gridMeasurement === 'CHEBYSHEV' && sceneMetadata.gridType === 'SQUARE') {
         // square
         return `max(${PARAM}.x, ${PARAM}.y)`;
+        // technically with SDF it should be:
+        // vec2 d = ${PARAM} - radius
+        // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
     } else if (sceneMetadata.gridMeasurement === 'MANHATTAN' && sceneMetadata.gridType === 'SQUARE') {
         // diamond
         return `${PARAM}.x + ${PARAM}.y`;
@@ -39,25 +31,6 @@ function getMeasurementExpression(sceneMetadata: SceneMetadata) {
     } else {
         // circle
         return `length(${PARAM})`;
-    }
-}
-
-function getSignedDistanceFunction(sceneMetadata: SceneMetadata): string {
-    if (sceneMetadata.gridMeasurement === 'CHEBYSHEV' && sceneMetadata.gridType === 'SQUARE') {
-        // rectangle
-        // special case - needs custom distance function
-        return `
-            vec2 d = ${PARAM} - .5;
-            return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
-        `;
-        // float roundRect(vec2 p) {
-        //   vec2 rectSize = vec2(.5);
-        //   float radius = 0.3 * dpi / size.x;
-        //   vec2 d = abs(p) - rectSize + radius;
-        //   return min(max(d.x, d.y), 0.0) + length(max(d,0.0)) - radius;
-        // }
-    } else {
-        return `return (${getMeasurementExpression(sceneMetadata)}) - 0.5;`;
     }
 }
 
