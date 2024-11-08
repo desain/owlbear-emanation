@@ -162,16 +162,16 @@ function drawingParamsChanged(localAura: Aura, aura: AuraEntry) {
 }
 
 function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
-    const style = aura.metadata[METADATA_KEY].style;
     switch (auraEntry.style.type) {
         case 'Bubble':
-            if (style.type === 'Bubble' && isEffect(aura)) {
+        case 'Fade':
+            if (isEffect(aura)) {
                 setColorUniform(aura, auraEntry.style.color);
                 setOpacityUniform(aura, auraEntry.style.opacity);
             }
             break;
         case 'Simple':
-            if (style.type === 'Simple' && isDrawable(aura)) {
+            if (isDrawable(aura)) {
                 aura.style.fillColor = auraEntry.style.itemStyle.fillColor;
                 aura.style.fillOpacity = auraEntry.style.itemStyle.fillOpacity;
                 aura.style.strokeColor = auraEntry.style.itemStyle.strokeColor;
