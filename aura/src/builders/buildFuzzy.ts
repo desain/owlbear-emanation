@@ -32,7 +32,7 @@ float random (in vec2 _st) {
 ${createDistanceFunction(sceneMetadata, DISTANCE)}
 
 vec4 main(vec2 fragCoord){
-    vec2 xy = (fragCoord - size/2.0) / dpi; // now in cell coords
+    vec2 xy = (fragCoord - size/2.0) / dpi; // cell coords
     xy += FUZZINESS * (vec2(random(xy), random(xy.yx)) - 0.5);
     xy = abs(xy); // mirror to each quadrant
     ${moveToCorner};
