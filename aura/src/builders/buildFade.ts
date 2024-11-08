@@ -45,7 +45,7 @@ ${createSignedDistanceFunction(sceneMetadata, SDF)}
 
 vec4 main(in vec2 fragCoord) {
     vec2 uv = (fragCoord / size) * 2.0 - 1.0;
-    float d = ${SDF}(uv);
+    float d = ${SDF}(abs(uv));
     return vec4(color, 1.) * getOpacity(d) * opacity;
 }
 `;

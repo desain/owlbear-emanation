@@ -40,7 +40,7 @@ async function renderAction() {
         ${createGridModeCheckbox(role, sceneAuraMetadata.gridMode)}
     `;
 
-    installGridModeChangeHandler((gridMode) => updateSceneMetadata({ gridMode }));
+    installGridModeChangeHandler(async (gridMode) => updateSceneMetadata({ gridMode }));
     installOpacityChangeHandler((opacity) => updatePlayerMetadata({ opacity }));
     installColorChangeHandler((color) => updatePlayerMetadata({ color }));
     installSizeChangeHandler((size) => updatePlayerMetadata({ size }));
