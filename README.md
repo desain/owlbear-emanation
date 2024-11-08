@@ -1,14 +1,14 @@
-# Emanations
+# Auras and Emanations
 
-Add emanations / auras to any character token.
+Add auras to any character token.
 
 ![Interface](./docs/header.jpg)
 
 ## Features
 - Adds a context menu item to character and mount token images.
-- Emanations will display the correct shape for the current grid type and grid measurement type.
-- Emanations will automatically resize after tokens are scaled.
-- Manage any number of emanations with any color.
+- Auras will display the correct shape for the current grid type and grid measurement type.
+- Auras will automatically resize after tokens are scaled.
+- Manage any number of auras with any color / opacity.
 
 Example:
 ![Example](./docs/menu.png)
@@ -29,7 +29,7 @@ This project is a simple Typescript app.
 
 The background script `background.ts` communicates with Owlbear Rodeo to create a context menu item. When that item is clicked a popup is shown with the `contextmenu.ts` site rendered.
 
-The `action.html` page is rendered as an action item, which controls global settings for emanations.
+The `action.html` page is rendered as an action item, which controls global settings for auras.
 
 ## Building
 
@@ -48,9 +48,8 @@ To make a production build run:
 `yarn build`
 
 ## To do
-- Update emanations when image alignment changes
+- Update auras when image alignment changes
 - Debounce rebuilds
-- Refocus size after rebuild
 - More effects!
 - https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
 

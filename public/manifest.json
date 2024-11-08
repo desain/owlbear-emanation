@@ -1,17 +1,17 @@
 {
-  "name": "Auras and Emanations",
-  "description": "Add auras and emanations to any character",
-  "version": "0.1.0",
-  "manifest_version": 1,
-  "author": "desain",
-  "homepage_url": "https://github.com/desain/owlbear-emanation",
-  "icon": "/logo.png",
-  "background_url": "/background.html",
-  "action": {
-    "title": "Aura/Emanation Settings",
+    "name": "Auras and Emanations",
+    "description": "Add auras and emanations to any character",
+    "version": "0.1.0",
+    "manifest_version": 1,
+    "author": "desain",
+    "homepage_url": "https://github.com/desain/owlbear-emanation",
     "icon": "/logo.png",
-    "popover": "/emanation/action.html",
-    "height": "300",
-    "width": "250"
-  }
+    "background_url": "/background.html",
+    "action": {
+        "title": "Aura Settings",
+        "icon": "/logo.png",
+        "popover": "/aura/action.html",
+        "height": "300",
+        "width": "250"
+    }
 }

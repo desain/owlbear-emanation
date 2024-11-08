@@ -1,4 +1,4 @@
-import installEmanations from "./emanation/src/install";
+import installAuras from "./aura/src/install";
 import ready from "./ready";
 
-ready(installEmanations);
+ready(installAuras);
