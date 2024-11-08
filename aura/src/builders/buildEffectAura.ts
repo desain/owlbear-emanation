@@ -1,7 +1,7 @@
 import { Effect, Vector2, buildEffect } from '@owlbear-rodeo/sdk';
 import { SceneMetadata } from '../metadata/SceneMetadata';
 import { EffectStyle } from '../types/AuraStyle';
-import { getUniforms } from '../utils/skslUtils';
+import { declareUniforms, getUniforms } from '../utils/skslUtils';
 import { getBubbleSksl } from "./buildBubble";
 import { getFadeSksl } from "./buildFade";
 import { getFuzzySksl } from "./buildFuzzy";
@@ -11,13 +11,13 @@ import { getSpiritsSksl } from "./buildSpirits";
 function getSksl(sceneMetadata: SceneMetadata, style: EffectStyle, numUnits: number): string {
     switch (style.type) {
         case 'Spirits':
-            return getSpiritsSksl(numUnits);
+            return declareUniforms(style) + getSpiritsSksl(numUnits);
         case 'Bubble':
-            return getBubbleSksl(sceneMetadata);
+            return declareUniforms(style) + getBubbleSksl(sceneMetadata);
         case 'Fade':
-            return getFadeSksl(sceneMetadata);
+            return declareUniforms(style) + getFadeSksl(sceneMetadata);
         case 'Fuzzy':
-            return getFuzzySksl(sceneMetadata);
+            return declareUniforms(style) + getFuzzySksl(sceneMetadata);
         default:
             const _exhaustiveCheck: never = style;
             throw new Error(`Unhandled aura type: ${_exhaustiveCheck}`);

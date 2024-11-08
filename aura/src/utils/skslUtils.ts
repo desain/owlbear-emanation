@@ -81,14 +81,22 @@ export function getUniforms(
     return uniforms;
 }
 
-export const DECLARE_UNIFORMS = `
-uniform vec2 size;
-uniform vec3 color;
-uniform float dpi;
-uniform float opacity;
-uniform float numUnits;
-uniform float halfItemSizeInUnits;
-`;
+export function declareUniforms(style: EffectStyle) {
+    let uniforms = `
+        uniform vec2 size;
+        uniform float dpi;
+        uniform float numUnits;
+        uniform float halfItemSizeInUnits;
+        uniform float time;
+    `;
+    if (hasColorOpacityUniforms(style)) {
+        uniforms += `
+            uniform vec3 color;
+            uniform float opacity;
+        `;
+    }
+    return uniforms;
+}
 
 // https://thebookofshaders.com/05/
 export const QUADRATIC_BEZIER = `
@@ -109,5 +117,15 @@ float quadraticBezier (float x, vec2 a){
   float t = (sqrt(a.x*a.x + om2a*x) - a.x)/om2a;
   float y = (1.0-2.0*a.y)*(t*t) + (2.0*a.y)*t;
   return y;
+}
+`;
+
+// https://thebookofshaders.com/10/
+// outputs 0 to 1
+export const RANDOM = `
+float random (vec2 st) {
+    return fract(sin(dot(st.xy,
+                         vec2(12.9898,78.233)))*
+        43758.5453123);
 }
 `

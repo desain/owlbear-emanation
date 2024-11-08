@@ -1,7 +1,7 @@
 
 
 import { SceneMetadata } from "../metadata/SceneMetadata";
-import { createDistanceFunction, DECLARE_UNIFORMS } from "../utils/skslUtils";
+import { createDistanceFunction, RANDOM } from "../utils/skslUtils";
 
 const DISTANCE = 'distance';
 const TOLERANCE = 0.01;
@@ -18,17 +18,9 @@ export function getFuzzySksl(sceneMetadata: SceneMetadata): string {
         : useSquares ? `0.5 + ${TOLERANCE}` : '0.0';
 
     return `
-${DECLARE_UNIFORMS}
-
 const float FUZZINESS = 0.5;
 
-// https://thebookofshaders.com/10/
-float random (in vec2 _st) {
-    return fract(sin(dot(_st.xy,
-                         vec2(12.9898,78.233)))*
-        43758.5453123);
-}
-
+${RANDOM}
 ${createDistanceFunction(sceneMetadata, DISTANCE)}
 
 vec4 main(vec2 fragCoord){
