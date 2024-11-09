@@ -1,19 +1,15 @@
 import { RANDOM } from '../utils/skslUtils';
 
 export function getSpiritsSksl(numUnits: number) {
+    let numParticles = 3 + 3 * numUnits;
     return `
-const float NUM_PARTICLES = ${6 * numUnits};
+const float NUM_PARTICLES = ${numParticles};
+const float RADIAL_JITTER = 0.5;
 const float PI = 3.1415926535897932384626433832795;
-
-const float glowy = 0.04;
-const float baseSpeed = PI * 0.4;
-
-// https://iquilezles.org/articles/functions/
-float expImpulse( float x, float k )
-{
-    float h = k*x;
-    return h*exp(1.0-h);
-}
+const float SPEED_JITTER = PI * 0.4;
+const float GLOW_RADIUS = 0.23;
+const float BASE_SPEED = PI * 0.8;
+const float COLOR_JITTER = 5.0;
 
 // https://iquilezles.org/articles/palettes/
 // cosine based palette, 4 vec3 params
@@ -25,34 +21,42 @@ vec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d )
 ${RANDOM}
 
 float glow(vec2 p, vec2 c) {
-    return 1.0 - smoothstep(0.0, glowy, length(p - c));
+    return 1.0 - smoothstep(0.0, GLOW_RADIUS, length(p - c));
 }
 
 // speed: angular speed (radians)
-vec4 trail(vec2 p, float speed, float dist, float r) {
-    float rot = -speed * time + r * PI;
+vec4 trail(vec2 p, float i) {
+    float r1 = random(vec2(i, 0.0));
+    float r2 = random(vec2(i, 1.0));
+    float r3 = random(vec2(i, 2.0));
+    float r4 = random(vec2(i, 3.0));
+
+    float dist = halfItemSizeInUnits + numUnits + r1 * RADIAL_JITTER;
+    float speed = BASE_SPEED / dist + r2 * SPEED_JITTER;
+    float rot = -speed * time + r3 * PI;
     p = mat2(cos(rot), -sin(rot), sin(rot), cos(rot)) * p; // rotate coordinate system
-    // mod = theta of point across, 0 to 2pi
-    // - PI -> theta of current point, -pi to pi
-    //float myTheta = mod(atan(-p.y,-p.x),2.0*PI) - PI;
 
-    float myTheta = mod(atan(p.y, p.x), 2.0*PI);
-    float elapsedTime = myTheta / speed;
+    // mod(theta, 2pi) gives it in full circle coords
+    float theta = atan(p.y, p.x);
 
-    vec2 closestCenter = vec2(cos(myTheta), sin(myTheta)) * dist;
-
-    float fadingFactor = 1.0 - clamp(elapsedTime, 0.0, 1.0);
-    fadingFactor = expImpulse(elapsedTime * 5.0, 2.0);
-
-    float opacity = glow(p, closestCenter) * fadingFactor * 1.5;
+    float elapsedTime = theta / speed;
     vec3 color = palette(
-        sin(time - elapsedTime + r * 5.0),
-        vec3(0.217,0.735,0.231),
-        vec3(0.720,0.576,0.775),
-        vec3(0.360,0.595,0.311),
-        vec3(0.872,0.995,0.577)
+        time - elapsedTime + r4 * COLOR_JITTER,
+        vec3(0.8, 0.8, 0.8),
+        vec3(0.2, 0.2, 0.2),
+        vec3(.5),
+        vec3(0.6,0.0,0.4)
     );
-    return vec4(normalize(color) * 1.5, 1.0) * opacity;
+
+    float opacity = 0.0;
+    if (theta > 0.0) {
+        vec2 closestCenter = vec2(cos(theta), sin(theta)) * dist;
+        opacity = glow(p, closestCenter) * max(0.0, 1.0 - elapsedTime);
+    } else {
+        opacity = glow(p, vec2(dist, 0.0));
+    }
+
+    return vec4(clamp(color, 0.0, 1.0), 1.0) * 2.0 * opacity;
 }
 
 
@@ -62,11 +66,7 @@ vec4 main(in vec2 fragCoord) {
 
     vec4 col = vec4(0);
     for (float i = 0.0; i < NUM_PARTICLES; i++) {
-        float r = random(vec2(i, 0.0));
-        float r2 = random(vec2(0.0, i));
-        float dist = halfItemSizeInUnits + numUnits + r * 0.7;
-        float speed = baseSpeed / dist + r2;
-        col += trail(xy, speed, dist, r);
+        col += trail(xy, i);
     }
 
     return col;
