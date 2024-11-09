@@ -1,7 +1,7 @@
 import OBR, { GridScale } from "@owlbear-rodeo/sdk";
 import * as mdc from "material-components-web";
+import { attrsToSpecifier, Specifier, specifierToHtml } from '../../types/Specifier';
 import createFormControl from './formControl';
-import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
 const AURA_SIZE = 'aura-size';
 
 export function createSizeInput(specifier: Specifier | null, size: number, scale: GridScale) {

@@ -1,7 +1,7 @@
 import * as mdc from 'material-components-web';
 import { AuraStyleType, STYLE_TYPES } from '../../types/AuraStyle';
+import { attrsToSpecifier, Specifier, specifierToHtml } from '../../types/Specifier';
 import createFormControl from './formControl';
-import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
 const AURA_STYLE = 'aura-style';
 
 function selectItem(value: string, selected: boolean) {

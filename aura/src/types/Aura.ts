@@ -1,7 +1,7 @@
 import { Curve, Effect, isCurve, isEffect, isShape, Item, Shape } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
-import { AuraMetadata } from "../metadata/AuraMetadata";
-import { HasMetadata } from '../metadata/metadataUtils';
+import { AuraMetadata } from "./metadata/AuraMetadata";
+import { HasMetadata } from './metadata/metadataUtils';
 
 export interface IsAttached {
     attachedTo: string;

@@ -1,8 +1,20 @@
+/**
+ * Way of specifying a specific aura.
+ */
 export interface Specifier {
+    /**
+     * Which items has the aura.
+     */
     sourceId: string;
+    /**
+     * Which item in the source's list of auras.
+     */
     sourceScopedId: string;
 }
 
+/**
+ * @returns Data attributes to encode a specifier in an html element
+ */
 export function specifierToHtml(specifier: Specifier | null) {
     if (!specifier) {
         return '';

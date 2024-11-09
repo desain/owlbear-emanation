@@ -1,6 +1,6 @@
 
 
-import { SceneMetadata } from "../metadata/SceneMetadata";
+import { SceneMetadata } from "../types/metadata/SceneMetadata";
 import { createDistanceFunction, RANDOM } from "../utils/skslUtils";
 
 const DISTANCE = 'distance';

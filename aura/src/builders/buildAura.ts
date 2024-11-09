@@ -1,9 +1,9 @@
 import { Image } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
-import { HasMetadata } from '../metadata/metadataUtils';
-import { SceneMetadata } from "../metadata/SceneMetadata";
 import { Aura, IsAttached } from "../types/Aura";
 import { AuraStyle } from '../types/AuraStyle';
+import { HasMetadata } from '../types/metadata/metadataUtils';
+import { SceneMetadata } from "../types/metadata/SceneMetadata";
 import { buildEffectAura } from "./buildEffectAura";
 import { buildSimpleAura } from "./buildSimple";
 

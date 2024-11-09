@@ -1,5 +1,5 @@
 import OBR, { GridMeasurement, GridType } from "@owlbear-rodeo/sdk";
-import { METADATA_KEY } from "../constants";
+import { METADATA_KEY } from "../../constants";
 
 export type SceneMetadata = {
     gridMode: boolean,

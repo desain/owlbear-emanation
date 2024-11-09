@@ -1,6 +1,6 @@
 import { Effect, Vector2, buildEffect } from '@owlbear-rodeo/sdk';
-import { SceneMetadata } from '../metadata/SceneMetadata';
 import { EffectStyle } from '../types/AuraStyle';
+import { SceneMetadata } from '../types/metadata/SceneMetadata';
 import { declareUniforms, getUniforms } from '../utils/skslUtils';
 import { getBubbleSksl } from "./buildBubble";
 import { getFadeSksl } from "./buildFade";

@@ -1,7 +1,7 @@
 import OBR, { buildCurve, Curve, Math2, Vector2 } from '@owlbear-rodeo/sdk';
-import { SceneMetadata } from '../metadata/SceneMetadata';
 import { SimpleAuraDrawable } from '../types/Aura';
 import { SimpleStyle } from '../types/AuraStyle';
+import { SceneMetadata } from '../types/metadata/SceneMetadata';
 import { buildAlternatingPreciseOctant, buildAlternatingSquareOctant } from "./buildAlternating";
 import { buildChebyshevSquareAura } from "./buildChebyshev";
 import { buildEuclideanAura } from "./buildEuclidean";

@@ -1,4 +1,4 @@
-import { METADATA_KEY } from "../constants";
+import { METADATA_KEY } from "../../constants";
 
 export interface HasMetadata<M> {
     metadata: {
