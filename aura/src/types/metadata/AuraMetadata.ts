@@ -1,4 +1,4 @@
-import { AuraStyle } from '../types/AuraStyle';
+import { AuraStyle } from '../AuraStyle';
 
 /**
  * Metadata for auras.

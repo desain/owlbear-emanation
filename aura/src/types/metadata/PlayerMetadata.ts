@@ -1,6 +1,6 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { METADATA_KEY } from "../constants";
-import { AuraStyleType } from '../types/AuraStyle';
+import { METADATA_KEY } from "../../constants";
+import { AuraStyleType } from '../AuraStyle';
 
 export interface PlayerMetadata {
     styleType: AuraStyleType,

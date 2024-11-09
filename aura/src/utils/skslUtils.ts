@@ -1,6 +1,6 @@
 import { Uniform } from '@owlbear-rodeo/sdk';
-import { SceneMetadata } from "../metadata/SceneMetadata";
 import { ColorOpacityShaderStyle, EffectStyle } from '../types/AuraStyle';
+import { SceneMetadata } from "../types/metadata/SceneMetadata";
 
 const PARAM = 'p';
 

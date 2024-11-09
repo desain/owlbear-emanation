@@ -1,6 +1,6 @@
 import { Item, Vector2 } from '@owlbear-rodeo/sdk';
-import { METADATA_KEY } from '../constants';
-import { AuraStyle } from '../types/AuraStyle';
+import { METADATA_KEY } from '../../constants';
+import { AuraStyle } from '../AuraStyle';
 
 /**
  * Metadata on an aura source to list what effects it should have locally.

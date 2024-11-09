@@ -4,16 +4,14 @@ import 'material-components-web/dist/material-components-web.min.css';
 import ready from "../../../ready";
 import "../../assets/style.css";
 import installTheme from "../installTheme";
-import { getPlayerMetadata, updatePlayerMetadata } from "../metadata/PlayerMetadata";
-import { getSceneMetadata, updateSceneMetadata } from "../metadata/SceneMetadata";
+import { getPlayerMetadata, updatePlayerMetadata } from "../types/metadata/PlayerMetadata";
+import { getSceneMetadata, updateSceneMetadata } from "../types/metadata/SceneMetadata";
 import { createColorInput, installColorChangeHandler } from "./elements/colorInput";
 import { createControlRow } from './elements/controlRow';
 import { createGridModeCheckbox, installGridModeChangeHandler } from './elements/gridModeCheckbox';
 import { createOpacityInput, installOpacityChangeHandler } from "./elements/opacityInput";
 import { createSizeInput, installSizeChangeHandler } from "./elements/sizeInput";
 import { createStyleSelect, installStyleChangeHandler } from './elements/styleSelect';
-
-ready(renderAction);
 
 async function renderAction() {
     const app = document.getElementById('app')!!;
@@ -50,3 +48,5 @@ async function renderAction() {
 
     return uninstallThemeHandler;
 }
+
+ready(renderAction);

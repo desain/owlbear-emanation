@@ -3,9 +3,9 @@ import OBR, { Effect, Image, isEffect, Item, Uniform } from '@owlbear-rodeo/sdk'
 import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
 import buildAura from '../builders/buildAura';
 import { METADATA_KEY } from '../constants';
-import { getSceneMetadata, SceneMetadata } from "../metadata/SceneMetadata";
-import { AuraEntry } from '../metadata/SourceMetadata';
 import { Aura, isAura, isDrawable } from '../types/Aura';
+import { getSceneMetadata, SceneMetadata } from "../types/metadata/SceneMetadata";
+import { AuraEntry } from '../types/metadata/SourceMetadata';
 import { isSource } from '../types/Source';
 import { getId, getSource } from './itemUtils';
 

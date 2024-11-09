@@ -3,11 +3,11 @@ import OBR, { Math2 } from "@owlbear-rodeo/sdk";
 import AwaitLock from "await-lock";
 import { METADATA_KEY, VECTOR2_COMPARE_EPSILON } from "./constants";
 import createContextMenu from "./createContextMenu";
-import { getSceneMetadata, SceneMetadata, sceneMetadataChanged, updateSceneMetadata } from "./metadata/SceneMetadata";
 import { Aura, isAura } from './types/Aura';
 import { isSource } from './types/Source';
+import { getSceneMetadata, SceneMetadata, sceneMetadataChanged, updateSceneMetadata } from "./types/metadata/SceneMetadata";
 import LocalItemFixer from './utils/LocalItemFixer';
-import { getId } from "./utils/itemUtils";
+import { assertItem, getId } from "./utils/itemUtils";
 
 /**
 * This file represents the background script run when the plugin loads.
@@ -34,7 +34,7 @@ export default async function installAuras() {
     await fixer.fix();
 
 
-    return () => uninstallers.forEach((uninstaller) => uninstaller());
+    return () => uninstallers.forEach(uninstaller => uninstaller());
 }
 
 async function handleSizeChanges() {
@@ -46,9 +46,8 @@ async function handleSizeChanges() {
 
     // Note the new size
     await OBR.scene.items.updateItems(changedSize, (items) => items.forEach((source) => {
-        if (isSource(source)) {
-            source.metadata[METADATA_KEY].scale = source.scale;
-        }
+        assertItem(source, isSource);
+        source.metadata[METADATA_KEY].scale = source.scale;
     }));
 
     // Update the network items

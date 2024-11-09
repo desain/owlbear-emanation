@@ -1,6 +1,6 @@
 import * as mdc from "material-components-web";
+import { attrsToSpecifier, Specifier, specifierToHtml } from '../../types/Specifier';
 import createFormControl from './formControl';
-import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
 const AURA_OPACITY = 'aura-opacity';
 
 export function createOpacityInput(specifier: Specifier | null, opacity: number) {

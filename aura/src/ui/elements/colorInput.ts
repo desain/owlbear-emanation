@@ -1,5 +1,5 @@
+import { attrsToSpecifier, Specifier, specifierToHtml } from '../../types/Specifier';
 import createFormControl from './formControl';
-import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
 
 const AURA_COLOR = 'aura-color';
 

@@ -1,7 +1,7 @@
 import { CurveStyle, ShapeStyle } from '@owlbear-rodeo/sdk';
 import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
-import { PlayerMetadata } from '../metadata/PlayerMetadata';
 import { hexToRgb, rgbToHex } from '../utils/colorUtils';
+import { PlayerMetadata } from './metadata/PlayerMetadata';
 
 export interface SimpleStyle {
     type: 'Simple';
@@ -67,6 +67,15 @@ export function getColor(style: AuraStyle, playerMetadata: PlayerMetadata): stri
     }
 }
 
+export function setColor(style: AuraStyle, color: string) {
+    if ('color' in style) {
+        style.color = hexToRgb(color) ?? { x: 1, y: 0, z: 1 };
+    } else if ('itemStyle' in style) {
+        style.itemStyle.fillColor = color;
+        style.itemStyle.strokeColor = color;
+    }
+}
+
 export function getOpacity(style: AuraStyle, playerMetadata: PlayerMetadata): number {
     switch (style.type) {
         case 'Bubble':
@@ -80,5 +89,13 @@ export function getOpacity(style: AuraStyle, playerMetadata: PlayerMetadata): nu
         default:
             const _exhaustiveCheck: never = style;
             throw new Error(`Unhandled aura type: ${_exhaustiveCheck}`);
+    }
+}
+
+export function setOpacity(style: AuraStyle, opacity: number) {
+    if ('opacity' in style) {
+        style.opacity = opacity;
+    } else if ('itemStyle' in style) {
+        style.itemStyle.fillOpacity = opacity;
     }
 }

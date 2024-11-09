@@ -1,4 +1,4 @@
-import { attrsToSpecifier, Specifier, specifierToHtml } from './specifier';
+import { attrsToSpecifier, Specifier, specifierToHtml } from '../../types/Specifier';
 
 const REMOVE_AURA = 'remove-aura';
 
