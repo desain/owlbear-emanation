@@ -9,7 +9,7 @@ export interface SimpleStyle {
 }
 
 export interface ColorOpacityShaderStyle {
-    type: 'Bubble' | 'Fade' | 'Fuzzy';
+    type: 'Bubble' | 'Glow' | 'Fuzzy';
     color: Vector3;
     opacity: number;
 }
@@ -25,7 +25,7 @@ export type AuraStyleType = AuraStyle['type'];
 export const STYLE_TYPES: AuraStyleType[] = [
     'Simple',
     'Bubble',
-    'Fade',
+    'Glow',
     'Fuzzy',
     'Spirits',
 ];
@@ -42,7 +42,7 @@ export function createStyle(styleType: AuraStyleType, color: string, opacity: nu
                 strokeWidth: 10,
                 strokeDash: [],
             },
-        } : styleType === 'Bubble' || styleType === 'Fade' || styleType === 'Fuzzy' ? {
+        } : styleType === 'Bubble' || styleType === 'Glow' || styleType === 'Fuzzy' ? {
             type: styleType,
             color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
             opacity: opacity,
@@ -54,7 +54,7 @@ export function createStyle(styleType: AuraStyleType, color: string, opacity: nu
 export function getColor(style: AuraStyle, playerMetadata: PlayerMetadata): string {
     switch (style.type) {
         case 'Bubble':
-        case 'Fade':
+        case 'Glow':
         case 'Fuzzy':
             return rgbToHex(style.color);
         case 'Simple':
@@ -79,7 +79,7 @@ export function setColor(style: AuraStyle, color: string) {
 export function getOpacity(style: AuraStyle, playerMetadata: PlayerMetadata): number {
     switch (style.type) {
         case 'Bubble':
-        case 'Fade':
+        case 'Glow':
         case 'Fuzzy':
             return style.opacity;
         case 'Simple':

@@ -3,8 +3,8 @@ import { EffectStyle } from '../types/AuraStyle';
 import { SceneMetadata } from '../types/metadata/SceneMetadata';
 import { declareUniforms, getUniforms } from '../utils/skslUtils';
 import { getBubbleSksl } from "./buildBubble";
-import { getFadeSksl } from "./buildFade";
 import { getFuzzySksl } from "./buildFuzzy";
+import { getGlowSksl } from "./buildGlow";
 import { getSpiritsSksl } from "./buildSpirits";
 
 
@@ -14,8 +14,8 @@ function getSksl(sceneMetadata: SceneMetadata, style: EffectStyle, numUnits: num
             return declareUniforms(style) + getSpiritsSksl(numUnits);
         case 'Bubble':
             return declareUniforms(style) + getBubbleSksl(sceneMetadata);
-        case 'Fade':
-            return declareUniforms(style) + getFadeSksl(sceneMetadata);
+        case 'Glow':
+            return declareUniforms(style) + getGlowSksl(sceneMetadata);
         case 'Fuzzy':
             return declareUniforms(style) + getFuzzySksl(sceneMetadata);
         default:
