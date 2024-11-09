@@ -1,10 +1,10 @@
-import OBR, { Math2 } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { METADATA_KEY, VECTOR2_COMPARE_EPSILON } from "./constants";
+import { METADATA_KEY } from "./constants";
 import createContextMenu from "./createContextMenu";
 import { Aura, isAura } from './types/Aura';
-import { isSource } from './types/Source';
+import { didChangeScale, isSource } from './types/Source';
 import { getSceneMetadata, SceneMetadata, sceneMetadataChanged, updateSceneMetadata } from "./types/metadata/SceneMetadata";
 import LocalItemFixer from './utils/LocalItemFixer';
 import { assertItem, getId } from "./utils/itemUtils";
@@ -38,25 +38,33 @@ export default async function installAuras() {
 }
 
 async function handleSizeChanges() {
+    const [
+        networkItems,
+        localItems,
+    ] = await Promise.all([
+        OBR.scene.items.getItems(),
+        OBR.scene.local.getItems(),
+    ]);
+
     // We want to rebuild auras whose source item changed sizes
-    const changedSize = (await OBR.scene.items.getItems())
-        .filter(source => isSource(source)
-            && !Math2.compare(source.scale, source.metadata[METADATA_KEY].scale, VECTOR2_COMPARE_EPSILON))
+    const changedScale = networkItems
+        .filter(isSource)
+        .filter(didChangeScale)
         .map(getId);
 
     // Note the new size
-    await OBR.scene.items.updateItems(changedSize, (items) => items.forEach((source) => {
+    await OBR.scene.items.updateItems(changedScale, (items) => items.forEach((source) => {
         assertItem(source, isSource);
         source.metadata[METADATA_KEY].scale = source.scale;
     }));
 
     // Update the network items
-    const isAttachedToSizeChanger = (aura: Aura) => changedSize.includes(aura.attachedTo);
-    const changingLocalAuras = (await OBR.scene.local.getItems())
+    const isAttachedToSizeChanger = (aura: Aura) => changedScale.includes(aura.attachedTo);
+    const toDelete = localItems
         .filter(isAura)
         .filter(isAttachedToSizeChanger)
         .map(getId);
-    await OBR.scene.local.deleteItems(changingLocalAuras); // fix is called after this function so they'll come back rebuilt
+    await OBR.scene.local.deleteItems(toDelete); // fix is called after this function so they'll come back rebuilt
 }
 
 function installItemHandler(auraReplaceLock: AwaitLock, fixer: LocalItemFixer, isGm: boolean) {

@@ -37,7 +37,7 @@ function getMeasurementExpression(sceneMetadata: SceneMetadata) {
 function hasColorOpacityUniforms(style: EffectStyle): style is ColorOpacityShaderStyle {
     switch (style.type) {
         case 'Bubble':
-        case 'Fade':
+        case 'Glow':
         case 'Fuzzy':
             return true;
         case 'Spirits':

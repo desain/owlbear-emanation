@@ -14,6 +14,7 @@ import { getPlayerMetadata, PlayerMetadata } from '../../types/metadata/PlayerMe
 import { isSource, updateEntry } from '../../types/Source';
 import { createAuras, createAurasWithDefaults } from "../../utils/createAuras";
 import { hasId } from '../../utils/itemUtils';
+import { groupBy } from '../../utils/jsUtils';
 import { removeAura, removeAuras } from '../../utils/removeAuras';
 import { createColorInput, installColorChangeHandler } from "../elements/colorInput";
 import { createControlRow } from '../elements/controlRow';
@@ -24,18 +25,6 @@ import { createRemoveAuraButton, installRemoveAuraHandler } from "../elements/re
 import { createSizeInput, installSizeChangeHandler } from "../elements/sizeInput";
 import { createStyleSelect, installStyleChangeHandler } from '../elements/styleSelect';
 import { MenuItem } from './Menuitem';
-
-function groupBy<T, K extends keyof any>(ts: T[], key: (t: T) => K): Record<K, T[]> {
-    return ts.reduce((acc, t) => {
-        const k = key(t);
-        if (acc[k]) {
-            acc[k].push(t);
-        } else {
-            acc[k] = [t];
-        }
-        return acc;
-    }, {} as Record<K, T[]>);
-}
 
 function createControls(menuItem: MenuItem, scale: GridScale, playerMetadata: PlayerMetadata) {
     const specifier = menuItem.toSpecifier();

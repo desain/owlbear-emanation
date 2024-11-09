@@ -3,7 +3,7 @@ import { createDistanceFunction, QUADRATIC_BEZIER } from "../utils/skslUtils";
 
 const DISTANCE = 'distance';
 
-export function getFadeSksl(sceneMetadata: SceneMetadata) {
+export function getGlowSksl(sceneMetadata: SceneMetadata) {
     const anchoredAtCorner = sceneMetadata.gridMeasurement !== 'EUCLIDEAN';
     const moveToCorner = anchoredAtCorner
         ? 'xy -= halfItemSizeInUnits' // move to corner of item

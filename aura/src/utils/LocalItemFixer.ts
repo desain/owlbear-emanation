@@ -1,9 +1,8 @@
-import OBR, { Effect, Image, isEffect, Item, Uniform } from '@owlbear-rodeo/sdk';
+import OBR, { Image, Item } from '@owlbear-rodeo/sdk';
 
-import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
 import buildAura from '../builders/buildAura';
 import { METADATA_KEY } from '../constants';
-import { Aura, isAura, isDrawable } from '../types/Aura';
+import { Aura, buildParamsChanged, drawingParamsChanged, isAura, updateDrawingParams } from '../types/Aura';
 import { getSceneMetadata, SceneMetadata } from "../types/metadata/SceneMetadata";
 import { AuraEntry } from '../types/metadata/SourceMetadata';
 import { isSource } from '../types/Source';
@@ -48,7 +47,7 @@ export default class LocalItemFixer {
         }
     }
 
-    private getAura(source: Image | undefined, aura: Aura): AuraEntry | undefined {
+    private getEntry(source: Image | undefined, aura: Aura): AuraEntry | undefined {
         if (!source || !isSource(source)) {
             return undefined;
         }
@@ -67,15 +66,15 @@ export default class LocalItemFixer {
             getSceneMetadata(),
         ]);
 
-        const toAdd: [SourceIdAndScopedId, Item][] = [];
+        const toAdd: [SourceIdAndScopedId, Aura][] = [];
         const toDelete: string[] = [];
-        const toUpdate: Item[] = [];
-        const updaters: ((item: Item) => void)[] = [];
-        const scheduleDrawingParamsUpdate = (item: Item, aura: AuraEntry) => {
-            toUpdate.push(item);
+        const toUpdate: Aura[] = [];
+        const updaters: ((aura: Aura) => void)[] = [];
+        const scheduleDrawingParamsUpdate = (aura: Aura, entry: AuraEntry) => {
+            toUpdate.push(aura);
             updaters.push((item: Item) => {
                 if (isAura(item)) {
-                    updateDrawingParams(item, aura);
+                    updateDrawingParams(item, entry);
                 }
             });
         };
@@ -92,21 +91,21 @@ export default class LocalItemFixer {
             }
         }
 
-        for (const localAura of localItems) {
-            if (!isAura(localAura)) {
+        for (const aura of localItems) {
+            if (!isAura(aura)) {
                 continue;
             }
-            const source = getSource(localAura, networkItems); // TODO if the whole metadata is removed, this throws. Allow source to be missing
-            const aura = this.getAura(source, localAura);
-            if (!aura) {
-                this.remove(toDelete, localAura);
-            } else if (buildParamsChanged(localAura, aura)) {
+            const source = getSource(aura, networkItems);
+            const entry = this.getEntry(source, aura);
+            if (!entry) {
+                this.remove(toDelete, aura);
+            } else if (buildParamsChanged(aura, entry)) {
                 // Update auras that have changed size or style and need rebuilding
-                this.remove(toDelete, localAura);
-                LocalItemFixer.add(toAdd, source, aura, sceneMetadata);
-            } else if (drawingParamsChanged(localAura, aura)) {
+                this.remove(toDelete, aura);
+                LocalItemFixer.add(toAdd, source, entry, sceneMetadata);
+            } else if (drawingParamsChanged(aura, entry)) {
                 // Update auras that have changed drawing params but don't need rebuilding
-                scheduleDrawingParamsUpdate(localAura, aura);
+                scheduleDrawingParamsUpdate(aura, entry);
             }
         }
 
@@ -124,99 +123,5 @@ export default class LocalItemFixer {
             }
             await OBR.scene.local.addItems(toAdd.map(([, item]) => item));
         }
-    }
-}
-
-function buildParamsChanged(localAura: Aura, aura: AuraEntry) {
-    return localAura.metadata[METADATA_KEY].size !== aura.size
-        || localAura.metadata[METADATA_KEY].style.type !== aura.style.type;
-}
-
-const isObject = (object: any) => {
-    return object != null && typeof object === "object";
-};
-
-const isDeepEqual = (object1: any, object2: any) => {
-    const objKeys1 = Object.keys(object1);
-    const objKeys2 = Object.keys(object2);
-
-    if (objKeys1.length !== objKeys2.length) return false;
-
-    for (var key of objKeys1) {
-        const value1 = object1[key];
-        const value2 = object2[key];
-
-        const isObjects = isObject(value1) && isObject(value2);
-
-        if ((isObjects && !isDeepEqual(value1, value2)) ||
-            (!isObjects && value1 !== value2)
-        ) {
-            return false;
-        }
-    }
-    return true;
-};
-
-function drawingParamsChanged(localAura: Aura, aura: AuraEntry) {
-    return !isDeepEqual(localAura.metadata[METADATA_KEY].style, aura.style);
-}
-
-function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
-    switch (auraEntry.style.type) {
-        case 'Bubble':
-        case 'Fade':
-        case 'Fuzzy':
-            if (isEffect(aura)) {
-                setColorUniform(aura, auraEntry.style.color);
-                setOpacityUniform(aura, auraEntry.style.opacity);
-            }
-            break;
-        case 'Simple':
-            if (isDrawable(aura)) {
-                aura.style.fillColor = auraEntry.style.itemStyle.fillColor;
-                aura.style.fillOpacity = auraEntry.style.itemStyle.fillOpacity;
-                aura.style.strokeColor = auraEntry.style.itemStyle.strokeColor;
-                aura.style.strokeDash = auraEntry.style.itemStyle.strokeDash;
-                aura.style.strokeOpacity = auraEntry.style.itemStyle.strokeOpacity;
-                aura.style.strokeWidth = auraEntry.style.itemStyle.strokeWidth;
-            }
-            break;
-        case 'Spirits':
-            break; // nothing to set
-        default:
-            const _exhaustiveCheck: never = auraEntry.style;
-            throw new Error(`Unhandled style type ${_exhaustiveCheck}`);
-    }
-}
-
-interface ColorUniform extends Uniform {
-    name: 'color';
-    value: Vector3;
-}
-
-interface OpacityUniform extends Uniform {
-    name: 'opacity';
-    value: number;
-}
-
-function isColorUniform(uniform: Uniform): uniform is ColorUniform {
-    return uniform.name === 'color';
-}
-
-function isOpacityUniform(uniform: Uniform): uniform is OpacityUniform {
-    return uniform.name === 'opacity';
-}
-
-function setColorUniform(localAura: Effect, color: Vector3) {
-    const colorUniform = localAura.uniforms.find(isColorUniform);
-    if (colorUniform) {
-        colorUniform.value = color;
-    }
-}
-
-function setOpacityUniform(localAura: Effect, opacity: number) {
-    const opacityUniform = localAura.uniforms.find(isOpacityUniform);
-    if (opacityUniform) {
-        opacityUniform.value = opacity;
     }
 }

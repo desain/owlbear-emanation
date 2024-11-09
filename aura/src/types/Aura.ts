@@ -1,7 +1,10 @@
-import { Curve, Effect, isCurve, isEffect, isShape, Item, Shape } from "@owlbear-rodeo/sdk";
+import { Curve, Effect, isCurve, isEffect, isShape, Item, Shape, Uniform } from "@owlbear-rodeo/sdk";
+import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
 import { METADATA_KEY } from "../constants";
+import { isDeepEqual } from '../utils/jsUtils';
 import { AuraMetadata } from "./metadata/AuraMetadata";
 import { HasMetadata } from './metadata/metadataUtils';
+import { AuraEntry } from './metadata/SourceMetadata';
 
 export interface IsAttached {
     attachedTo: string;
@@ -26,4 +29,82 @@ export function isAura(item: Item): item is Aura {
         && item.attachedTo !== undefined
         && METADATA_KEY in item.metadata
         && typeof item.metadata[METADATA_KEY] === 'object';
+}
+
+export function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
+    switch (auraEntry.style.type) {
+        case 'Bubble':
+        case 'Glow':
+        case 'Fuzzy':
+            if (isEffect(aura)) {
+                setColorUniform(aura, auraEntry.style.color);
+                setOpacityUniform(aura, auraEntry.style.opacity);
+            }
+            break;
+        case 'Simple':
+            if (isDrawable(aura)) {
+                aura.style.fillColor = auraEntry.style.itemStyle.fillColor;
+                aura.style.fillOpacity = auraEntry.style.itemStyle.fillOpacity;
+                aura.style.strokeColor = auraEntry.style.itemStyle.strokeColor;
+                aura.style.strokeDash = auraEntry.style.itemStyle.strokeDash;
+                aura.style.strokeOpacity = auraEntry.style.itemStyle.strokeOpacity;
+                aura.style.strokeWidth = auraEntry.style.itemStyle.strokeWidth;
+            }
+            break;
+        case 'Spirits':
+            break; // nothing to set
+        default:
+            const _exhaustiveCheck: never = auraEntry.style;
+            throw new Error(`Unhandled style type ${_exhaustiveCheck}`);
+    }
+}
+/**
+ * The entry's params are the source of truth, and the metadata follows.
+ * @returns Whether the aura's parameters have changed in a way that requires
+ *          fully rebuilding the aura.
+ */
+export function buildParamsChanged(localAura: Aura, aura: AuraEntry) {
+    return localAura.metadata[METADATA_KEY].size !== aura.size
+        || localAura.metadata[METADATA_KEY].style.type !== aura.style.type;
+}
+
+/**
+ * The entry's params are the source of truth, and the metadata follows.
+ * @returns Whether the aura's parameters have changed in a way that can be
+ *          updated without rebuilding the aura.
+ */
+export function drawingParamsChanged(localAura: Aura, aura: AuraEntry) {
+    return !isDeepEqual(localAura.metadata[METADATA_KEY].style, aura.style);
+}
+
+interface ColorUniform extends Uniform {
+    name: 'color';
+    value: Vector3;
+}
+
+interface OpacityUniform extends Uniform {
+    name: 'opacity';
+    value: number;
+}
+
+function isColorUniform(uniform: Uniform): uniform is ColorUniform {
+    return uniform.name === 'color';
+}
+
+function isOpacityUniform(uniform: Uniform): uniform is OpacityUniform {
+    return uniform.name === 'opacity';
+}
+
+function setColorUniform(aura: Effect, color: Vector3) {
+    const colorUniform = aura.uniforms.find(isColorUniform);
+    if (colorUniform) {
+        colorUniform.value = color;
+    }
+}
+
+function setOpacityUniform(aura: Effect, opacity: number) {
+    const opacityUniform = aura.uniforms.find(isOpacityUniform);
+    if (opacityUniform) {
+        opacityUniform.value = opacity;
+    }
 }
