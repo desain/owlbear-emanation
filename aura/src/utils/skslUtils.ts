@@ -1,6 +1,7 @@
 import { Uniform } from '@owlbear-rodeo/sdk';
 import { ColorOpacityShaderStyle, EffectStyle } from '../types/AuraStyle';
 import { SceneMetadata } from "../types/metadata/SceneMetadata";
+import { isHexGrid } from './HexGridUtils';
 
 const PARAM = 'p';
 
@@ -17,17 +18,20 @@ float ${functionName}(vec2 ${PARAM}) {
 
 function getMeasurementExpression(sceneMetadata: SceneMetadata) {
     if (sceneMetadata.gridMeasurement === 'CHEBYSHEV' && sceneMetadata.gridType === 'SQUARE') {
-        // square
         return `max(${PARAM}.x, ${PARAM}.y)`;
         // technically with SDF it should be:
         // vec2 d = ${PARAM} - radius
         // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
     } else if (sceneMetadata.gridMeasurement === 'MANHATTAN' && sceneMetadata.gridType === 'SQUARE') {
-        // diamond
-        return `${PARAM}.x + ${PARAM}.y`;
+        return `abs(${PARAM}.x) + abs(${PARAM}.y)`;
     } if (sceneMetadata.gridMeasurement === 'ALTERNATING' && sceneMetadata.gridType === 'SQUARE') {
-        // octagon
-        return `max(${PARAM}.x, ${PARAM}.y) + min(${PARAM}.x, ${PARAM}.y) / 2.0`;
+        // sdf = octagon
+        const baseDistance = `max(${PARAM}.x, ${PARAM}.y) + min(${PARAM}.x, ${PARAM}.y) / 2.0`;
+        return sceneMetadata.gridMode ? `floor(${baseDistance})` : baseDistance;
+    } else if (sceneMetadata.gridMeasurement === 'CHEBYSHEV' && isHexGrid(sceneMetadata.gridType)) {
+        // axial distance in hex coordinate space
+        // param.x = q, param.y = r; s = -q-r
+        return `(abs(${PARAM}.x) + abs(${PARAM}.x + ${PARAM}.y) + abs(${PARAM}.y)) / 2.0`;
     } else {
         // circle
         return `length(${PARAM})`;
@@ -129,3 +133,5 @@ float random (vec2 st) {
         43758.5453123);
 }
 `
+
+export const CELL_COORDS = '(fragCoord - size/2.0) / dpi';

@@ -49,8 +49,9 @@ To make a production build run:
 
 ## To do
 - Update auras when image alignment changes
-- Debounce rebuilds
+- Find more ways to skip rebuilds (debounce, track builder)
 - More effects!
+- Listener for other plugins to call this
 - https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
 
 ## License
