@@ -1,7 +1,15 @@
 import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
 
+function parseColor(color: string) {
+    return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+}
+
+export function isHexColor(color: string): boolean {
+    return parseColor(color) !== null;
+}
+
 export function hexToRgb(hex: string): Vector3 | null {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    var result = parseColor(hex);
     return result ? {
         x: parseInt(result[1], 16) / 255,
         y: parseInt(result[2], 16) / 255,

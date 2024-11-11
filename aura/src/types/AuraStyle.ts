@@ -30,6 +30,10 @@ export const STYLE_TYPES: AuraStyleType[] = [
     'Spirits',
 ];
 
+export function isAuraStyle(style: string): style is AuraStyleType {
+    return STYLE_TYPES.includes(style as AuraStyleType);
+}
+
 export function createStyle(styleType: AuraStyleType, color: string, opacity: number): AuraStyle {
     return styleType === 'Simple'
         ? {

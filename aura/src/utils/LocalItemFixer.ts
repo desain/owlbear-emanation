@@ -9,6 +9,10 @@ import { isSource } from '../types/Source';
 import { getId, getSource } from './itemUtils';
 
 type SourceIdAndScopedId = string;
+/**
+ * Class to track changes to remote item metadata and mirror it to local items.
+ * TODO: Use the Reactor design pattern from official OBR plugins.
+ */
 export default class LocalItemFixer {
     sourceAndScopedToLocal: Map<SourceIdAndScopedId, string> = new Map();
 
