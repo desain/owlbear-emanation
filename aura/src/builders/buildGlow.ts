@@ -17,7 +17,7 @@ vec3 getColor(float pct) {
 
 vec4 main(in vec2 fragCoord) {
     vec2 xy = ${CELL_COORDS}; // cell coords
-    float radius = numUnits + halfItemSizeInUnits;
+    float radius = numUnits + itemRadiusUnits;
     float pct = length(xy) / radius;
     return vec4(getColor(pct), 1.) * getOpacity(pct) * opacity;
 }

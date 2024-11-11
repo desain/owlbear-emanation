@@ -27,6 +27,8 @@ function getMeasurementExpression(sceneMetadata: SceneMetadata) {
     } if (sceneMetadata.gridMeasurement === 'ALTERNATING' && sceneMetadata.gridType === 'SQUARE') {
         // sdf = octagon
         const baseDistance = `max(${PARAM}.x, ${PARAM}.y) + min(${PARAM}.x, ${PARAM}.y) / 2.0`;
+        // diagonals calculate as .5 distance, so floor the distance if we only care about grid
+        // cell distance
         return sceneMetadata.gridMode ? `floor(${baseDistance})` : baseDistance;
     } else if (sceneMetadata.gridMeasurement === 'CHEBYSHEV' && isHexGrid(sceneMetadata.gridType)) {
         // axial distance in hex coordinate space
@@ -68,7 +70,7 @@ export function getUniforms(
             value: numUnits,
         },
         {
-            name: 'halfItemSizeInUnits',
+            name: 'itemRadiusUnits',
             value: 0.5 * absoluteItemSize / sceneMetadata.gridDpi,
         },
     ];
@@ -90,7 +92,7 @@ export function declareUniforms(style: EffectStyle) {
         uniform vec2 size;
         uniform float dpi;
         uniform float numUnits;
-        uniform float halfItemSizeInUnits;
+        uniform float itemRadiusUnits;
         uniform float time;
     `;
     if (hasColorOpacityUniforms(style)) {

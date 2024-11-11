@@ -6,9 +6,9 @@ const DISTANCE = 'distance';
 export function getBubbleSksl(sceneMetadata: SceneMetadata) {
     const anchoredAtCorner = sceneMetadata.gridMeasurement !== 'EUCLIDEAN';
     const moveToCorner = anchoredAtCorner
-        ? 'xy -= halfItemSizeInUnits' // move to corner of item
+        ? 'xy -= itemRadiusUnits' // move to corner of item
         : '';
-    const distanceAdjustment = anchoredAtCorner ? '0.0' : 'halfItemSizeInUnits';
+    const distanceAdjustment = anchoredAtCorner ? '0.0' : 'itemRadiusUnits';
 
     return `
 ${QUADRATIC_BEZIER}
