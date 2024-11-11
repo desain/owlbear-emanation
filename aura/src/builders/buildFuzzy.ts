@@ -4,6 +4,7 @@ import { SceneMetadata } from "../types/metadata/SceneMetadata";
 import { isHexGrid } from '../utils/HexGridUtils';
 import { CELL_COORDS, createDistanceFunction, RANDOM } from "../utils/skslUtils";
 
+
 const DISTANCE = 'distance';
 const TOLERANCE = 0.01;
 
@@ -29,24 +30,26 @@ function getTransformCoordinateSpace(sceneMetadata: SceneMetadata) {
 
         return `pxtohex * ${rotation} * p * ${Math.sqrt(3)}`;
     } else if (anchoredAtCorner(sceneMetadata)) {
-        return 'max(vec2(0.0), p - halfItemSizeInUnits)';
+        return 'max(vec2(0.0), p - itemRadiusUnits)';
     } else {
         return 'p';
     }
 }
 
-function getThreshold(sceneMetadata: SceneMetadata) {
+function getItemRadius(sceneMetadata: SceneMetadata) {
     if (isHexGrid(sceneMetadata.gridType) && sceneMetadata.gridMeasurement === 'CHEBYSHEV') {
-        return 'floor(halfItemSizeInUnits) + 0.5';
+        // in grid mode, 
+        const itemRadius = sceneMetadata.gridMode ? 'floor(itemRadiusUnits)' : 'itemRadiusUnits';
+        return `${itemRadius} + ${TOLERANCE}`;
     } else if (sceneMetadata.gridMeasurement === 'EUCLIDEAN') {
-        return 'halfItemSizeInUnits';
-    } else {
+        return 'itemRadiusUnits';
+    } else { // anchored at corner, so item width is already subtracted away
         return String(TOLERANCE);
     }
 }
 
 function getRoundToCell(sceneMetadata: SceneMetadata) {
-    if (isHexGrid(sceneMetadata.gridType) && sceneMetadata.gridMeasurement !== 'EUCLIDEAN') {
+    if (sceneMetadata.gridMode && isHexGrid(sceneMetadata.gridType) && sceneMetadata.gridMeasurement !== 'EUCLIDEAN') {
         return 'axial_round(p)';
     } else if (sceneMetadata.gridMode && sceneMetadata.gridMeasurement !== 'EUCLIDEAN') {
         // starting from the corner, anything between 0 and 1 belongs to 1, etc
@@ -91,6 +94,7 @@ vec2 axial_round(vec2 qr) {
 }
 
 ${RANDOM}
+
 ${createDistanceFunction(sceneMetadata, DISTANCE)}
 
 vec2 transformCoordinateSpace(vec2 p) {
@@ -101,15 +105,7 @@ vec2 roundToCell(vec2 p) {
     return ${getRoundToCell(sceneMetadata)};
 }
 
-float getThreshold() {
-    return ${getThreshold(sceneMetadata)};
-}
-
 vec3 getColor(float pct) {
-    //return mix(vec3(1.0), color, pct);
-    //return hueShift(color, (d-1.0)*0.4);
-    //return mix(hueShift(color, -0.5), hueShift(color, 0.5), sin(pct * 2 * 3.141592 + time));
-    //return mix(vec3(1.0), color, sin(pct * 2 * 3.141592 + time) * 0.5 + 1.0);
     return mix(vec3(1.0), color, pct);
 }
 
@@ -121,8 +117,9 @@ vec4 main(vec2 fragCoord){
     xy = roundToCell(xy);
 
     float d = ${DISTANCE}(xy);
-    float threshold = numUnits + getThreshold();
-    float pct = ceil(d) / numUnits;
+    float itemRadius = ${getItemRadius(sceneMetadata)};
+    float threshold = numUnits + itemRadius;
+    float pct = ceil(d - itemRadius) / numUnits;
 	float b = 1.0 - step(threshold, d);
 
     return vec4(getColor(pct), 1.0) * b * opacity;
