@@ -30,7 +30,7 @@ export default function buildAura(
 
     aura.locked = true;
     aura.name = `Aura ${item.name} ${size}`;
-    aura.layer = 'PROP';
+    aura.layer = 'DRAWING';
     aura.disableHit = true;
     aura.visible = item.visible;
     aura.attachedTo = item.id;
