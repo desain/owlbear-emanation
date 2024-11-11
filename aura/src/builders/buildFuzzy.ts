@@ -38,8 +38,6 @@ function getTransformCoordinateSpace(sceneMetadata: SceneMetadata) {
 function getThreshold(sceneMetadata: SceneMetadata) {
     if (isHexGrid(sceneMetadata.gridType) && sceneMetadata.gridMeasurement === 'CHEBYSHEV') {
         return 'floor(halfItemSizeInUnits) + 0.5';
-        // } else if (sceneMetadata.gridMode && sceneMetadata.gridMeasurement !== 'EUCLIDEAN') {
-        //     return String(/*0.5*/ + TOLERANCE);
     } else if (sceneMetadata.gridMeasurement === 'EUCLIDEAN') {
         return 'halfItemSizeInUnits';
     } else {

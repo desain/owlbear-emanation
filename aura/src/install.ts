@@ -1,14 +1,14 @@
 import OBR from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { METADATA_KEY } from "./constants";
+import { MESSAGE_CHANNEL, METADATA_KEY } from "./constants";
 import createContextMenu from "./createContextMenu";
-import { Aura, isAura } from './types/Aura';
-import { didChangeScale, isSource } from './types/Source';
+import { isAura } from './types/Aura';
 import { getSceneMetadata, SceneMetadata, sceneMetadataChanged, updateSceneMetadata } from "./types/metadata/SceneMetadata";
 import LocalItemFixer from './utils/LocalItemFixer';
-import { assertItem, getId } from "./utils/itemUtils";
-
+import { handleScaleChanges } from "./utils/handleScaleChanges";
+import { getId } from "./utils/itemUtils";
+import { handleMessage } from "./utils/messaging";
 /**
 * This file represents the background script run when the plugin loads.
 * It creates the context menu item for the aura.
@@ -22,6 +22,7 @@ export default async function installAuras() {
     const auraReplaceLock = new AwaitLock();
     const [fixer, uninstallFixer] = LocalItemFixer.install();
     uninstallers.push(uninstallFixer);
+    uninstallers.push(installBroadcastListener());
     // Only install global listeners that can change network items for one instance
     const isGm = await OBR.player.getRole() === 'GM';
     uninstallers.push(installItemHandler(auraReplaceLock, fixer, isGm));
@@ -37,42 +38,14 @@ export default async function installAuras() {
     return () => uninstallers.forEach(uninstaller => uninstaller());
 }
 
-async function handleSizeChanges() {
-    const [
-        networkItems,
-        localItems,
-    ] = await Promise.all([
-        OBR.scene.items.getItems(),
-        OBR.scene.local.getItems(),
-    ]);
 
-    // We want to rebuild auras whose source item changed sizes
-    const changedScale = networkItems
-        .filter(isSource)
-        .filter(didChangeScale)
-        .map(getId);
-
-    // Note the new size
-    await OBR.scene.items.updateItems(changedScale, (items) => items.forEach((source) => {
-        assertItem(source, isSource);
-        source.metadata[METADATA_KEY].scale = source.scale;
-    }));
-
-    // Update the network items
-    const isAttachedToSizeChanger = (aura: Aura) => changedScale.includes(aura.attachedTo);
-    const toDelete = localItems
-        .filter(isAura)
-        .filter(isAttachedToSizeChanger)
-        .map(getId);
-    await OBR.scene.local.deleteItems(toDelete); // fix is called after this function so they'll come back rebuilt
-}
 
 function installItemHandler(auraReplaceLock: AwaitLock, fixer: LocalItemFixer, isGm: boolean) {
     return OBR.scene.items.onChange(async () => {
         await auraReplaceLock.acquireAsync();
         try {
             if (isGm) {
-                await handleSizeChanges();
+                await handleScaleChanges();
             }
 
             await fixer.fix();
@@ -111,6 +84,13 @@ function installGridHandler() {
             gridType: grid.type,
         };
 
-        await updateSceneMetadata(newSceneMetadata);
+        return await updateSceneMetadata(newSceneMetadata);
+    });
+}
+
+function installBroadcastListener() {
+    console.log("Installing broadcast listener");
+    return OBR.broadcast.onMessage(MESSAGE_CHANNEL, ({ data }) => {
+        return handleMessage(data);
     });
 }
