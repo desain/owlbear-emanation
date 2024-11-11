@@ -5,15 +5,10 @@ import { isHexGrid } from './HexGridUtils';
 
 const PARAM = 'p';
 
-export function createDistanceFunction(
-    sceneMetadata: SceneMetadata,
-    functionName: string,
-) {
-    return `
-float ${functionName}(vec2 ${PARAM}) {
-    return (${getMeasurementExpression(sceneMetadata)});
-}
-`;
+export function createDistanceFunction(sceneMetadata: SceneMetadata) {
+    return `float distance(vec2 ${PARAM}) {
+        return (${getMeasurementExpression(sceneMetadata)});
+    }`;
 }
 
 function getMeasurementExpression(sceneMetadata: SceneMetadata) {
@@ -44,7 +39,7 @@ function hasColorOpacityUniforms(style: EffectStyle): style is ColorOpacityShade
     switch (style.type) {
         case 'Bubble':
         case 'Glow':
-        case 'Fuzzy':
+        case 'Range':
             return true;
         case 'Spirits':
             return false;
@@ -104,36 +99,58 @@ export function declareUniforms(style: EffectStyle) {
     return uniforms;
 }
 
-// https://thebookofshaders.com/05/
-export const QUADRATIC_BEZIER = `
-float quadraticBezier (float x, vec2 a){
-  // adapted from BEZMATH.PS (1993)
-  // by Don Lancaster, SYNERGETICS Inc.
-  // http://www.tinaja.com/text/bezmath.html
-
-  float epsilon = 0.00001;
-  a.x = clamp(a.x,0.0,1.0);
-  a.y = clamp(a.y,0.0,1.0);
-  if (a.x == 0.5){
-    a += epsilon;
-  }
-
-  // solve t from x (an inverse operation)
-  float om2a = 1.0 - 2.0 * a.x;
-  float t = (sqrt(a.x*a.x + om2a*x) - a.x)/om2a;
-  float y = (1.0-2.0*a.y)*(t*t) + (2.0*a.y)*t;
-  return y;
+function anchoredAtCorner(sceneMetadata: SceneMetadata) {
+    return sceneMetadata.gridType === 'SQUARE' && (
+        sceneMetadata.gridMeasurement === 'ALTERNATING'
+        || sceneMetadata.gridMeasurement === 'MANHATTAN'
+        || sceneMetadata.gridMeasurement === 'CHEBYSHEV');
 }
-`;
 
-// https://thebookofshaders.com/10/
-// outputs 0 to 1
-export const RANDOM = `
-float random (vec2 st) {
-    return fract(sin(dot(st.xy,
-                         vec2(12.9898,78.233)))*
-        43758.5453123);
+// sqrt3/3  -1/3
+// 0        2/3
+const PX_TO_HEX = `mat2(
+  0.577350269, 0.0,
+  -0.333333333, 0.666666666
+)`;
+
+export function createTransformCoordinateSpace(sceneMetadata: SceneMetadata) {
+    let expression: string;
+    if (isHexGrid(sceneMetadata.gridType) && sceneMetadata.gridMeasurement === 'CHEBYSHEV') {
+        // why times sqrt3?
+        // want xy / size
+        // already have p = xy / width since width = dpi
+        // size = width / sqrt3, width = size sqrt3
+        // so p sqrt3 = sqrt3 xy / width = sqrt3 xy / size sqrt3 = xy / size
+
+        const PI_6 = Math.PI / 6; // 30 deg
+        const rotation = sceneMetadata.gridType === 'HEX_HORIZONTAL'
+            ? `mat2(cos(${PI_6}), -sin(${PI_6}), sin(${PI_6}), cos(${PI_6}))`
+            : 'mat2(1.0, 0.0, 0.0, 1.0)';
+
+        expression = `${PX_TO_HEX} * ${rotation} * p * ${Math.sqrt(3)}`;
+    } else if (anchoredAtCorner(sceneMetadata)) {
+        expression = 'max(vec2(0.0), p - itemRadiusUnits)';
+    } else {
+        expression = 'p';
+    }
+    return `vec2 transformCoordinateSpace(vec2 p) {
+        return ${expression};
+    }`;
 }
-`
 
-export const CELL_COORDS = '(fragCoord - size/2.0) / dpi';
+export function createItemRadius(sceneMetadata: SceneMetadata) {
+    const TOLERANCE = 0.01;
+    let expression: string;
+    if (isHexGrid(sceneMetadata.gridType) && sceneMetadata.gridMeasurement === 'CHEBYSHEV') {
+        // in grid mode, 
+        const itemRadius = sceneMetadata.gridMode ? 'floor(itemRadiusUnits)' : 'itemRadiusUnits';
+        expression = `${itemRadius} + ${TOLERANCE}`;
+    } else if (sceneMetadata.gridMeasurement === 'EUCLIDEAN') {
+        expression = 'itemRadiusUnits';
+    } else { // anchored at corner, so item width is already subtracted away
+        expression = String(TOLERANCE);
+    }
+    return `float getItemRadius() {
+        return ${expression};
+    }`;
+}

@@ -51,9 +51,7 @@ To make a production build run:
 - Update auras when image alignment changes
 - Find more ways to skip rebuilds (debounce, track builder)
 - More effects!
-- Listener for other plugins to call this
 - https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
-- https://www.npmjs.com/package/vite-plugin-glsl like https://github.com/owlbear-rodeo/weather does? (can't dynamically change shaders though)
 
 ## License
 
