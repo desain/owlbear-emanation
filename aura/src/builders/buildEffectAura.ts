@@ -3,9 +3,9 @@ import { EffectStyle } from '../types/AuraStyle';
 import { SceneMetadata } from '../types/metadata/SceneMetadata';
 import { declareUniforms, getUniforms } from '../utils/skslUtils';
 import { getBubbleSksl } from "./buildBubble";
-import { getFuzzySksl } from "./buildFuzzy";
-import { getGlowSksl } from "./buildGlow";
+import { getRangeSksl } from "./buildRange";
 import { getSpiritsSksl } from "./buildSpirits";
+import glow from "./shaders/glow.frag";
 
 
 function getSksl(sceneMetadata: SceneMetadata, style: EffectStyle, numUnits: number): string {
@@ -15,9 +15,9 @@ function getSksl(sceneMetadata: SceneMetadata, style: EffectStyle, numUnits: num
         case 'Bubble':
             return declareUniforms(style) + getBubbleSksl(sceneMetadata);
         case 'Glow':
-            return declareUniforms(style) + getGlowSksl(sceneMetadata);
-        case 'Fuzzy':
-            return declareUniforms(style) + getFuzzySksl(sceneMetadata);
+            return declareUniforms(style) + glow;
+        case 'Range':
+            return declareUniforms(style) + getRangeSksl(sceneMetadata);
         default:
             const _exhaustiveCheck: never = style;
             throw new Error(`Unhandled aura type: ${_exhaustiveCheck}`);
@@ -32,7 +32,7 @@ export function buildEffectAura(
     absoluteItemSize: number,
 ): Effect {
     const sksl = getSksl(sceneMetadata, style, numUnits);
-    // console.log(sksl);
+    console.log(sksl);
     // give the effect one extra grid space for overdraw
     const wh = (2 * (numUnits + 1) * sceneMetadata.gridDpi + absoluteItemSize);
     return buildEffect()

@@ -1,7 +1,10 @@
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import glsl from 'vite-plugin-glsl';
+
 
 export default defineConfig({
+    plugins: [glsl()],
     build: {
         assetsInlineLimit: 0, // disable inlining assets since that doesn't work for OBR
         rollupOptions: {

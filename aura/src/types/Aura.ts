@@ -35,7 +35,7 @@ export function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
     switch (auraEntry.style.type) {
         case 'Bubble':
         case 'Glow':
-        case 'Fuzzy':
+        case 'Range':
             if (isEffect(aura)) {
                 setColorUniform(aura, auraEntry.style.color);
                 setOpacityUniform(aura, auraEntry.style.opacity);
