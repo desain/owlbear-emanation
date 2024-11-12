@@ -11,7 +11,7 @@
         "title": "Aura Settings",
         "icon": "/logo.png",
         "popover": "/aura/action.html",
-        "height": "300",
+        "height": "350",
         "width": "250"
     }
 }

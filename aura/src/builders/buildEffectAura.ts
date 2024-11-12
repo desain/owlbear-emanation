@@ -32,7 +32,7 @@ export function buildEffectAura(
     absoluteItemSize: number,
 ): Effect {
     const sksl = getSksl(sceneMetadata, style, numUnits);
-    console.log(sksl);
+    // console.log(sksl);
     // give the effect one extra grid space for overdraw
     const wh = (2 * (numUnits + 1) * sceneMetadata.gridDpi + absoluteItemSize);
     return buildEffect()
