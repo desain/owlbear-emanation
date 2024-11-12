@@ -9,6 +9,9 @@ export class MenuItem {
         public readonly sourceId: string,
         public readonly aura: AuraEntry,
     ) { }
+    toKey() {
+        return `${this.sourceId}/${this.aura.sourceScopedId}`;
+    }
     toSpecifier(): Specifier {
         return { sourceId: this.sourceId, sourceScopedId: this.aura.sourceScopedId };
     }
