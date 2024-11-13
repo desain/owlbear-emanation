@@ -3,12 +3,13 @@ import add from "../assets/add.svg";
 import edit from "../assets/edit.svg";
 
 import { CONTEXTMENU_CREATE_ID, CONTEXTMENU_EDIT_ID, METADATA_KEY } from "./constants";
+import { getPlayerMetadata } from './types/metadata/PlayerMetadata';
 import { createAurasWithDefaults } from "./utils/createAuras";
 
 export default function createContextMenu() {
     OBR.contextMenu.create({
         id: CONTEXTMENU_CREATE_ID,
-        shortcut: 'E',
+        shortcut: 'E', // Emanation
         icons: [{
             icon: add,
             label: "Add Aura",
@@ -22,7 +23,8 @@ export default function createContextMenu() {
             },
         }],
         async onClick(context, _) {
-            await createAurasWithDefaults(context.items as Image[]); // Typecast OK because filter requires image
+            const playerMetadata = await getPlayerMetadata();
+            createAurasWithDefaults(context.items as Image[], playerMetadata); // Typecast OK because filter requires image
         },
     });
     OBR.contextMenu.create({
@@ -45,7 +47,7 @@ export default function createContextMenu() {
         ],
         embed: {
             url: "/aura/contextmenu.html",
-            height: 200,
+            height: 210,
         },
     });
 }
