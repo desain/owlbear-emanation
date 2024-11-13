@@ -10,7 +10,7 @@ import { getPlayerMetadata, PlayerMetadata } from '../../types/metadata/PlayerMe
 import { isSource, updateEntry } from '../../types/Source';
 import { Specifier } from '../../types/Specifier';
 import { createAuras, createAurasWithDefaults } from '../../utils/createAuras';
-import { hasId } from '../../utils/itemUtils';
+import { getId, hasId } from '../../utils/itemUtils';
 import { groupBy } from '../../utils/jsUtils';
 import { removeAura, removeAuras } from '../../utils/removeAuras';
 import { ColorInput } from '../components/ColorInput';
@@ -59,7 +59,7 @@ function AuraControls({
                     })}
                 />
             </Stack>
-            <Stack direction="row" gap={1} sx={{ width: '100%', mb: 2 }}>
+            <Stack direction="row" gap={1} sx={{ width: '100%' }}>
                 <ColorInput
                     value={getColor(menuItem.aura.style, playerMetadata)}
                     onChange={color => updateEntry(menuItem.toSpecifier(), entry => {
@@ -80,7 +80,7 @@ function AuraControls({
                     </IconButton>
                 </Control>
             </Stack>
-            <Divider />
+            <Divider sx={{ mt: 2, mb: 2 }} />
         </>
     );
 }
@@ -117,18 +117,12 @@ function ExtantAuras({ selectedItems, grid, playerMetadata }: {
         );
 }
 
-export function ContextMenu({
-    initialPlayerMetadata,
-    selection
-}: {
-    initialPlayerMetadata: PlayerMetadata,
-    selection: string[],
-}) {
-    const playerMetadata = usePlayerMetadata(initialPlayerMetadata);
+export function ContextMenu() {
+    const playerMetadata = usePlayerMetadata();
     const grid = useGrid();
-    const selectedItems = useSelection(selection);
+    const selectedItems = useSelection();
 
-    if (grid === null) {
+    if (grid === null || playerMetadata === null || selectedItems.length === 0) {
         return null;
     }
 
@@ -148,7 +142,7 @@ export function ContextMenu({
                     variant='outlined'
                     startIcon={<DeleteForeverIcon />}
                     color='error'
-                    onClick={() => removeAuras(selection)}
+                    onClick={() => removeAuras(selectedItems.map(getId))}
                     sx={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                 >
                     Delete All

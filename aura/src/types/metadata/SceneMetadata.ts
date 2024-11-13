@@ -1,4 +1,4 @@
-import OBR, { GridMeasurement, GridType } from "@owlbear-rodeo/sdk";
+import OBR, { GridMeasurement, GridType, Metadata } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
 
 export type SceneMetadata = {
@@ -9,15 +9,19 @@ export type SceneMetadata = {
     gridType: GridType,
 }
 
-export async function getSceneMetadata(): Promise<SceneMetadata> {
-    return (await OBR.scene.getMetadata())[METADATA_KEY] as SceneMetadata | undefined
-        ?? {
+async function defaultSceneMetadata(): Promise<SceneMetadata> {
+    return {
         gridMode: true,
         gridDpi: await OBR.scene.grid.getDpi(),
         gridMultiplier: (await OBR.scene.grid.getScale()).parsed.multiplier,
         gridMeasurement: await OBR.scene.grid.getMeasurement(),
         gridType: await OBR.scene.grid.getType(),
     };
+}
+
+export async function getSceneMetadata(apiMetadata?: Metadata): Promise<SceneMetadata> {
+    const metadata = apiMetadata ?? await OBR.scene.getMetadata();
+    return metadata[METADATA_KEY] as SceneMetadata | undefined ?? defaultSceneMetadata();
 }
 
 export function sceneMetadataChanged(newMetadata: Partial<SceneMetadata>, oldMetadata: SceneMetadata): boolean {

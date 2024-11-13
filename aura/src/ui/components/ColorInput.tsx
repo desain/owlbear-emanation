@@ -26,7 +26,7 @@ export function ColorInput({ value, onChange, ...props }: {
     }, [color]);
 
     return (
-        <Control {...props} label="Color">
+        <Control {...props} sx={{ justifyContent: 'center' }} label="Color">
             <label className="color-label" style={{ background: color }}>
                 <input type="color"
                     value={color}

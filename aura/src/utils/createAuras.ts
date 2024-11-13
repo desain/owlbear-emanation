@@ -1,11 +1,10 @@
 import OBR, { Image } from '@owlbear-rodeo/sdk';
-import { getPlayerMetadata } from "../types/metadata/PlayerMetadata";
+import { PlayerMetadata } from "../types/metadata/PlayerMetadata";
 
 import { AuraStyle, createStyle } from '../types/AuraStyle';
 import { addEntry } from '../types/metadata/SourceMetadata';
 
-export async function createAurasWithDefaults(items: Image[]) {
-    const playerMetadata = await getPlayerMetadata();
+export function createAurasWithDefaults(items: Image[], playerMetadata: PlayerMetadata) {
     return createAuras(
         items,
         playerMetadata.size,

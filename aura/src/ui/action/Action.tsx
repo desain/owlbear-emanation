@@ -3,24 +3,19 @@ import Stack from '@mui/material/Stack';
 import React from 'react';
 import { updatePlayerMetadata } from "../../types/metadata/PlayerMetadata";
 
-import { PlayerMetadata } from '../../types/metadata/PlayerMetadata';
-import { SceneMetadata, updateSceneMetadata } from '../../types/metadata/SceneMetadata';
+import { updateSceneMetadata } from '../../types/metadata/SceneMetadata';
 import { ColorInput } from '../components/ColorInput';
 import { OpacitySlider } from '../components/OpacitySlider';
 import { SizeInput } from '../components/SizeInput';
 import { StyleSelector } from '../components/StyleSelector';
 import { useGrid, usePlayerMetadata, useSceneMetadata } from '../hooks';
 
-interface ActionProps {
-    initialPlayerMetadata: PlayerMetadata;
-    initialSceneMetadata: SceneMetadata;
-}
-
-export function Action({ initialPlayerMetadata, initialSceneMetadata }: ActionProps) {
-    const playerMetadata = usePlayerMetadata(initialPlayerMetadata);
-    const sceneMetadata = useSceneMetadata(initialSceneMetadata);
+export function Action() {
+    const playerMetadata = usePlayerMetadata();
+    const sceneMetadata = useSceneMetadata();
     const grid = useGrid();
-    if (!grid) {
+
+    if (grid === null || playerMetadata === null || sceneMetadata === null) {
         return <div>Loading...</div>;
     }
 
@@ -53,8 +48,10 @@ export function Action({ initialPlayerMetadata, initialSceneMetadata }: ActionPr
                 control={
                     <Switch
                         checked={sceneMetadata.gridMode}
-                        onChange={(_, gridMode) => updateSceneMetadata({ gridMode })} />}
-                label="Shape to grid" />
+                        onChange={(_, gridMode) => updateSceneMetadata({ gridMode })}
+                    />}
+                label="Shape to grid"
+            />
         </FormGroup>
     </>;
 }
