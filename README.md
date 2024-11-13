@@ -27,7 +27,7 @@ After checkout, run `yarn dlx @yarnpkg/sdks vscode` to set up development in VS 
 
 This project is a simple Typescript app.
 
-The background script `background.ts` communicates with Owlbear Rodeo to create a context menu item. When that item is clicked a popup is shown with the `contextmenu.ts` site rendered.
+The background script `background.ts` communicates with Owlbear Rodeo to create a context menu item. When that item is clicked a popup is shown with the `contextmenu.html` site rendered.
 
 The `action.html` page is rendered as an action item, which controls global settings for auras.
 
