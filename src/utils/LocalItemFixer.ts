@@ -73,7 +73,11 @@ export default class LocalItemFixer {
             return undefined;
         }
         return source.metadata[METADATA_KEY].auras
-            .find(entry => aura.id === this.sourceAndScopedToLocal.get(LocalItemFixer.key(source, entry))?.localItemId);
+            .find(entry => {
+                const key = LocalItemFixer.key(source, entry);
+                const localItemId = this.sourceAndScopedToLocal.get(key)?.localItemId;
+                return localItemId === aura.id;
+            });
     }
 
     /**

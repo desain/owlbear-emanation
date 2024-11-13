@@ -1,6 +1,6 @@
-import OBR, { Image, isImage, Item, Math2 } from "@owlbear-rodeo/sdk";
+import OBR, { Image, isImage, Item } from "@owlbear-rodeo/sdk";
 
-import { METADATA_KEY, VECTOR2_COMPARE_EPSILON } from '../constants';
+import { METADATA_KEY } from '../constants';
 import { assertItem } from '../utils/itemUtils';
 import { HasMetadata } from './metadata/metadataUtils';
 import { AuraEntry, SourceMetadata } from "./metadata/SourceMetadata";
@@ -29,13 +29,4 @@ export async function updateEntry(specifier: Specifier | null, updater: (aura: A
             updater(entry);
         }
     }));
-}
-
-/**
- * The item's scale is the source of truth, and the metadata follows.
- * @returns Whether the source has changed size since the last time we checked.
- *          If so, metadata needs to be updated.
- */
-export function didChangeScale(source: Source) {
-    return !Math2.compare(source.scale, source.metadata[METADATA_KEY].scale, VECTOR2_COMPARE_EPSILON);
 }
