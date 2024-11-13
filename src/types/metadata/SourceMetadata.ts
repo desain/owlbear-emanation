@@ -1,4 +1,4 @@
-import { Item, Vector2 } from '@owlbear-rodeo/sdk';
+import { Item } from '@owlbear-rodeo/sdk';
 import { METADATA_KEY } from '../../constants';
 import { AuraStyle } from '../AuraStyle';
 
@@ -15,7 +15,6 @@ export interface AuraEntry {
  * Metadata on an aura source.
  */
 export interface SourceMetadata {
-    scale: Vector2; // Last seen scale for item - used to check for item scale changes
     auras: AuraEntry[];
 }
 
@@ -24,10 +23,7 @@ export function getItemMetadata(item: Item): SourceMetadata | undefined {
 }
 
 function getItemMetadataOrDefault(item: Item): SourceMetadata {
-    return getItemMetadata(item) ?? {
-        scale: item.scale,
-        auras: [],
-    };
+    return getItemMetadata(item) ?? { auras: [] };
 }
 
 export function addEntry(item: Item, style: AuraStyle, size: number) {
