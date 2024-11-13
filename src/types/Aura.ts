@@ -2,23 +2,27 @@ import { Curve, Effect, isCurve, isEffect, isShape, Item, Shape, Uniform } from 
 import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
 import { METADATA_KEY } from "../constants";
 import { AuraEntry } from './metadata/SourceMetadata';
+import { HasMetadata } from './metadata/metadataUtils';
 
 export interface IsAttached {
     attachedTo: string;
 }
 
-export type Circle = Shape & { shapeType: 'CIRCLE', }
-export type SimpleAuraDrawable = Circle | Curve;
-export type Aura = (SimpleAuraDrawable | Effect) & IsAttached;
+interface AuraMetadata {
+    isAura: true;
+}
 
+export type Circle = Shape & { shapeType: 'CIRCLE', }
 function isCircle(item: Item): item is Circle {
     return isShape(item) && item.shapeType === 'CIRCLE';
 }
 
+export type SimpleAuraDrawable = Circle | Curve;
 export function isDrawable(item: Item): item is SimpleAuraDrawable {
     return isCircle(item) || isCurve(item);
 }
 
+export type Aura = (SimpleAuraDrawable | Effect) & IsAttached & HasMetadata<AuraMetadata>;
 export function isAura(item: Item): item is Aura {
     return (isEffect(item) || isCurve(item) || isCircle(item))
         && item.attachedTo !== undefined

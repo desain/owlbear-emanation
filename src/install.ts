@@ -58,7 +58,10 @@ export default async function installAuras() {
     uninstallers.push(installSceneMetadataWatcher(withLock, fixer, getGrid));
 
     await fixer.fix(getGrid());
-    return () => uninstallers.forEach(uninstaller => uninstaller());
+    return () => {
+        console.log('Uninstalling Auras and Emanations');
+        uninstallers.forEach(uninstaller => uninstaller());
+    };
 }
 
 async function rebuildAuras(fixer: LocalItemFixer, grid: GridParsed, ids?: string[]) {
