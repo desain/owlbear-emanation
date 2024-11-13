@@ -10,7 +10,7 @@
     "action": {
         "title": "Aura Settings",
         "icon": "/logo.png",
-        "popover": "/aura/action.html",
+        "popover": "/action.html",
         "height": "350",
         "width": "250"
     }
