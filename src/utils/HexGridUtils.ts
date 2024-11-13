@@ -6,15 +6,15 @@ export function isHexGrid(gridType: GridType): gridType is HexGridType {
     return gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL';
 }
 
-export type HexGridUtils = {
-    absoluteSideLength: number,
-    mainAxisSpacing: number,
-    crossAxisSpacing: number,
+export interface HexGridUtils {
+    absoluteSideLength: number;
+    mainAxisSpacing: number;
+    crossAxisSpacing: number;
     /**
      * Degrees to rotate a shape. 0 if pointy top, 30 if flat top
      */
-    baseRotationDegrees: number,
-    getAuraRadius: (numHexes: number, absoluteItemSize: number) => number,
+    baseRotationDegrees: number;
+    getAuraRadius: (numHexes: number, absoluteItemSize: number) => number;
 }
 
 

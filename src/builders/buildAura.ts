@@ -3,7 +3,8 @@ import { METADATA_KEY } from "../constants";
 import { Aura, IsAttached } from "../types/Aura";
 import { AuraStyle } from '../types/AuraStyle';
 import { HasMetadata } from '../types/metadata/metadataUtils';
-import { SceneMetadata } from "../types/metadata/SceneMetadata";
+import { SceneMetadata } from '../types/metadata/SceneMetadata';
+import { GridParsed } from '../ui/GridParsed';
 import { buildEffectAura } from "./buildEffectAura";
 import { buildSimpleAura } from "./buildSimple";
 
@@ -18,15 +19,16 @@ export default function buildAura(
     style: AuraStyle,
     size: number,
     sceneMetadata: SceneMetadata,
+    grid: GridParsed,
 ): Aura {
 
-    const numUnits = size / sceneMetadata.gridMultiplier;
-    const unitSize = sceneMetadata.gridDpi / item.grid.dpi;
+    const numUnits = size / grid.parsedScale.multiplier;
+    const unitSize = grid.dpi / item.grid.dpi;
     const absoluteItemSize = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) * unitSize;
 
     const aura = style.type === 'Simple'
-        ? buildSimpleAura(sceneMetadata, style, item.position, numUnits, absoluteItemSize)
-        : buildEffectAura(sceneMetadata, style, item.position, numUnits, absoluteItemSize);
+        ? buildSimpleAura(sceneMetadata, grid, style, item.position, numUnits, absoluteItemSize)
+        : buildEffectAura(sceneMetadata, grid, style, item.position, numUnits, absoluteItemSize);
 
     aura.locked = true;
     aura.name = `Aura ${item.name} ${size}`;

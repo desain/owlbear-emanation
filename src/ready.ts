@@ -6,7 +6,6 @@ export default function ready(install: Installer) {
     OBR.onReady(async () => {
         uninstall();
         if (await OBR.scene.isReady()) {
-            console.log('scene isready');
             uninstall = await install();
         }
         OBR.scene.onReadyChange(async (ready) => {
