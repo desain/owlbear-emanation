@@ -2,7 +2,13 @@ export function isObject(object: unknown): object is object {
     return object != null && typeof object === "object";
 };
 
-export function isDeepEqual<T extends object>(object1: T, object2: T) {
+export function isDeepEqual<T extends object>(object1: T | undefined, object2: T | undefined) {
+    if (object1 === undefined && object2 === undefined) {
+        return true;
+    } else if (object1 === undefined || object2 === undefined) {
+        return false;
+    }
+
     const objKeys1: (keyof T)[] = Object.keys(object1) as (keyof T)[];
     const objKeys2 = Object.keys(object2);
 

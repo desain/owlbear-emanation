@@ -2,7 +2,7 @@ import OBR, { Item } from '@owlbear-rodeo/sdk';
 import React, { useEffect, useState } from 'react';
 import { PlayerMetadata, getPlayerMetadata } from '../types/metadata/PlayerMetadata';
 import { SceneMetadata, getSceneMetadata } from '../types/metadata/SceneMetadata';
-import { GridParsed } from './GridParsed';
+import { GridParsed, watchGrid } from './GridParsed';
 
 export function usePlayerMetadata() {
     const [playerMetadata, setPlayerMetadataHookState] = useState(null as PlayerMetadata | null);
@@ -32,43 +32,10 @@ export function useSceneMetadata() {
 
 export function useGrid() {
     const [grid, setGrid] = React.useState(null as GridParsed | null);
-
     useEffect(() => {
-        async function fetchGrid() {
-            const [
-                dpi,
-                fullScale,
-                measurement,
-                type,
-            ] = await Promise.all([
-                OBR.scene.grid.getDpi(),
-                OBR.scene.grid.getScale(),
-                OBR.scene.grid.getMeasurement(),
-                OBR.scene.grid.getType(),
-            ]);
-            setGrid({
-                dpi,
-                measurement,
-                parsedScale: fullScale.parsed,
-                type,
-            });
-        }
-
-        const unsubscribeGrid = OBR.scene.grid.onChange(async grid => {
-            const fullScale = await OBR.scene.grid.getScale();
-            setGrid({
-                ...grid,
-                parsedScale: fullScale.parsed,
-            });
-        });
-
-        if (grid === null) {
-            void fetchGrid();
-        }
-
-        return unsubscribeGrid;
-    }, [grid])
-
+        const [, uninstall] = watchGrid(grid, setGrid);
+        return uninstall;
+    }, [grid]);
     return grid;
 }
 

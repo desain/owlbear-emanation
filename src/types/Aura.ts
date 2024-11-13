@@ -1,9 +1,6 @@
 import { Curve, Effect, isCurve, isEffect, isShape, Item, Shape, Uniform } from "@owlbear-rodeo/sdk";
 import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
 import { METADATA_KEY } from "../constants";
-import { isDeepEqual } from '../utils/jsUtils';
-import { AuraMetadata } from "./metadata/AuraMetadata";
-import { HasMetadata } from './metadata/metadataUtils';
 import { AuraEntry } from './metadata/SourceMetadata';
 
 export interface IsAttached {
@@ -12,9 +9,7 @@ export interface IsAttached {
 
 export type Circle = Shape & { shapeType: 'CIRCLE', }
 export type SimpleAuraDrawable = Circle | Curve;
-export type Aura = (SimpleAuraDrawable | Effect)
-    & HasMetadata<AuraMetadata>
-    & IsAttached;
+export type Aura = (SimpleAuraDrawable | Effect) & IsAttached;
 
 function isCircle(item: Item): item is Circle {
     return isShape(item) && item.shapeType === 'CIRCLE';
@@ -54,24 +49,6 @@ export function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
         case 'Spirits':
             break; // nothing to set
     }
-}
-/**
- * The entry's params are the source of truth, and the metadata follows.
- * @returns Whether the aura's parameters have changed in a way that requires
- *          fully rebuilding the aura.
- */
-export function buildParamsChanged(localAura: Aura, aura: AuraEntry) {
-    return localAura.metadata[METADATA_KEY].size !== aura.size
-        || localAura.metadata[METADATA_KEY].style.type !== aura.style.type;
-}
-
-/**
- * The entry's params are the source of truth, and the metadata follows.
- * @returns Whether the aura's parameters have changed in a way that can be
- *          updated without rebuilding the aura.
- */
-export function drawingParamsChanged(localAura: Aura, aura: AuraEntry) {
-    return !isDeepEqual(localAura.metadata[METADATA_KEY].style, aura.style);
 }
 
 interface ColorUniform extends Uniform {
