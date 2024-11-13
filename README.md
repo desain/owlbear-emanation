@@ -2,7 +2,7 @@
 
 This extension allows you to add auras to any character in a variety of styles.
 
-![Interface](./docs/header.png)
+![Interface](https://github.com/user-attachments/assets/1231da26-2939-4877-a023-3444ed2018b7)
 
 ## Installing
 
@@ -40,13 +40,13 @@ Menu options:
 
 ### Resizing tokens
 
-![Resizing](https://github.com/user-attachments/assets/71ca78dc-01bd-4de4-b110-9d3072eba336)
+https://github.com/user-attachments/assets/71ca78dc-01bd-4de4-b110-9d3072eba336
 
 When you drag to resize a token, the aura will change size after you let go.
 
 ### Changing grid types
 
-![Changing Grid Type](https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a)
+https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
 
@@ -59,7 +59,7 @@ To change the default settings for newly created auras, open the Auras actions m
 In addition to the standard auras settings, this menu has an additional setting:
 - **Shape to grid**: When enabled, causes auras to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 
-![Shape to grid changing](https://github.com/user-attachments/assets/130b5f4f-14bb-41ed-9fa2-ecd1b1354b79)
+https://github.com/user-attachments/assets/130b5f4f-14bb-41ed-9fa2-ecd1b1354b79
 
 ### Aura Styles
 
