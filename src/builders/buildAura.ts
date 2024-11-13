@@ -1,5 +1,5 @@
 import { Image } from "@owlbear-rodeo/sdk";
-import { METADATA_KEY } from "../constants";
+import { METADATA_KEY } from '../constants';
 import { Aura, IsAttached } from "../types/Aura";
 import { AuraStyle } from '../types/AuraStyle';
 import { HasMetadata } from '../types/metadata/metadataUtils';
@@ -21,7 +21,6 @@ export default function buildAura(
     sceneMetadata: SceneMetadata,
     grid: GridParsed,
 ): Aura {
-
     const numUnits = size / grid.parsedScale.multiplier;
     const unitSize = grid.dpi / item.grid.dpi;
     const absoluteItemSize = Math.max(item.image.width * item.scale.x, item.image.height * item.scale.y) * unitSize;
@@ -37,13 +36,11 @@ export default function buildAura(
     aura.visible = item.visible;
     aura.attachedTo = item.id;
     aura.disableAttachmentBehavior = ['ROTATION', 'LOCKED', 'COPY'];
-
-    const metadata = {
-        size,
-        style,
+    const metadata = { isAura: true } as const;
+    aura.metadata[METADATA_KEY] = {
         ...aura.metadata[METADATA_KEY] ?? {},
+        ...metadata,
     };
-    aura.metadata[METADATA_KEY] = metadata;
 
     return aura as typeof aura
         & IsAttached

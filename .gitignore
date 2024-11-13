@@ -15,6 +15,7 @@ dist-ssr
 .yarnrc.yml
 .pnp.cjs
 .pnp.loader.mjs
+*.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
