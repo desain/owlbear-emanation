@@ -28,7 +28,7 @@ function createLock() {
 }
 
 export default async function installAuras() {
-    console.log("Auras and Emanations version 0.1.0");
+    console.log("Auras and Emanations version 1.0.0");
     await createContextMenu();
 
     const uninstallers: VoidFunction[] = [];
