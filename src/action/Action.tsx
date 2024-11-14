@@ -1,9 +1,4 @@
-import {
-    FormControlLabel,
-    FormGroup,
-    FormHelperText,
-    Switch,
-} from "@mui/material";
+import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 import Stack from "@mui/material/Stack";
 import { updatePlayerMetadata } from "../types/metadata/PlayerMetadata";
 
@@ -12,6 +7,7 @@ import { ColorInput } from "../ui/components/ColorInput";
 import { OpacitySlider } from "../ui/components/OpacitySlider";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
+import { GmGate } from "../ui/GmGate";
 import { useGrid, usePlayerMetadata, useSceneMetadata } from "../ui/hooks";
 
 export function SceneSettings() {
@@ -81,7 +77,9 @@ export function Action() {
                     onChange={(opacity) => updatePlayerMetadata({ opacity })}
                 />
             </Stack>
-            <SceneSettings />
+            <GmGate>
+                <SceneSettings />
+            </GmGate>
         </>
     );
 }

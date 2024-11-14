@@ -17,9 +17,12 @@ export function isSource(item: Item): item is Source {
 }
 
 export function getEntry(
-    source: Source,
+    source: Item | undefined,
     sourceScopedId: string,
 ): AuraEntry | undefined {
+    if (source === undefined || !isSource(source)) {
+        return undefined;
+    }
     return source.metadata[METADATA_KEY].auras.find(
         (aura) => aura.sourceScopedId === sourceScopedId,
     );
@@ -32,7 +35,7 @@ export async function updateEntry(
     if (specifier === null) {
         return;
     }
-    await OBR.scene.items.updateItems([specifier.sourceId], (items) =>
+    return await OBR.scene.items.updateItems([specifier.sourceId], (items) =>
         items.forEach((item) => {
             assertItem(item, isSource);
             const entry = getEntry(item, specifier.sourceScopedId);

@@ -1,25 +1,41 @@
-import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
+import OBR, { Item } from "@owlbear-rodeo/sdk";
 
+import AwaitLock from "await-lock";
 import buildAura from "../builders/buildAura";
 import { METADATA_KEY } from "../constants";
 import { Aura, isAura, updateDrawingParams } from "../types/Aura";
-import { AuraStyle } from "../types/AuraStyle";
-import { GridParsed } from "../types/GridParsed";
+import { createGridWatcher, GridParsed } from "../types/GridParsed";
 import {
     getSceneMetadata,
     SceneMetadata,
 } from "../types/metadata/SceneMetadata";
-import { AuraEntry } from "../types/metadata/SourceMetadata";
-import { isSource } from "../types/Source";
-import { getId, getSource } from "./itemUtils";
-import { isDeepEqual } from "./jsUtils";
+import {
+    AuraEntry,
+    buildParamsChanged,
+    drawingParamsChanged,
+} from "../types/metadata/SourceMetadata";
+import { getEntry, isSource, Source } from "../types/Source";
+import { assertItem, didChangeScale, hasId } from "./itemUtils";
+import { deferCallAll, getOrInsert, isDeepEqual } from "./jsUtils";
 
-type SourceIdAndScopedId = string;
+type SourceAndAuras = {
+    source: Source;
+    /**
+     * Map of scoped ID to local aura item ID.
+     */
+    auras: Map<string, string>;
+};
 
-interface LocalAuraData {
-    localItemId: string;
-    size: number;
-    style: AuraStyle;
+function createLock() {
+    const lock = new AwaitLock();
+    return async (runnable: () => Promise<void>) => {
+        await lock.acquireAsync();
+        try {
+            await runnable();
+        } finally {
+            lock.release();
+        }
+    };
 }
 
 /**
@@ -27,176 +43,182 @@ interface LocalAuraData {
  * TODO: Use the Reactor design pattern from official OBR plugins.
  */
 export default class LocalItemFixer {
-    sourceAndScopedToLocal: Map<SourceIdAndScopedId, LocalAuraData> = new Map();
+    private sources: Map<string, SourceAndAuras> = new Map();
 
-    static install(): [LocalItemFixer, () => void] {
+    static async install(): Promise<[LocalItemFixer, VoidFunction]> {
         const fixer = new LocalItemFixer();
+        const withLock = createLock();
+
+        const [getGrid, unsubscribeGrid] = await createGridWatcher(
+            async (grid) => {
+                return await withLock(async () => {
+                    const sceneMetadata = await getSceneMetadata();
+                    const items = await OBR.scene.items.getItems();
+                    return await fixer.fix(grid, items, sceneMetadata, true);
+                });
+            },
+        );
+
+        let oldMetadata: SceneMetadata | null = null;
+        const unsubscribeSceneMetadata = OBR.scene.onMetadataChange(
+            async (metadata) => {
+                return await withLock(async () => {
+                    const newMetadata = metadata[METADATA_KEY] as
+                        | SceneMetadata
+                        | undefined;
+                    if (
+                        newMetadata !== undefined &&
+                        !isDeepEqual(oldMetadata, newMetadata)
+                    ) {
+                        const items = await OBR.scene.items.getItems();
+                        await fixer.fix(getGrid(), items, newMetadata, true);
+                        oldMetadata = newMetadata;
+                    }
+                });
+            },
+        );
+
+        const unsubscribeItems = OBR.scene.items.onChange(async (items) => {
+            return await withLock(async () => {
+                const sceneMetadata = await getSceneMetadata();
+                await fixer.fix(getGrid(), items, sceneMetadata);
+            });
+        });
+
         return [
             fixer,
-            OBR.scene.local.onChange((items) =>
-                fixer.forgetDeletedLocals(items),
+            deferCallAll(
+                unsubscribeGrid,
+                unsubscribeSceneMetadata,
+                unsubscribeItems,
             ),
         ];
     }
 
     private constructor() {}
 
-    private static key(source: Item, aura: AuraEntry): SourceIdAndScopedId {
-        return source.id + "/" + aura.sourceScopedId;
-    }
-
-    private forgetDeletedLocals(newLocals: Item[]) {
-        const localIds = newLocals.map(getId);
-        const toForget = [...this.sourceAndScopedToLocal.entries()].filter(
-            ([, { localItemId }]) => !localIds.includes(localItemId),
-        );
-        for (const [key] of toForget) {
-            this.sourceAndScopedToLocal.delete(key);
+    private getNewAuras(source: Source): AuraEntry[] {
+        const oldEntry = this.sources.get(source.id);
+        if (oldEntry === undefined) {
+            return source.metadata[METADATA_KEY].auras;
         }
+        return source.metadata[METADATA_KEY].auras.filter(
+            (aura) => !oldEntry.auras.has(aura.sourceScopedId),
+        );
     }
 
-    private static add(
-        toAdd: [SourceIdAndScopedId, Item, LocalAuraData][],
-        source: Image,
-        auraEntry: AuraEntry,
-        sceneMetadata: SceneMetadata,
+    async fix(
         grid: GridParsed,
+        networkItems: Item[],
+        sceneMetadata: SceneMetadata,
+        rebuildAll: boolean = false,
     ) {
-        const aura = buildAura(
-            source,
-            auraEntry.style,
-            auraEntry.size,
-            sceneMetadata,
-            grid,
-        );
-        const key = LocalItemFixer.key(source, auraEntry);
-        const data = {
-            localItemId: aura.id,
-            size: auraEntry.size,
-            style: auraEntry.style,
-        };
-        toAdd.push([key, aura, data]);
-    }
-
-    private remove(toDelete: string[], aura: Aura) {
-        // Remove auras that shouldn't exist anymore
-        toDelete.push(aura.id);
-        const entry = [...this.sourceAndScopedToLocal.entries()].find(
-            ([, value]) => value.localItemId === aura.id,
-        );
-        if (entry) {
-            this.sourceAndScopedToLocal.delete(entry[0]);
-        }
-    }
-
-    private getEntry(
-        source: Image | undefined,
-        aura: Aura,
-    ): AuraEntry | undefined {
-        if (!source || !isSource(source)) {
-            return undefined;
-        }
-        return source.metadata[METADATA_KEY].auras.find((entry) => {
-            const key = LocalItemFixer.key(source, entry);
-            const localItemId =
-                this.sourceAndScopedToLocal.get(key)?.localItemId;
-            return localItemId === aura.id;
-        });
-    }
-
-    /**
-     * @returns Whether the aura's parameters have changed in a way that requires
-     *          fully rebuilding the aura.
-     */
-    private buildParamsChanged(aura: Aura, entry: AuraEntry) {
-        const oldData = [...this.sourceAndScopedToLocal.values()].find(
-            (data) => data.localItemId === aura.id,
-        );
-        return (
-            oldData?.size !== entry.size ||
-            oldData.style.type !== entry.style.type
-        );
-    }
-
-    /**
-     * @returns Whether the aura's parameters have changed in a way that can be
-     *          updated without rebuilding the aura.
-     */
-    private drawingParamsChanged(aura: Aura, entry: AuraEntry) {
-        const oldData = [...this.sourceAndScopedToLocal.values()].find(
-            (data) => data.localItemId === aura.id,
-        );
-        return !isDeepEqual(oldData?.style, entry.style);
-    }
-
-    async fix(grid: GridParsed) {
-        const [networkItems, localItems, sceneMetadata] = await Promise.all([
-            OBR.scene.items.getItems(),
-            OBR.scene.local.getItems(),
-            getSceneMetadata(),
-        ]);
-        const toAdd: [SourceIdAndScopedId, Aura, LocalAuraData][] = [];
+        const toAdd: Aura[] = [];
         const toDelete: string[] = [];
-        const toUpdate: Aura[] = [];
+        const toUpdate: string[] = [];
         const updaters: Map<string, ((aura: Aura) => void)[]> = new Map();
-        const scheduleDrawingParamsUpdate = (aura: Aura, entry: AuraEntry) => {
-            toUpdate.push(aura);
-            if (updaters.get(aura.id) === undefined) {
-                updaters.set(aura.id, []);
-            }
-            updaters.get(aura.id)?.push((item: Item) => {
-                if (isAura(item)) {
-                    updateDrawingParams(item, entry);
-                }
-            });
+
+        const newSources: typeof this.sources = new Map();
+        const saveAuraId = (
+            source: Source,
+            entry: AuraEntry,
+            auraId: string,
+        ) => {
+            const sourceAndAuras = getOrInsert(newSources, source.id, () => ({
+                source,
+                auras: new Map(),
+            }));
+            sourceAndAuras.auras.set(entry.sourceScopedId, auraId);
+        };
+        const createAura = (source: Source, entry: AuraEntry) => {
+            const aura = buildAura(
+                source,
+                entry.style,
+                entry.size,
+                sceneMetadata,
+                grid,
+            );
+            toAdd.push(aura);
+            saveAuraId(source, entry, aura.id);
         };
 
         // Create auras that don't exist yet
         for (const source of networkItems) {
-            if (!isSource(source)) {
-                continue;
-            }
-            for (const aura of source.metadata[METADATA_KEY].auras) {
-                if (
-                    this.sourceAndScopedToLocal.get(
-                        LocalItemFixer.key(source, aura),
-                    ) === undefined
-                ) {
-                    LocalItemFixer.add(
-                        toAdd,
-                        source,
-                        aura,
-                        sceneMetadata,
-                        grid,
-                    );
+            if (isSource(source)) {
+                for (const newAuraEntry of this.getNewAuras(source)) {
+                    createAura(source, newAuraEntry);
                 }
             }
         }
 
-        for (const aura of localItems) {
-            if (!isAura(aura)) {
+        // Update and delete auras we're tracking
+        for (const {
+            source: oldSource,
+            auras: oldAuras,
+        } of this.sources.values()) {
+            // check for deleted sources
+            const newSource = networkItems.find(hasId(oldSource.id));
+            if (newSource === undefined || !isSource(newSource)) {
+                // source was deleted or all auras were removed
+                // if it was deleted, its auras will already be gone
+                // but if not, we need to delete them
+                toDelete.push(...oldAuras.values());
                 continue;
             }
-            const source = getSource(aura, networkItems);
-            const entry = this.getEntry(source, aura);
-            if (!entry) {
-                this.remove(toDelete, aura);
-            } else if (this.buildParamsChanged(aura, entry)) {
-                // Update auras that have changed size or style and need rebuilding
-                this.remove(toDelete, aura);
-                LocalItemFixer.add(toAdd, source, entry, sceneMetadata, grid);
-            } else if (this.drawingParamsChanged(aura, entry)) {
-                // Update auras that have changed drawing params but don't need rebuilding
-                scheduleDrawingParamsUpdate(aura, entry);
+
+            // skip items that haven't been modified if we're not just rebuilding everything
+            if (
+                !rebuildAll &&
+                oldSource.lastModified === newSource.lastModified
+            ) {
+                newSources.set(oldSource.id, {
+                    source: newSource,
+                    auras: oldAuras,
+                });
+                continue;
+            }
+
+            // check for deleted or updated auras
+            for (const [scopedId, localItemId] of oldAuras) {
+                const oldEntry = getEntry(oldSource, scopedId)!; // never null if this is kept in sync
+                const newEntry = getEntry(newSource, scopedId);
+                if (newEntry === undefined) {
+                    // aura was deleted
+                    toDelete.push(localItemId);
+                } else if (
+                    rebuildAll ||
+                    didChangeScale(oldSource, newSource) ||
+                    buildParamsChanged(oldEntry, newEntry)
+                ) {
+                    // aura needs to be rebuilt
+                    toDelete.push(localItemId);
+                    createAura(newSource, newEntry);
+                } else if (drawingParamsChanged(oldEntry, newEntry)) {
+                    toUpdate.push(localItemId);
+                    getOrInsert(updaters, localItemId, () => []).push(
+                        (aura) => {
+                            updateDrawingParams(aura, newEntry);
+                        },
+                    );
+                    saveAuraId(newSource, newEntry, localItemId); // keep this aura for next state
+                } else {
+                    saveAuraId(newSource, newEntry, localItemId); // keep this aura for next state
+                }
             }
         }
+
+        this.sources = newSources;
 
         if (toDelete.length > 0) {
             await OBR.scene.local.deleteItems(toDelete);
         }
+        if (toAdd.length > 0) {
+            await OBR.scene.local.addItems(toAdd);
+        }
         if (toUpdate.length > 0) {
             await OBR.scene.local.updateItems(toUpdate, (items) =>
                 items.forEach((item) => {
+                    assertItem(item, isAura);
                     const updaterList = updaters.get(item.id);
                     if (updaterList) {
                         updaterList.forEach((updater) => updater(item));
@@ -204,11 +226,78 @@ export default class LocalItemFixer {
                 }),
             );
         }
-        if (toAdd.length > 0) {
-            for (const [key, , data] of toAdd) {
-                this.sourceAndScopedToLocal.set(key, data);
-            }
-            await OBR.scene.local.addItems(toAdd.map(([, item]) => item));
-        }
+        console.log("finished fix, state is", this.sources);
+    }
+
+    async destroy() {
+        await OBR.scene.local.deleteItems(
+            Array.from(this.sources.values()).flatMap((sourceAndAuras) =>
+                Array.from(sourceAndAuras.auras.values()),
+            ),
+        );
+        this.sources = new Map();
     }
 }
+
+// const key = LocalItemFixer.key(sourceId, oldEntry);
+
+// // Remove auras if they have no source or the source has deleted their entry
+// const source = networkItems.find(hasId(sourceId));
+// const newEntry = getEntry(source, oldEntry.sourceScopedId);
+// if (
+//     source === undefined ||
+//     !isSource(source) ||
+//     newEntry === undefined
+// ) {
+//     toDelete.push(localItemId);
+//     this.sources.delete(key);
+// } else if (buildParamsChanged(oldEntry, newEntry)) {
+//     toDelete.push(localItemId);
+//     this.sources.delete(key);
+//     this.add(toAdd, source, newEntry, sceneMetadata, grid);
+// } else if (drawingParamsChanged(oldEntry, newEntry)) {
+//     toUpdate.push(localItemId);
+//     this.sources.set(key, {
+//         sourceId,
+//         localItemId,
+//         entry: newEntry,
+//     });
+//     const updater = (item: Item) => {
+//         if (isAura(item)) {
+//             updateDrawingParams(item, newEntry);
+//         }
+//     };
+//     const updaterList = updaters.get(localItemId);
+//     if (updaterList !== undefined) {
+//         updaterList.push(updater);
+//     } else {
+//         updaters.set(localItemId, [updater]);
+//     }
+// }
+
+// for (const aura of localItems) {
+//     if (!isAura(aura)) {
+//         continue;
+//     }
+//     const source = getSource(aura, networkItems);
+//     const entry = this.getEntry(source, aura);
+//     if (!entry) {
+//         // Remove auras that shouldn't exist anymore
+//         this.remove(toDelete, aura);
+//     } else if (this.buildParamsChanged(aura, entry)) {
+//         // Update auras that have changed size or style and need rebuilding
+//         this.remove(toDelete, aura);
+//         LocalItemFixer.add(toAdd, source, entry, sceneMetadata, grid);
+//     } else if (this.drawingParamsChanged(aura, entry)) {
+//         // Update auras that have changed drawing params but don't need rebuilding
+//         toUpdate.push(aura);
+//         if (updaters.get(aura.id) === undefined) {
+//             updaters.set(aura.id, []);
+//         }
+//         updaters.get(aura.id)?.push((item: Item) => {
+//             if (isAura(item)) {
+//                 updateDrawingParams(item, entry);
+//             }
+//         });
+//     }
+// }

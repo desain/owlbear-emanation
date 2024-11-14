@@ -3,12 +3,19 @@ export function isObject(object: unknown): object is object {
 }
 
 export function isDeepEqual<T extends object>(
-    object1: T | undefined,
-    object2: T | undefined,
+    object1: T | null | undefined,
+    object2: T | null | undefined,
 ) {
     if (object1 === undefined && object2 === undefined) {
         return true;
-    } else if (object1 === undefined || object2 === undefined) {
+    } else if (object1 === null && object2 === null) {
+        return true;
+    } else if (
+        object1 === undefined ||
+        object1 === null ||
+        object2 === undefined ||
+        object2 === null
+    ) {
         return false;
     }
 
@@ -46,4 +53,19 @@ export function groupBy<T, K extends string>(
         }
         return acc;
     }, {} as Record<K, T[]>);
+}
+
+export function deferCallAll(...functions: VoidFunction[]): VoidFunction {
+    return () => functions.forEach((f) => f());
+}
+
+export function getOrInsert<K, V>(m: Map<K, V>, key: K, insert: () => V): V {
+    const maybeV = m.get(key);
+    if (maybeV !== undefined) {
+        return maybeV;
+    } else {
+        const value = insert();
+        m.set(key, value);
+        return value;
+    }
 }
