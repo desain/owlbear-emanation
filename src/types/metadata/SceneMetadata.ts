@@ -16,15 +16,6 @@ export async function getSceneMetadata(
     );
 }
 
-export function sceneMetadataChanged(
-    newMetadata: Partial<SceneMetadata>,
-    oldMetadata: SceneMetadata,
-): boolean {
-    return (Object.keys(newMetadata) as (keyof SceneMetadata)[]).some(
-        (key: keyof SceneMetadata) => newMetadata[key] !== oldMetadata[key],
-    );
-}
-
 export async function updateSceneMetadata(metadata: Partial<SceneMetadata>) {
     const currentMetadata = await getSceneMetadata();
     const newMetadata: SceneMetadata = { ...currentMetadata, ...metadata };

@@ -1,4 +1,5 @@
-import { Image, isImage, Item } from "@owlbear-rodeo/sdk";
+import { Image, isImage, Item, Math2 } from "@owlbear-rodeo/sdk";
+import { VECTOR2_COMPARE_EPSILON } from "../constants";
 import { Aura } from "../types/Aura";
 import { NotAttachedError } from "../types/Errors";
 
@@ -25,4 +26,12 @@ export function assertItem<T extends Item>(
     if (!f(item)) {
         throw new Error(`Expected item to be of type ${f.name}`);
     }
+}
+
+export function didChangeScale(oldItem: Item, newItem: Item) {
+    return !Math2.compare(
+        oldItem.scale,
+        newItem.scale,
+        VECTOR2_COMPARE_EPSILON,
+    );
 }

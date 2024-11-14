@@ -5,6 +5,21 @@ export interface GridParsed extends Pick<Grid, "dpi" | "type" | "measurement"> {
     parsedScale: GridScale["parsed"];
 }
 
+export async function getParsedGrid(): Promise<GridParsed> {
+    const [dpi, fullScale, measurement, type] = await Promise.all([
+        OBR.scene.grid.getDpi(),
+        OBR.scene.grid.getScale(),
+        OBR.scene.grid.getMeasurement(),
+        OBR.scene.grid.getType(),
+    ]);
+    return {
+        dpi,
+        parsedScale: fullScale.parsed,
+        measurement,
+        type,
+    };
+}
+
 export function watchGrid(
     oldGrid: GridParsed | null,
     onGridChange: (grid: GridParsed) => void,
@@ -26,20 +41,7 @@ export function watchGrid(
         gridParsed !== null
             ? Promise.resolve(gridParsed)
             : (async () => {
-                  const [dpi, fullScale, measurement, type] = await Promise.all(
-                      [
-                          OBR.scene.grid.getDpi(),
-                          OBR.scene.grid.getScale(),
-                          OBR.scene.grid.getMeasurement(),
-                          OBR.scene.grid.getType(),
-                      ],
-                  );
-                  const newGrid = {
-                      dpi,
-                      parsedScale: fullScale.parsed,
-                      measurement,
-                      type,
-                  };
+                  const newGrid = await getParsedGrid();
                   if (enabled) {
                       updateGrid(newGrid);
                   }

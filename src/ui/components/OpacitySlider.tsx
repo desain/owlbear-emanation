@@ -46,7 +46,7 @@ export function OpacitySlider({
                     onChangeCommitted={() => {
                         // don't use the new value parameter here since it has wrong values
                         // sometimes when you click and drag outside the iframe.
-                        onChange(displayValue as number);
+                        onChange(displayValue);
                     }}
                 />
                 <OpacityIcon color="disabled" />

@@ -146,7 +146,7 @@ function ExtantAuras({
 
     return Object.keys(menuItemsByAttachedTo)
         .map((id) => ({ id, name: selectedItems.find(hasId(id))!.name }))
-        .sort((a, b) => a.name.localeCompare(b.name))
+        .sort((a, b) => a.id.localeCompare(b.id))
         .flatMap(({ id, name }) => [
             onlyOneSelection ? null : <Divider key={id}>{name}</Divider>,
             ...menuItemsByAttachedTo[id]
