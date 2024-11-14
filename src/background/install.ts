@@ -1,8 +1,8 @@
 import OBR from "@owlbear-rodeo/sdk";
 
 import { MESSAGE_CHANNEL } from "../constants";
+import AuraFixer from "../utils/AuraFixer";
 import { deferCallAll } from "../utils/jsUtils";
-import LocalItemFixer from "../utils/LocalItemFixer";
 import { handleMessage } from "../utils/messaging";
 import createContextMenu from "./createContextMenu";
 /**
@@ -10,13 +10,13 @@ import createContextMenu from "./createContextMenu";
  * It creates the context menu item for the aura.
  */
 
-let fixerRefForHotReload: LocalItemFixer | null = null;
+let fixerRefForHotReload: AuraFixer | null = null;
 export default async function installAuras() {
     console.log("Auras and Emanations version 1.0.0");
     await createContextMenu();
 
     const uninstallers: VoidFunction[] = [];
-    const [fixer, uninstallFixer] = await LocalItemFixer.install();
+    const [fixer, uninstallFixer] = await AuraFixer.install();
     fixerRefForHotReload = fixer;
     uninstallers.push(uninstallFixer);
     uninstallers.push(installBroadcastListener());

@@ -1,5 +1,5 @@
 import OBR, { Grid, GridScale } from "@owlbear-rodeo/sdk";
-import { isDeepEqual } from "../utils/jsUtils";
+import { makeWatcher } from "../utils/watchers";
 
 export interface GridParsed extends Pick<Grid, "dpi" | "type" | "measurement"> {
     parsedScale: GridScale["parsed"];
@@ -20,59 +20,16 @@ export async function getParsedGrid(): Promise<GridParsed> {
     };
 }
 
-export function watchGrid(
-    oldGrid: GridParsed | null,
-    onGridChange: (grid: GridParsed) => void,
-): [Promise<GridParsed>, VoidFunction] {
-    let gridParsed: GridParsed | null = oldGrid;
-    let enabled = true;
-
-    const updateGrid = (newGrid: GridParsed) => {
-        const changed =
-            gridParsed === null || !isDeepEqual(gridParsed, newGrid);
-        gridParsed = newGrid;
-        if (changed) {
-            onGridChange(newGrid);
-        }
-    };
-
-    // If we don't already have a grid, fire off an async routine to get it
-    const firstGridPromise =
-        gridParsed !== null
-            ? Promise.resolve(gridParsed)
-            : (async () => {
-                  const newGrid = await getParsedGrid();
-                  if (enabled) {
-                      updateGrid(newGrid);
-                  }
-                  return newGrid;
-              })();
-
-    const unsubscribeGrid = OBR.scene.grid.onChange(async (grid) => {
+export const watchGrid = makeWatcher(
+    getParsedGrid,
+    (cb) => OBR.scene.grid.onChange(cb),
+    async (grid: Grid) => {
         const fullScale = await OBR.scene.grid.getScale();
-        updateGrid({
+        return {
             dpi: grid.dpi,
+            parsedScale: fullScale.parsed,
             measurement: grid.measurement,
             type: grid.type,
-            parsedScale: fullScale.parsed,
-        });
-    });
-
-    const stopWatching = () => {
-        enabled = false;
-        unsubscribeGrid();
-    };
-    return [firstGridPromise, stopWatching];
-}
-
-export async function createGridWatcher(
-    onGridChange: (grid: GridParsed) => void,
-): Promise<[() => GridParsed, VoidFunction]> {
-    let grid: GridParsed;
-    const [gridPromise, unsubscribeGrid] = watchGrid(null, (newGrid) => {
-        grid = newGrid;
-        onGridChange(grid);
-    });
-    grid = await gridPromise;
-    return [() => grid, unsubscribeGrid];
-}
+        };
+    },
+);
