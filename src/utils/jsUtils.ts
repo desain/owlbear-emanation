@@ -1,8 +1,11 @@
 export function isObject(object: unknown): object is object {
     return object != null && typeof object === "object";
-};
+}
 
-export function isDeepEqual<T extends object>(object1: T | undefined, object2: T | undefined) {
+export function isDeepEqual<T extends object>(
+    object1: T | undefined,
+    object2: T | undefined,
+) {
     if (object1 === undefined && object2 === undefined) {
         return true;
     } else if (object1 === undefined || object2 === undefined) {
@@ -20,16 +23,20 @@ export function isDeepEqual<T extends object>(object1: T | undefined, object2: T
 
         const isObjects = isObject(value1) && isObject(value2);
 
-        if ((isObjects && !isDeepEqual(value1, value2)) ||
+        if (
+            (isObjects && !isDeepEqual(value1, value2)) ||
             (!isObjects && value1 !== value2)
         ) {
             return false;
         }
     }
     return true;
-};
+}
 
-export function groupBy<T, K extends string>(ts: T[], key: (t: T) => K): Record<K, T[]> {
+export function groupBy<T, K extends string>(
+    ts: T[],
+    key: (t: T) => K,
+): Record<K, T[]> {
     return ts.reduce((acc, t) => {
         const k = key(t);
         if (acc[k]) {

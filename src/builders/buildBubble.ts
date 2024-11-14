@@ -1,6 +1,10 @@
+import { GridParsed } from "../types/GridParsed";
 import { SceneMetadata } from "../types/metadata/SceneMetadata";
-import { GridParsed } from '../ui/GridParsed';
-import { createDistanceFunction, createItemRadius, createTransformCoordinateSpace } from '../utils/skslUtils';
+import {
+    createDistanceFunction,
+    createItemRadius,
+    createTransformCoordinateSpace,
+} from "../utils/skslUtils";
 import bubble from "./shaders/bubble.frag";
 
 export function getBubbleSksl(sceneMetadata: SceneMetadata, grid: GridParsed) {
@@ -11,5 +15,5 @@ export function getBubbleSksl(sceneMetadata: SceneMetadata, grid: GridParsed) {
         createDistanceFunction(sceneMetadata, grid),
         createItemRadius(sceneMetadata, grid),
         bubble,
-    ].join('\n');
+    ].join("\n");
 }

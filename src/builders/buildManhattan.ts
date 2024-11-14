@@ -8,7 +8,12 @@ import { Vector2, buildCurve } from "@owlbear-rodeo/sdk";
  * @param halfSize Half the height of the center item in absolute space.
  * @returns aura item with points in clockwise order.
  */
-export function buildManhattanPrecise(position: Vector2, numUnits: number, unitSize: number, absoluteItemSize: number) {
+export function buildManhattanPrecise(
+    position: Vector2,
+    numUnits: number,
+    unitSize: number,
+    absoluteItemSize: number,
+) {
     const absoluteSize = numUnits * unitSize;
     const halfSize = absoluteItemSize / 2;
     return buildCurve()

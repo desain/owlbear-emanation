@@ -1,15 +1,18 @@
-import OBR, { Image, Item } from '@owlbear-rodeo/sdk';
+import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
 
-import buildAura from '../builders/buildAura';
-import { METADATA_KEY } from '../constants';
-import { Aura, isAura, updateDrawingParams } from '../types/Aura';
-import { AuraStyle } from '../types/AuraStyle';
-import { getSceneMetadata, SceneMetadata } from "../types/metadata/SceneMetadata";
-import { AuraEntry } from '../types/metadata/SourceMetadata';
-import { isSource } from '../types/Source';
-import { GridParsed } from '../ui/GridParsed';
-import { getId, getSource } from './itemUtils';
-import { isDeepEqual } from './jsUtils';
+import buildAura from "../builders/buildAura";
+import { METADATA_KEY } from "../constants";
+import { Aura, isAura, updateDrawingParams } from "../types/Aura";
+import { AuraStyle } from "../types/AuraStyle";
+import { GridParsed } from "../types/GridParsed";
+import {
+    getSceneMetadata,
+    SceneMetadata,
+} from "../types/metadata/SceneMetadata";
+import { AuraEntry } from "../types/metadata/SourceMetadata";
+import { isSource } from "../types/Source";
+import { getId, getSource } from "./itemUtils";
+import { isDeepEqual } from "./jsUtils";
 
 type SourceIdAndScopedId = string;
 
@@ -28,19 +31,26 @@ export default class LocalItemFixer {
 
     static install(): [LocalItemFixer, () => void] {
         const fixer = new LocalItemFixer();
-        return [fixer, OBR.scene.local.onChange(items => fixer.forgetDeletedLocals(items))];
+        return [
+            fixer,
+            OBR.scene.local.onChange((items) =>
+                fixer.forgetDeletedLocals(items),
+            ),
+        ];
     }
 
-    private constructor() { }
+    private constructor() {}
 
     private static key(source: Item, aura: AuraEntry): SourceIdAndScopedId {
-        return source.id + '/' + aura.sourceScopedId;
+        return source.id + "/" + aura.sourceScopedId;
     }
 
     private forgetDeletedLocals(newLocals: Item[]) {
         const localIds = newLocals.map(getId);
-        const toForget = [...this.sourceAndScopedToLocal.entries()].filter(([, { localItemId }]) => !localIds.includes(localItemId));
-        for (const [key,] of toForget) {
+        const toForget = [...this.sourceAndScopedToLocal.entries()].filter(
+            ([, { localItemId }]) => !localIds.includes(localItemId),
+        );
+        for (const [key] of toForget) {
             this.sourceAndScopedToLocal.delete(key);
         }
     }
@@ -52,42 +62,60 @@ export default class LocalItemFixer {
         sceneMetadata: SceneMetadata,
         grid: GridParsed,
     ) {
-        const aura = buildAura(source, auraEntry.style, auraEntry.size, sceneMetadata, grid);
+        const aura = buildAura(
+            source,
+            auraEntry.style,
+            auraEntry.size,
+            sceneMetadata,
+            grid,
+        );
         const key = LocalItemFixer.key(source, auraEntry);
-        const data = { localItemId: aura.id, size: auraEntry.size, style: auraEntry.style }
+        const data = {
+            localItemId: aura.id,
+            size: auraEntry.size,
+            style: auraEntry.style,
+        };
         toAdd.push([key, aura, data]);
     }
 
     private remove(toDelete: string[], aura: Aura) {
         // Remove auras that shouldn't exist anymore
         toDelete.push(aura.id);
-        const entry = [...this.sourceAndScopedToLocal.entries()]
-            .find(([, value]) => value.localItemId === aura.id);
+        const entry = [...this.sourceAndScopedToLocal.entries()].find(
+            ([, value]) => value.localItemId === aura.id,
+        );
         if (entry) {
             this.sourceAndScopedToLocal.delete(entry[0]);
         }
     }
 
-    private getEntry(source: Image | undefined, aura: Aura): AuraEntry | undefined {
+    private getEntry(
+        source: Image | undefined,
+        aura: Aura,
+    ): AuraEntry | undefined {
         if (!source || !isSource(source)) {
             return undefined;
         }
-        return source.metadata[METADATA_KEY].auras
-            .find(entry => {
-                const key = LocalItemFixer.key(source, entry);
-                const localItemId = this.sourceAndScopedToLocal.get(key)?.localItemId;
-                return localItemId === aura.id;
-            });
+        return source.metadata[METADATA_KEY].auras.find((entry) => {
+            const key = LocalItemFixer.key(source, entry);
+            const localItemId =
+                this.sourceAndScopedToLocal.get(key)?.localItemId;
+            return localItemId === aura.id;
+        });
     }
 
     /**
-    * @returns Whether the aura's parameters have changed in a way that requires
-    *          fully rebuilding the aura.
-    */
+     * @returns Whether the aura's parameters have changed in a way that requires
+     *          fully rebuilding the aura.
+     */
     private buildParamsChanged(aura: Aura, entry: AuraEntry) {
-        const oldData = [...this.sourceAndScopedToLocal.values()].find(data => data.localItemId === aura.id);
-        return oldData?.size !== entry.size
-            || oldData.style.type !== entry.style.type;
+        const oldData = [...this.sourceAndScopedToLocal.values()].find(
+            (data) => data.localItemId === aura.id,
+        );
+        return (
+            oldData?.size !== entry.size ||
+            oldData.style.type !== entry.style.type
+        );
     }
 
     /**
@@ -95,16 +123,14 @@ export default class LocalItemFixer {
      *          updated without rebuilding the aura.
      */
     private drawingParamsChanged(aura: Aura, entry: AuraEntry) {
-        const oldData = [...this.sourceAndScopedToLocal.values()].find(data => data.localItemId === aura.id);
+        const oldData = [...this.sourceAndScopedToLocal.values()].find(
+            (data) => data.localItemId === aura.id,
+        );
         return !isDeepEqual(oldData?.style, entry.style);
     }
 
     async fix(grid: GridParsed) {
-        const [
-            networkItems,
-            localItems,
-            sceneMetadata,
-        ] = await Promise.all([
+        const [networkItems, localItems, sceneMetadata] = await Promise.all([
             OBR.scene.items.getItems(),
             OBR.scene.local.getItems(),
             getSceneMetadata(),
@@ -131,8 +157,18 @@ export default class LocalItemFixer {
                 continue;
             }
             for (const aura of source.metadata[METADATA_KEY].auras) {
-                if (this.sourceAndScopedToLocal.get(LocalItemFixer.key(source, aura)) === undefined) {
-                    LocalItemFixer.add(toAdd, source, aura, sceneMetadata, grid);
+                if (
+                    this.sourceAndScopedToLocal.get(
+                        LocalItemFixer.key(source, aura),
+                    ) === undefined
+                ) {
+                    LocalItemFixer.add(
+                        toAdd,
+                        source,
+                        aura,
+                        sceneMetadata,
+                        grid,
+                    );
                 }
             }
         }
@@ -159,12 +195,14 @@ export default class LocalItemFixer {
             await OBR.scene.local.deleteItems(toDelete);
         }
         if (toUpdate.length > 0) {
-            await OBR.scene.local.updateItems(toUpdate, (items) => items.forEach((item) => {
-                const updaterList = updaters.get(item.id);
-                if (updaterList) {
-                    updaterList.forEach(updater => updater(item));
-                }
-            }));
+            await OBR.scene.local.updateItems(toUpdate, (items) =>
+                items.forEach((item) => {
+                    const updaterList = updaters.get(item.id);
+                    if (updaterList) {
+                        updaterList.forEach((updater) => updater(item));
+                    }
+                }),
+            );
         }
         if (toAdd.length > 0) {
             for (const [key, , data] of toAdd) {

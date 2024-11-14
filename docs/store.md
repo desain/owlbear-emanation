@@ -5,9 +5,9 @@ author: desain
 image: https://github.com/user-attachments/assets/1231da26-2939-4877-a023-3444ed2018b7
 icon: https://github.com/desain/owlbear-emanation/blob/main/public/logo.png
 tags:
-  - tool
-  - combat
-  - drawing
+    - tool
+    - combat
+    - drawing
 manifest: https://owlbear-emanation.pages.dev/manifest.json
 learn-more: https://github.com/desain/owlbear-emanation
 ---
@@ -17,9 +17,10 @@ learn-more: https://github.com/desain/owlbear-emanation
 This extension allows you to add auras to any character in a variety of styles.
 
 ## Features
-- Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chevyshev / Chessboard D&D 5e distance, auras will be square)
-- Auras will automatically resize after tokens are scaled, so that their boundary is the correct distance away.
-- Manage any number of auras with any color, opacity, or style.
+
+-   Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chevyshev / Chessboard D&D 5e distance, auras will be square)
+-   Auras will automatically resize after tokens are scaled, so that their boundary is the correct distance away.
+-   Manage any number of auras with any color, opacity, or style.
 
 ## How to use
 
@@ -36,13 +37,14 @@ Select one or more character tokens, then right click and click the 'Add Aura' i
 When any selected character has at least one aura, you will see the edit auras menu, which lets you manage auras for those characters.
 
 Menu options:
-- **Style**: Display style of the aura (see below).
-- **Size**: Size of the aura, in the same units as the grid.
-- **Color**: Aura color. Editable with your browser's native color picker. By default, the color will be your player color.
-- **Opacity**: Aura opacity.
-- **Delete** (trash icon): Remove this aura from the character.
-- **New**: Add another aura to the characters. You can manage all auras in the context menu (if you don't see a new aura, try scrolling up or down in the menu). If multiple characters are selected, this button will add a new aura to all of them.
-- **Delete All**: Remove all auras from the selected characters.
+
+-   **Style**: Display style of the aura (see below).
+-   **Size**: Size of the aura, in the same units as the grid.
+-   **Color**: Aura color. Editable with your browser's native color picker. By default, the color will be your player color.
+-   **Opacity**: Aura opacity.
+-   **Delete** (trash icon): Remove this aura from the character.
+-   **New**: Add another aura to the characters. You can manage all auras in the context menu (if you don't see a new aura, try scrolling up or down in the menu). If multiple characters are selected, this button will add a new aura to all of them.
+-   **Delete All**: Remove all auras from the selected characters.
 
 ### Resizing tokens
 
@@ -63,7 +65,8 @@ When you change the grid type or measurement type, auras will reshape to be appr
 To change the default settings for newly created auras, open the Auras actions menu in the top left.
 
 In addition to the standard auras settings, this menu has an additional setting:
-- **Shape to grid**: When enabled, causes auras to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
+
+-   **Shape to grid**: When enabled, causes auras to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 
 https://github.com/user-attachments/assets/130b5f4f-14bb-41ed-9fa2-ecd1b1354b79
 
@@ -104,6 +107,52 @@ A rangefinder which steps from white to the aura color at each discrete grid uni
 A fancy one just for fun! Displays animated trails that circle your character while changing color.
 
 This style ignores your color and opacity settings because the spirits have their own ideas.
+
+## Calling this extension from other extensions
+
+If you're another extension developer, you can automate managing auras with this API. Create an object `message` of one of these types:
+
+```typescript
+interface CreateAurasMessage {
+    type: "CREATE_AURAS";
+    /**
+     *  Item IDs for character images that will receive auras.
+     */
+    sources: string[];
+    /**
+     * Aura size, e.g 5 for 5ft.
+     */
+    size: number;
+    /**
+     * Style of aura to create. If not provided, the current player's default style will be used.
+     */
+    style?: AuraStyleType;
+    /**
+     * Hex code, e.g #d00dad. If not provided, the current player's default color will be used.
+     */
+    color?: string;
+    /**
+     * Number from 0 (fully transparent) to 1 (fully opaque). If not provided, the current player's default opacity will be used.
+     */
+    opacity?: number;
+}
+
+interface RemoveAurasMessage {
+    type: "REMOVE_AURAS";
+    /**
+     *  Item IDs for character images that will receive auras.
+     */
+    sources: string[];
+}
+```
+
+Then send a local broadcast with the message:
+
+```typescript
+await OBR.broadcast.sendMessage("com.desain.emanation/message", message, {
+    destination: "LOCAL",
+});
+```
 
 ## Support
 

@@ -5,16 +5,24 @@ export interface SceneMetadata {
     gridMode: boolean;
 }
 
-export async function getSceneMetadata(apiMetadata?: Metadata): Promise<SceneMetadata> {
-    const metadata = apiMetadata ?? await OBR.scene.getMetadata();
-    return metadata[METADATA_KEY] as SceneMetadata | undefined ?? {
-        gridMode: true,
-    };
+export async function getSceneMetadata(
+    apiMetadata?: Metadata,
+): Promise<SceneMetadata> {
+    const metadata = apiMetadata ?? (await OBR.scene.getMetadata());
+    return (
+        (metadata[METADATA_KEY] as SceneMetadata | undefined) ?? {
+            gridMode: true,
+        }
+    );
 }
 
-export function sceneMetadataChanged(newMetadata: Partial<SceneMetadata>, oldMetadata: SceneMetadata): boolean {
-    return (Object.keys(newMetadata) as (keyof SceneMetadata)[])
-        .some((key: keyof SceneMetadata) => newMetadata[key] !== oldMetadata[key]);
+export function sceneMetadataChanged(
+    newMetadata: Partial<SceneMetadata>,
+    oldMetadata: SceneMetadata,
+): boolean {
+    return (Object.keys(newMetadata) as (keyof SceneMetadata)[]).some(
+        (key: keyof SceneMetadata) => newMetadata[key] !== oldMetadata[key],
+    );
 }
 
 export async function updateSceneMetadata(metadata: Partial<SceneMetadata>) {
