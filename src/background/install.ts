@@ -36,6 +36,6 @@ function installBroadcastListener() {
 if (import.meta.hot) {
     import.meta.hot.accept();
     import.meta.hot.dispose(() => {
-        fixerRefForHotReload?.destroy();
+        void fixerRefForHotReload?.destroy();
     });
 }
