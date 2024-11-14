@@ -10,7 +10,7 @@ export function GmGate({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!isGm) {
-            OBR.player.getRole().then(isGmRole).then(setIsGm);
+            void OBR.player.getRole().then(isGmRole).then(setIsGm);
         }
         return OBR.player.onChange((player) => {
             setIsGm(isGmRole(player.role));
