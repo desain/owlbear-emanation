@@ -4,10 +4,10 @@ import AwaitLock from "await-lock";
 import buildAura from "../builders/buildAura";
 import { METADATA_KEY } from "../constants";
 import { Aura, isAura, updateDrawingParams } from "../types/Aura";
-import { createGridWatcher, GridParsed } from "../types/GridParsed";
+import { GridParsed, watchGrid } from "../types/GridParsed";
 import {
-    getSceneMetadata,
     SceneMetadata,
+    watchSceneMetadata,
 } from "../types/metadata/SceneMetadata";
 import {
     AuraEntry,
@@ -16,7 +16,8 @@ import {
 } from "../types/metadata/SourceMetadata";
 import { getEntry, isSource, Source } from "../types/Source";
 import { assertItem, didChangeScale, hasId } from "./itemUtils";
-import { deferCallAll, getOrInsert, isDeepEqual } from "./jsUtils";
+import { deferCallAll, getOrInsert } from "./jsUtils";
+import { watcherToLatest } from "./watchers";
 
 type SourceAndAuras = {
     source: Source;
@@ -40,51 +41,44 @@ function createLock() {
 
 /**
  * Class to track changes to remote item metadata and mirror it to local items.
- * TODO: Use the Reactor design pattern from official OBR plugins.
+ * TODO: Use the Reconciler/Reactor/Actor/Patcher design pattern from official OBR plugins.
  */
-export default class LocalItemFixer {
+export default class AuraFixer {
     private sources: Map<string, SourceAndAuras> = new Map();
 
-    static async install(): Promise<[LocalItemFixer, VoidFunction]> {
-        const fixer = new LocalItemFixer();
+    static async install(): Promise<[AuraFixer, VoidFunction]> {
+        const fixer = new AuraFixer();
         const withLock = createLock();
 
-        const [getGrid, unsubscribeGrid] = await createGridWatcher(
-            async (grid) => {
-                return await withLock(async () => {
-                    const sceneMetadata = await getSceneMetadata();
-                    const items = await OBR.scene.items.getItems();
-                    return await fixer.fix(grid, items, sceneMetadata, true);
-                });
-            },
-        );
+        const [
+            [getGrid, addGridWatcher, unsubscribeGrid],
+            [
+                getSceneMetadata,
+                addSceneMetadataWatcher,
+                unsubscribeSceneMetadata,
+            ],
+        ] = await Promise.all([
+            watcherToLatest(watchGrid),
+            watcherToLatest(watchSceneMetadata),
+        ]);
 
-        let oldMetadata: SceneMetadata | null = null;
-        const unsubscribeSceneMetadata = OBR.scene.onMetadataChange(
-            async (metadata) => {
-                return await withLock(async () => {
-                    const newMetadata = metadata[METADATA_KEY] as
-                        | SceneMetadata
-                        | undefined;
-                    if (
-                        newMetadata !== undefined &&
-                        !isDeepEqual(oldMetadata, newMetadata)
-                    ) {
-                        const items = await OBR.scene.items.getItems();
-                        await fixer.fix(getGrid(), items, newMetadata, true);
-                        oldMetadata = newMetadata;
-                    }
-                });
-            },
-        );
-
-        const unsubscribeItems = OBR.scene.items.onChange(async (items) => {
+        addGridWatcher(async (grid) => {
             return await withLock(async () => {
-                const sceneMetadata = await getSceneMetadata();
-                await fixer.fix(getGrid(), items, sceneMetadata);
+                const items = await OBR.scene.items.getItems();
+                return await fixer.fix(grid, items, getSceneMetadata(), true);
             });
         });
-
+        addSceneMetadataWatcher(async (sceneMetadata) => {
+            return await withLock(async () => {
+                const items = await OBR.scene.items.getItems();
+                return await fixer.fix(getGrid(), items, sceneMetadata, true);
+            });
+        });
+        const unsubscribeItems = OBR.scene.items.onChange(async (items) => {
+            return await withLock(async () => {
+                return await fixer.fix(getGrid(), items, getSceneMetadata());
+            });
+        });
         return [
             fixer,
             deferCallAll(
@@ -226,7 +220,6 @@ export default class LocalItemFixer {
                 }),
             );
         }
-        console.log("finished fix, state is", this.sources);
     }
 
     async destroy() {

@@ -1,14 +1,9 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
-import React, { useEffect, useState } from "react";
-import { GridParsed, watchGrid } from "../types/GridParsed";
-import {
-    PlayerMetadata,
-    getPlayerMetadata,
-} from "../types/metadata/PlayerMetadata";
-import {
-    SceneMetadata,
-    getSceneMetadata,
-} from "../types/metadata/SceneMetadata";
+import { useEffect, useState } from "react";
+import { watchGrid } from "../types/GridParsed";
+import { watchPlayerMetadata } from "../types/metadata/PlayerMetadata";
+import { watchSceneMetadata } from "../types/metadata/SceneMetadata";
+import { Watcher } from "../utils/watchers";
 
 // hooks for watching OBR state
 // these are currently only used at one place in the component hierarchy, and data passed
@@ -16,50 +11,22 @@ import {
 // if UI gets complicated enough that they're needed in multiple places, zustand or react-query
 // might be better
 
-export function usePlayerMetadata() {
-    const [playerMetadata, setPlayerMetadataHookState] = useState(
-        null as PlayerMetadata | null,
-    );
-
-    useEffect(() => {
-        void OBR.player.getMetadata().then(async (metadata) => {
-            setPlayerMetadataHookState(await getPlayerMetadata(metadata));
-        });
-        return OBR.player.onChange(async (player) =>
-            setPlayerMetadataHookState(
-                await getPlayerMetadata(player.metadata),
-            ),
-        );
-    }, []);
-
-    return playerMetadata;
+function makeWatcherHook<T>(watcher: Watcher<T>) {
+    return function useWatcher() {
+        const [value, setValue] = useState(null as T | null);
+        useEffect(() => {
+            const [, uninstall] = watcher(setValue);
+            return uninstall;
+        }, []);
+        return value;
+    };
 }
 
-export function useSceneMetadata() {
-    const [sceneMetadata, setSceneMetadata] = useState(
-        null as SceneMetadata | null,
-    );
+export const useSceneMetadata = makeWatcherHook(watchSceneMetadata);
 
-    useEffect(() => {
-        void OBR.scene.getMetadata().then(async (metadata) => {
-            setSceneMetadata(await getSceneMetadata(metadata));
-        });
-        return OBR.scene.onMetadataChange(async (metadata) =>
-            setSceneMetadata(await getSceneMetadata(metadata)),
-        );
-    }, []);
+export const useGrid = makeWatcherHook(watchGrid);
 
-    return sceneMetadata;
-}
-
-export function useGrid() {
-    const [grid, setGrid] = React.useState(null as GridParsed | null);
-    useEffect(() => {
-        const [, uninstall] = watchGrid(grid, setGrid);
-        return uninstall;
-    }, [grid]);
-    return grid;
-}
+export const usePlayerMetadata = makeWatcherHook(watchPlayerMetadata);
 
 export function useSelection() {
     const [selection, setSelection] = useState([] as string[]);

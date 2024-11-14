@@ -1,5 +1,6 @@
-import OBR, { Metadata } from "@owlbear-rodeo/sdk";
+import OBR, { Metadata, Player } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
+import { makeWatcher } from "../../utils/watchers";
 import { AuraStyleType } from "../AuraStyle";
 
 export interface PlayerMetadata {
@@ -19,7 +20,7 @@ async function defaultPlayerMetadata(): Promise<PlayerMetadata> {
 }
 
 export async function getPlayerMetadata(
-    apiMetadata?: Metadata
+    apiMetadata?: Metadata,
 ): Promise<PlayerMetadata> {
     const metadata = apiMetadata ?? (await OBR.player.getMetadata());
     return (
@@ -29,10 +30,16 @@ export async function getPlayerMetadata(
 }
 
 export async function updatePlayerMetadata(
-    metadata: Partial<PlayerMetadata>
+    metadata: Partial<PlayerMetadata>,
 ): Promise<PlayerMetadata> {
     const currentMetadata = await getPlayerMetadata();
     const newMetadata = { ...currentMetadata, ...metadata };
     await OBR.player.setMetadata({ [METADATA_KEY]: newMetadata });
     return newMetadata;
 }
+
+export const watchPlayerMetadata = makeWatcher(
+    getPlayerMetadata,
+    (cb) => OBR.player.onChange(cb),
+    async (player: Player) => getPlayerMetadata(player.metadata),
+);
