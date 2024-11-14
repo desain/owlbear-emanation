@@ -1,8 +1,17 @@
-import { Curve, Effect, isCurve, isEffect, isShape, Item, Shape, Uniform } from "@owlbear-rodeo/sdk";
-import { Vector3 } from '@owlbear-rodeo/sdk/lib/types/Vector3';
+import {
+    Curve,
+    Effect,
+    isCurve,
+    isEffect,
+    isShape,
+    Item,
+    Shape,
+    Uniform,
+} from "@owlbear-rodeo/sdk";
+import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { METADATA_KEY } from "../constants";
-import { AuraEntry } from './metadata/SourceMetadata';
-import { HasMetadata } from './metadata/metadataUtils';
+import { AuraEntry } from "./metadata/SourceMetadata";
+import { HasMetadata } from "./metadata/metadataUtils";
 
 export interface IsAttached {
     attachedTo: string;
@@ -12,9 +21,9 @@ interface AuraMetadata {
     isAura: true;
 }
 
-export type Circle = Shape & { shapeType: 'CIRCLE', }
+export type Circle = Shape & { shapeType: "CIRCLE" };
 function isCircle(item: Item): item is Circle {
-    return isShape(item) && item.shapeType === 'CIRCLE';
+    return isShape(item) && item.shapeType === "CIRCLE";
 }
 
 export type SimpleAuraDrawable = Circle | Curve;
@@ -22,55 +31,60 @@ export function isDrawable(item: Item): item is SimpleAuraDrawable {
     return isCircle(item) || isCurve(item);
 }
 
-export type Aura = (SimpleAuraDrawable | Effect) & IsAttached & HasMetadata<AuraMetadata>;
+export type Aura = (SimpleAuraDrawable | Effect) &
+    IsAttached &
+    HasMetadata<AuraMetadata>;
 export function isAura(item: Item): item is Aura {
-    return (isEffect(item) || isCurve(item) || isCircle(item))
-        && item.attachedTo !== undefined
-        && METADATA_KEY in item.metadata
-        && typeof item.metadata[METADATA_KEY] === 'object';
+    return (
+        (isEffect(item) || isCurve(item) || isCircle(item)) &&
+        item.attachedTo !== undefined &&
+        METADATA_KEY in item.metadata &&
+        typeof item.metadata[METADATA_KEY] === "object"
+    );
 }
 
 export function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
     switch (auraEntry.style.type) {
-        case 'Bubble':
-        case 'Glow':
-        case 'Range':
+        case "Bubble":
+        case "Glow":
+        case "Range":
             if (isEffect(aura)) {
                 setColorUniform(aura, auraEntry.style.color);
                 setOpacityUniform(aura, auraEntry.style.opacity);
             }
             break;
-        case 'Simple':
+        case "Simple":
             if (isDrawable(aura)) {
                 aura.style.fillColor = auraEntry.style.itemStyle.fillColor;
                 aura.style.fillOpacity = auraEntry.style.itemStyle.fillOpacity;
                 aura.style.strokeColor = auraEntry.style.itemStyle.strokeColor;
                 aura.style.strokeDash = auraEntry.style.itemStyle.strokeDash;
-                aura.style.strokeOpacity = auraEntry.style.itemStyle.strokeOpacity;
+                aura.style.strokeOpacity =
+                    auraEntry.style.itemStyle.strokeOpacity;
                 aura.style.strokeWidth = auraEntry.style.itemStyle.strokeWidth;
             }
             break;
-        case 'Spirits':
+        case "Spirits":
             break; // nothing to set
     }
 }
 
 interface ColorUniform extends Uniform {
-    name: 'color';
+    name: "color";
     value: Vector3;
 }
 
 interface OpacityUniform extends Uniform {
-    name: 'opacity';
+    name: "opacity";
     value: number;
 }
 
 function isColorUniform(uniform: Uniform): uniform is ColorUniform {
-    return uniform.name === 'color';
+    return uniform.name === "color";
 }
 
 function isOpacityUniform(uniform: Uniform): uniform is OpacityUniform {
-    return uniform.name === 'opacity';
+    return uniform.name === "opacity";
 }
 
 function setColorUniform(aura: Effect, color: Vector3) {

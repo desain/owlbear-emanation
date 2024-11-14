@@ -1,6 +1,6 @@
-import { Item } from '@owlbear-rodeo/sdk';
-import { METADATA_KEY } from '../../constants';
-import { AuraStyle } from '../AuraStyle';
+import { Item } from "@owlbear-rodeo/sdk";
+import { METADATA_KEY } from "../../constants";
+import { AuraStyle } from "../AuraStyle";
 
 /**
  * Metadata on an aura source to list what effects it should have locally.

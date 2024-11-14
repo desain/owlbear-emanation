@@ -19,6 +19,6 @@ export function buildEuclideanAura(
         .width(diameter)
         .height(diameter)
         .position(position)
-        .shapeType('CIRCLE')
+        .shapeType("CIRCLE")
         .build() as Circle; // typescript doesn't know about builders
 }

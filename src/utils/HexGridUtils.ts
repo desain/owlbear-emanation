@@ -1,9 +1,9 @@
 import { GridType } from "@owlbear-rodeo/sdk";
 
-export type HexGridType = 'HEX_HORIZONTAL' | 'HEX_VERTICAL';
+export type HexGridType = "HEX_HORIZONTAL" | "HEX_VERTICAL";
 
 export function isHexGrid(gridType: GridType): gridType is HexGridType {
-    return gridType === 'HEX_HORIZONTAL' || gridType === 'HEX_VERTICAL';
+    return gridType === "HEX_HORIZONTAL" || gridType === "HEX_VERTICAL";
 }
 
 export interface HexGridUtils {
@@ -17,15 +17,18 @@ export interface HexGridUtils {
     getAuraRadius: (numHexes: number, absoluteItemSize: number) => number;
 }
 
-
-export function getHexGridUtils(hexSize: number, gridType: HexGridType): HexGridUtils {
-    const flatTop = gridType === 'HEX_HORIZONTAL';
+export function getHexGridUtils(
+    hexSize: number,
+    gridType: HexGridType,
+): HexGridUtils {
+    const flatTop = gridType === "HEX_HORIZONTAL";
     const absoluteSideLength = hexSize / Math.sqrt(3);
     return {
         absoluteSideLength,
         mainAxisSpacing: hexSize,
-        crossAxisSpacing: absoluteSideLength * 3 / 2,
+        crossAxisSpacing: (absoluteSideLength * 3) / 2,
         baseRotationDegrees: flatTop ? 30 : 0,
-        getAuraRadius: (numHexes: number, absoluteItemSize: number) => numHexes + Math.floor(absoluteItemSize / hexSize / 2)
+        getAuraRadius: (numHexes: number, absoluteItemSize: number) =>
+            numHexes + Math.floor(absoluteItemSize / hexSize / 2),
     };
 }

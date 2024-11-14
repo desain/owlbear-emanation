@@ -1,12 +1,22 @@
-import { FormControlProps } from '@mui/material';
-import { useEffect, useState } from 'react';
-import { Control } from './Control';
+import { FormControlProps } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Control } from "./Control";
 
-export function ColorInput({ value, onChange, ...props }: {
-    value: string,
-    onChange: (value: string) => void,
-} & Omit<FormControlProps, 'onChange'>) {
-    const [color, setColor] = useState(value);
+export function ColorInput({
+    value,
+    onChange,
+    ...props
+}: {
+    value: string;
+    onChange: (value: string) => void;
+} & Omit<FormControlProps, "onChange">) {
+    const [oldValue, setOldValue] = useState(value);
+    const [displayValue, setDisplayValue] = useState(value);
+
+    if (value !== oldValue) {
+        setOldValue(value);
+        setDisplayValue(value);
+    }
 
     // Ughhhhhh
     // React breaks the dom 'onchange' event, which is the behavior I want.
@@ -15,21 +25,22 @@ export function ColorInput({ value, onChange, ...props }: {
     // So work around that by debouncing the input, so it at least doesn't fire all the time
     useEffect(() => {
         const handler = setTimeout(() => {
-            if (color !== value) {
-                onChange(color);
+            if (displayValue !== value) {
+                onChange(displayValue);
             }
         }, 100);
 
         return () => clearTimeout(handler); // Clear timeout if color changes within the delay
-    }, [value, color, onChange]);
+    }, [value, displayValue, onChange]);
 
     return (
-        <Control {...props} sx={{ alignItems: 'center' }} label="Color">
-            <label className="color-label" style={{ background: color }}>
-                <input type="color"
-                    value={color}
-                    onInput={e => {
-                        setColor(e.currentTarget.value);
+        <Control {...props} sx={{ alignItems: "center" }} label="Color">
+            <label className="color-label" style={{ background: displayValue }}>
+                <input
+                    type="color"
+                    value={displayValue}
+                    onInput={(e) => {
+                        setDisplayValue(e.currentTarget.value);
                     }}
                 />
             </label>

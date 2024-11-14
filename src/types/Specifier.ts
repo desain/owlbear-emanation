@@ -17,7 +17,7 @@ export interface Specifier {
  */
 export function specifierToHtml(specifier: Specifier | null) {
     if (!specifier) {
-        return '';
+        return "";
     } else {
         return `data-source-id="${specifier.sourceId}" data-scoped-id="${specifier.sourceScopedId}"`;
     }
