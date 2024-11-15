@@ -9,7 +9,6 @@ import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
 import { GmGate } from "../ui/GmGate";
 import { useOwlbearStore } from "../useOwlbearStore";
-import { useOwlbearStoreSync } from "../useOwlbearStoreSync";
 
 export function SceneSettings() {
     const sceneMetadata = useOwlbearStore((store) => store.sceneMetadata);
@@ -37,14 +36,14 @@ export function SceneSettings() {
     );
 }
 
-const SYNC_PARAMS = { syncItems: false };
+// const SYNC_PARAMS = { syncItems: false };
 export function Action() {
-    const initialized = useOwlbearStoreSync(SYNC_PARAMS);
+    // const initialized = useOwlbearStoreSync(SYNC_PARAMS); store will be synced in background
     const playerMetadata = useOwlbearStore((store) => store.playerMetadata);
 
-    if (!initialized) {
-        return null;
-    }
+    // if (!initialized) {
+    //     return null;
+    // }
 
     return (
         <>

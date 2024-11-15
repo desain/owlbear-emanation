@@ -9,7 +9,6 @@ tags:
     - combat
     - drawing
 manifest: https://owlbear-emanation.pages.dev/manifest.json
-learn-more: https://github.com/desain/owlbear-emanation
 ---
 
 # Auras and Emanations
@@ -86,6 +85,8 @@ A filled area with a solid outline. The color control sets the color of both the
 
 An area with a gradient that gets more opaque towards the edges. High opacity values are recommended.
 
+Inspired by [these AoE tokens](https://drive.google.com/drive/folders/16EoOnBMzu2oerC98bZ3HdF4nfk9Fpw_5).
+
 All grid types are supported, but this style will not conform its edges to grid squares when that would lead to a concave outline.
 
 #### Glow
@@ -126,7 +127,8 @@ interface CreateAurasMessage {
     /**
      * Style of aura to create. If not provided, the current player's default style will be used.
      */
-    style?: AuraStyleType;
+    style?: "Simple" | "Bubble" | "Glow" | "Range" | "Spirits";
+;
     /**
      * Hex code, e.g #d00dad. If not provided, the current player's default color will be used.
      */
