@@ -10,14 +10,12 @@ import createContextMenu from "./createContextMenu";
  * It creates the context menu item for the aura.
  */
 
-let fixerRefForHotReload: AuraFixer | null = null;
-export default async function installAuras() {
+export default async function installAuras(): Promise<VoidFunction> {
     console.log("Auras and Emanations version 1.0.0");
     await createContextMenu();
 
     const uninstallers: VoidFunction[] = [];
-    const [fixer, uninstallFixer] = await AuraFixer.install();
-    fixerRefForHotReload = fixer;
+    const [, uninstallFixer] = await AuraFixer.install();
     uninstallers.push(uninstallFixer);
     uninstallers.push(installBroadcastListener());
 
@@ -32,11 +30,13 @@ function installBroadcastListener() {
         return handleMessage(data);
     });
 }
+// OBR.onReady(installAuras);
 
-if (import.meta.hot) {
-    import.meta.hot.accept();
-    import.meta.hot.dispose(() => {
-        void fixerRefForHotReload?.destroy();
-        fixerRefForHotReload = null;
-    });
-}
+// if (import.meta.hot) {
+//     import.meta.hot.accept();
+//     import.meta.hot.dispose(() => {
+//         console.log("Disposing of previous fixer");
+//         void fixerRefForHotReload?.destroy();
+//         fixerRefForHotReload = null;
+//     });
+// }
