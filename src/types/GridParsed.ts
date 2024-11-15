@@ -1,7 +1,10 @@
 import OBR, { Grid, GridScale } from "@owlbear-rodeo/sdk";
-import { makeWatcher } from "../utils/watchers";
 
-export interface GridParsed extends Pick<Grid, "dpi" | "type" | "measurement"> {
+// params of interest from base grid object
+export type GridParams = Pick<Grid, "dpi" | "type" | "measurement">;
+
+// params of interest with scale context
+export interface GridParsed extends GridParams {
     parsedScale: GridScale["parsed"];
 }
 
@@ -19,17 +22,3 @@ export async function getParsedGrid(): Promise<GridParsed> {
         type,
     };
 }
-
-export const watchGrid = makeWatcher(
-    getParsedGrid,
-    (cb) => OBR.scene.grid.onChange(cb),
-    async (grid: Grid) => {
-        const fullScale = await OBR.scene.grid.getScale();
-        return {
-            dpi: grid.dpi,
-            parsedScale: fullScale.parsed,
-            measurement: grid.measurement,
-            type: grid.type,
-        };
-    },
-);

@@ -12,18 +12,15 @@ import {
     setColor,
     setOpacity,
 } from "../types/AuraStyle";
-import { GridParsed } from "../types/GridParsed";
-import {
-    getPlayerMetadata,
-    PlayerMetadata,
-} from "../types/metadata/PlayerMetadata";
+import { getPlayerMetadataOrDefault } from "../types/metadata/PlayerMetadata";
 import { isSource, updateEntry } from "../types/Source";
 import { ColorInput } from "../ui/components/ColorInput";
 import { Control } from "../ui/components/Control";
 import { OpacitySlider } from "../ui/components/OpacitySlider";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
-import { useGrid, usePlayerMetadata, useSelection } from "../ui/hooks";
+import { useOwlbearStore } from "../useOwlbearStore";
+import { useOwlbearStoreSync } from "../useOwlbearStoreSync";
 import { createAuras, createAurasWithDefaults } from "../utils/createAuras";
 import { getId, hasId } from "../utils/itemUtils";
 import { groupBy } from "../utils/jsUtils";
@@ -31,7 +28,7 @@ import { removeAura, removeAuras } from "../utils/removeAuras";
 import { MenuItem } from "./Menuitem";
 
 async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
-    const playerMetadata = await getPlayerMetadata();
+    const playerMetadata = await getPlayerMetadataOrDefault();
     const size = menuItem.aura.size;
     const color = getColor(menuItem.aura.style, playerMetadata);
     const opacity = getOpacity(menuItem.aura.style, playerMetadata);
@@ -62,15 +59,8 @@ function AuraDivider() {
     return <Divider sx={{ mt: 2, mb: 2 }} />;
 }
 
-function AuraControls({
-    menuItem,
-    grid,
-    playerMetadata,
-}: {
-    menuItem: MenuItem;
-    grid: GridParsed;
-    playerMetadata: PlayerMetadata;
-}) {
+function AuraControls({ menuItem }: { menuItem: MenuItem }) {
+    const playerMetadata = useOwlbearStore((store) => store.playerMetadata);
     return (
         <>
             <TopControlRow>
@@ -80,7 +70,6 @@ function AuraControls({
                     onChange={(styleType) => changeStyle(styleType, menuItem)}
                 />
                 <SizeInput
-                    grid={grid}
                     value={menuItem.aura.size}
                     onChange={(size) =>
                         updateEntry(menuItem.toSpecifier(), (entry) => {
@@ -121,15 +110,7 @@ function AuraControls({
     );
 }
 
-function ExtantAuras({
-    selectedItems,
-    grid,
-    playerMetadata,
-}: {
-    selectedItems: Item[];
-    grid: GridParsed;
-    playerMetadata: PlayerMetadata;
-}) {
+function ExtantAuras({ selectedItems }: { selectedItems: Item[] }) {
     const onlyOneSelection = selectedItems.length === 1;
     const selectedSources = selectedItems.filter(isSource);
 
@@ -152,36 +133,24 @@ function ExtantAuras({
             ...menuItemsByAttachedTo[id]
                 .sort(MenuItem.compare)
                 .map((menuItem) => (
-                    <AuraControls
-                        key={menuItem.toKey()}
-                        menuItem={menuItem}
-                        grid={grid}
-                        playerMetadata={playerMetadata}
-                    />
+                    <AuraControls key={menuItem.toKey()} menuItem={menuItem} />
                 )),
         ]);
 }
 
+const SYNC_PARAMS = { syncItems: true };
 export function ContextMenu() {
-    const playerMetadata = usePlayerMetadata();
-    const grid = useGrid();
-    const selectedItems = useSelection();
+    const initialized = useOwlbearStoreSync(SYNC_PARAMS);
+    const playerMetadata = useOwlbearStore((store) => store.playerMetadata);
+    const selectedItems = useOwlbearStore((store) => store.selectedItems);
 
-    if (
-        grid === null ||
-        playerMetadata === null ||
-        selectedItems.length === 0
-    ) {
+    if (!initialized) {
         return <MenuSkeleton />;
     }
 
     return (
         <>
-            <ExtantAuras
-                selectedItems={selectedItems}
-                grid={grid}
-                playerMetadata={playerMetadata}
-            />
+            <ExtantAuras selectedItems={selectedItems} />
             <Stack direction="row" justifyContent="center">
                 <Button
                     variant="outlined"

@@ -1,7 +1,7 @@
 import OBR from "@owlbear-rodeo/sdk";
 
+import AuraFixer from "../AuraFixer";
 import { MESSAGE_CHANNEL } from "../constants";
-import AuraFixer from "../utils/AuraFixer";
 import { deferCallAll } from "../utils/jsUtils";
 import { handleMessage } from "../utils/messaging";
 import createContextMenu from "./createContextMenu";
@@ -37,5 +37,6 @@ if (import.meta.hot) {
     import.meta.hot.accept();
     import.meta.hot.dispose(() => {
         void fixerRefForHotReload?.destroy();
+        fixerRefForHotReload = null;
     });
 }
