@@ -3,10 +3,6 @@
 
 const float FUZZINESS = 0.1;
 
-vec3 getColor(float pct) {
-    return mix(vec3(1.0), color, pct);
-}
-
 vec4 main(vec2 fragCoord){
     vec2 xy = cellCoords(fragCoord);
     xy += FUZZINESS * (vec2(random(xy), random(xy.yx)) - 0.5); // dither
@@ -20,5 +16,5 @@ vec4 main(vec2 fragCoord){
     float pct = ceil(d - itemRadius) / numUnits;
 	float b = 1.0 - step(threshold, d);
 
-    return vec4(getColor(pct), 1.0) * b * opacity;
+    return vec4(mix(vec3(1.0), color, pct), 1.0) * b * opacity;
 }

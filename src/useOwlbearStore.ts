@@ -3,10 +3,6 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { GridParams, GridParsed } from "./types/GridParsed";
 import {
-    getPlayerMetadataOrDefault as extractPlayerMetadataOrDefault,
-    PlayerMetadata,
-} from "./types/metadata/PlayerMetadata";
-import {
     DEFAULT_SCENE_METADATA,
     extractSceneMetadataOrDefault,
     SceneMetadata,
@@ -16,13 +12,11 @@ type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
 
 export interface OwlbearStore {
     role: Role;
-    playerMetadata: PlayerMetadata;
     sceneMetadata: SceneMetadata;
     grid: GridParsed;
     selection: string[];
     selectedItems: Item[];
     setRole: (role: Role) => void;
-    setPlayerMetadata: (metadata: Metadata) => Promise<void>;
     setSceneMetadata: (metadata: Metadata) => void;
     setGrid: (grid: GridParams) => Promise<void>;
     setSelection: (selection: string[] | undefined) => Promise<void>;
@@ -33,12 +27,6 @@ export const useOwlbearStore = create<OwlbearStore>()(
     subscribeWithSelector((set) => ({
         // dummy values
         role: "PLAYER",
-        playerMetadata: {
-            color: "#FF00FF",
-            opacity: 1,
-            size: 5,
-            styleType: "Simple",
-        },
         sceneMetadata: DEFAULT_SCENE_METADATA,
         grid: {
             dpi: -1,
@@ -53,10 +41,6 @@ export const useOwlbearStore = create<OwlbearStore>()(
         selection: [],
         selectedItems: [],
         setRole: (role: Role) => set({ role }),
-        setPlayerMetadata: async (metadata: Metadata) =>
-            set({
-                playerMetadata: await extractPlayerMetadataOrDefault(metadata),
-            }),
         setSceneMetadata: (metadata: Metadata) =>
             set({ sceneMetadata: extractSceneMetadataOrDefault(metadata) }),
         setGrid: async (grid: GridParams) => {

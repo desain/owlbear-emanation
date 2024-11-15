@@ -57,15 +57,15 @@ https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
 
-### Changing defaults
+### Changing defaults and global settings
 
 ![Defaults Menu](https://github.com/user-attachments/assets/f477f7e3-b41c-4893-a19e-f71eceb7b37c)
 
-To change the default settings for newly created auras, open the Auras actions menu in the top left.
+To change the default settings for newly created auras, open the Auras actions menu in the top left. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser).
 
-In addition to the standard auras settings, this menu has an additional setting:
+For the GM, this menu has an additional setting under 'Global Settings':
 
--   **Shape to grid**: When enabled, causes auras to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
+-   **Shape to grid**: When enabled, causes auras in the current scene to try to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 
 https://github.com/user-attachments/assets/130b5f4f-14bb-41ed-9fa2-ecd1b1354b79
 

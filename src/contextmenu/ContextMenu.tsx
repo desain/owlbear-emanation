@@ -12,7 +12,6 @@ import {
     setColor,
     setOpacity,
 } from "../types/AuraStyle";
-import { getPlayerMetadataOrDefault } from "../types/metadata/PlayerMetadata";
 import { isSource, updateEntry } from "../types/Source";
 import { ColorInput } from "../ui/components/ColorInput";
 import { Control } from "../ui/components/Control";
@@ -21,6 +20,7 @@ import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { useOwlbearStoreSync } from "../useOwlbearStoreSync";
+import { usePlayerSettings } from "../usePlayerSettings";
 import { createAuras, createAurasWithDefaults } from "../utils/createAuras";
 import { getId, hasId } from "../utils/itemUtils";
 import { groupBy } from "../utils/jsUtils";
@@ -28,10 +28,9 @@ import { removeAura, removeAuras } from "../utils/removeAuras";
 import { MenuItem } from "./Menuitem";
 
 async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
-    const playerMetadata = await getPlayerMetadataOrDefault();
     const size = menuItem.aura.size;
-    const color = getColor(menuItem.aura.style, playerMetadata);
-    const opacity = getOpacity(menuItem.aura.style, playerMetadata);
+    const color = getColor(menuItem.aura.style);
+    const opacity = getOpacity(menuItem.aura.style);
     const source = await OBR.scene.items.getItems<Image>([menuItem.sourceId]);
     // Need to create before removing, since removing the last aura destroys the
     // context menu before we can create the new one.
@@ -60,7 +59,6 @@ function AuraDivider() {
 }
 
 function AuraControls({ menuItem }: { menuItem: MenuItem }) {
-    const playerMetadata = useOwlbearStore((store) => store.playerMetadata);
     return (
         <>
             <TopControlRow>
@@ -80,7 +78,7 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
             </TopControlRow>
             <BottomControlRow>
                 <ColorInput
-                    value={getColor(menuItem.aura.style, playerMetadata)}
+                    value={getColor(menuItem.aura.style)}
                     onChange={(color) =>
                         updateEntry(menuItem.toSpecifier(), (entry) => {
                             setColor(entry.style, color);
@@ -89,7 +87,7 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                 />
                 <OpacitySlider
                     sx={{ flexGrow: 1 }}
-                    value={getOpacity(menuItem.aura.style, playerMetadata)}
+                    value={getOpacity(menuItem.aura.style)}
                     onChange={(opacity) =>
                         updateEntry(menuItem.toSpecifier(), (entry) => {
                             setOpacity(entry.style, opacity);
@@ -140,11 +138,13 @@ function ExtantAuras({ selectedItems }: { selectedItems: Item[] }) {
 
 const SYNC_PARAMS = { syncItems: true };
 export function ContextMenu() {
-    const initialized = useOwlbearStoreSync(SYNC_PARAMS);
-    const playerMetadata = useOwlbearStore((store) => store.playerMetadata);
+    const initializedOwlbearStore = useOwlbearStoreSync(SYNC_PARAMS);
+    const playerSettingsSensible = usePlayerSettings(
+        (store) => store.hasSensibleValues,
+    );
     const selectedItems = useOwlbearStore((store) => store.selectedItems);
 
-    if (!initialized) {
+    if (!initializedOwlbearStore || !playerSettingsSensible) {
         return <MenuSkeleton />;
     }
 
@@ -156,10 +156,7 @@ export function ContextMenu() {
                     variant="outlined"
                     startIcon={<AddCircleIcon />}
                     onClick={() =>
-                        createAurasWithDefaults(
-                            selectedItems.filter(isImage),
-                            playerMetadata,
-                        )
+                        createAurasWithDefaults(selectedItems.filter(isImage))
                     }
                     sx={{
                         borderTopRightRadius: 0,

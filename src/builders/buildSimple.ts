@@ -138,15 +138,6 @@ function buildDrawable(
     return buildEuclideanAura(position, numUnits, grid.dpi, absoluteItemSize);
 }
 
-function styleDrawable(style: SimpleStyle, aura: SimpleAuraDrawable) {
-    aura.style.fillColor = style.itemStyle.fillColor;
-    aura.style.fillOpacity = style.itemStyle.fillOpacity;
-    aura.style.strokeColor = style.itemStyle.strokeColor;
-    aura.style.strokeOpacity = style.itemStyle.strokeOpacity;
-    aura.style.strokeWidth = style.itemStyle.strokeWidth;
-    aura.style.strokeDash = style.itemStyle.strokeDash;
-}
-
 export function buildSimpleAura(
     sceneMetadata: SceneMetadata,
     grid: GridParsed,
@@ -162,6 +153,11 @@ export function buildSimpleAura(
         numUnits,
         absoluteItemSize,
     );
-    styleDrawable(style, drawable);
+    drawable.style.fillColor = style.itemStyle.fillColor;
+    drawable.style.fillOpacity = style.itemStyle.fillOpacity;
+    drawable.style.strokeColor = style.itemStyle.strokeColor;
+    drawable.style.strokeOpacity = style.itemStyle.strokeOpacity;
+    drawable.style.strokeWidth = style.itemStyle.strokeWidth;
+    drawable.style.strokeDash = style.itemStyle.strokeDash;
     return drawable;
 }
