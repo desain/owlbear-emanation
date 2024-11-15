@@ -14,15 +14,11 @@ export function startSyncing(
     const store = useOwlbearStore.getState();
 
     const roleInitialized = OBR.player.getRole().then(store.setRole);
-    const playerMetadataInitialized = OBR.player
-        .getMetadata()
-        .then(store.setPlayerMetadata);
     const selectionInitialized = OBR.player
         .getSelection()
         .then(store.setSelection);
     const unsubscribePlayer = OBR.player.onChange((player) => {
         store.setRole(player.role);
-        void store.setPlayerMetadata(player.metadata);
         void store.setSelection(player.selection);
     });
 
@@ -49,7 +45,6 @@ export function startSyncing(
     return [
         Promise.all([
             roleInitialized,
-            playerMetadataInitialized,
             selectionInitialized,
             sceneMetadataInitialized,
             gridInitialized,

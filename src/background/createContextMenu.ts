@@ -7,7 +7,6 @@ import {
     CONTEXTMENU_EDIT_ID,
     METADATA_KEY,
 } from "../constants";
-import { getPlayerMetadataOrDefault } from "../types/metadata/PlayerMetadata";
 import { createAurasWithDefaults } from "../utils/createAuras";
 
 export default async function createContextMenu() {
@@ -29,11 +28,7 @@ export default async function createContextMenu() {
             },
         ],
         async onClick(context) {
-            const playerMetadata = await getPlayerMetadataOrDefault();
-            return createAurasWithDefaults(
-                context.items as Image[],
-                playerMetadata,
-            ); // Typecast OK because filter requires image
+            return createAurasWithDefaults(context.items as Image[]); // Typecast OK because filter requires image
         },
     });
     await OBR.contextMenu.create({

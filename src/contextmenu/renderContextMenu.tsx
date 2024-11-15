@@ -13,7 +13,7 @@ import { ContextMenu } from "./ContextMenu";
 
 ReactDOM.createRoot(document.getElementById("reactApp")!).render(
     <React.StrictMode>
-        <PluginGate alt={null}>
+        <PluginGate>
             <PluginThemeProvider>
                 <CssBaseline />
                 <ContextMenu />

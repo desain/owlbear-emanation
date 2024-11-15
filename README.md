@@ -24,6 +24,8 @@ The extension can be installed from https://owlbear-emanation.pages.dev/manifest
 
 Select one or more character tokens, then right click and click the 'Add Aura' item that appears on the context menu. You can also press 'E' (for Emanation - A for Aura was taken :P) while the context menu is open to add one quickly.
 
+The aura will be centered on the source's origin point (the center of the controls you edit the item). This means that if the image's center is offset from the origin, the aura will not appear in the center of the image. This is intentional, to allow things like torches (with the origin at the head) to have glow auras emanate from the the head of the torch rather than the middle of the body.
+
 ### Editing aura parameters
 
 ![Edit Auras](https://github.com/user-attachments/assets/bf696d4f-e605-4792-a4de-30b78a6f9eae)
@@ -52,15 +54,15 @@ https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
 
-### Changing defaults
+### Changing defaults and global settings
 
 ![Defaults Menu](https://github.com/user-attachments/assets/f477f7e3-b41c-4893-a19e-f71eceb7b37c)
 
-To change the default settings for newly created auras, open the Auras actions menu in the top left.
+To change the default settings for newly created auras, open the Auras actions menu in the top left. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser).
 
-In addition to the standard auras settings, this menu has an additional setting:
+For the GM, this menu has an additional setting under 'Global Settings':
 
--   **Shape to grid**: When enabled, causes auras to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
+-   **Shape to grid**: When enabled, causes auras in the current scene to try to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 
 https://github.com/user-attachments/assets/130b5f4f-14bb-41ed-9fa2-ecd1b1354b79
 
@@ -188,6 +190,7 @@ To make a production build run:
 -   Update auras when image alignment changes
 -   Find more ways to skip rebuilds (debounce, track builder)
 -   More effects!
+    -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects)
 -   https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
 
 ## License

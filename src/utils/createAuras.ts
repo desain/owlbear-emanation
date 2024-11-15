@@ -1,20 +1,18 @@
 import OBR, { Image } from "@owlbear-rodeo/sdk";
-import { PlayerMetadata } from "../types/metadata/PlayerMetadata";
 
 import { AuraStyle, createStyle } from "../types/AuraStyle";
 import { addEntry } from "../types/metadata/SourceMetadata";
+import { usePlayerSettings } from "../usePlayerSettings";
 
-export function createAurasWithDefaults(
-    items: Image[],
-    playerMetadata: PlayerMetadata,
-) {
+export function createAurasWithDefaults(items: Image[]) {
+    const playerSettings = usePlayerSettings.getState();
     return createAuras(
         items,
-        playerMetadata.size,
+        playerSettings.size,
         createStyle(
-            playerMetadata.styleType,
-            playerMetadata.color,
-            playerMetadata.opacity,
+            playerSettings.styleType,
+            playerSettings.color,
+            playerSettings.opacity,
         ),
     );
 }

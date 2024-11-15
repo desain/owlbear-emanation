@@ -1,7 +1,7 @@
 import { CurveStyle, ShapeStyle } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import { usePlayerSettings } from "../usePlayerSettings";
 import { hexToRgb, rgbToHex } from "../utils/colorUtils";
-import { PlayerMetadata } from "./metadata/PlayerMetadata";
 
 export interface SimpleStyle {
     type: "Simple";
@@ -64,10 +64,7 @@ export function createStyle(
           };
 }
 
-export function getColor(
-    style: AuraStyle,
-    playerMetadata: PlayerMetadata,
-): string {
+export function getColor(style: AuraStyle): string {
     switch (style.type) {
         case "Bubble":
         case "Glow":
@@ -76,7 +73,7 @@ export function getColor(
         case "Simple":
             return style.itemStyle.fillColor;
         case "Spirits":
-            return playerMetadata.color;
+            return usePlayerSettings.getState().color;
     }
 }
 
@@ -89,10 +86,7 @@ export function setColor(style: AuraStyle, color: string) {
     }
 }
 
-export function getOpacity(
-    style: AuraStyle,
-    playerMetadata: PlayerMetadata,
-): number {
+export function getOpacity(style: AuraStyle): number {
     switch (style.type) {
         case "Bubble":
         case "Glow":
@@ -101,7 +95,7 @@ export function getOpacity(
         case "Simple":
             return style.itemStyle.fillOpacity;
         case "Spirits":
-            return playerMetadata.opacity;
+            return usePlayerSettings.getState().opacity;
     }
 }
 

@@ -22,12 +22,12 @@ export default function buildAura(
     grid: GridParsed,
 ): Aura {
     const numUnits = size / grid.parsedScale.multiplier;
-    const unitSize = grid.dpi / item.grid.dpi;
+    const gridUnitsPerItemGridUnit = grid.dpi / item.grid.dpi;
     const absoluteItemSize =
         Math.max(
             item.image.width * item.scale.x,
             item.image.height * item.scale.y,
-        ) * unitSize;
+        ) * gridUnitsPerItemGridUnit;
 
     const aura =
         style.type === "Simple"
