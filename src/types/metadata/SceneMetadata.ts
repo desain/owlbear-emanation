@@ -1,10 +1,11 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
-import { makeWatcher } from "../../utils/watchers";
 
 export interface SceneMetadata {
     gridMode: boolean;
 }
+
+export const DEFAULT_SCENE_METADATA: SceneMetadata = { gridMode: true };
 
 export function extractSceneMetadataOrDefault(metadata: Metadata) {
     return (
@@ -26,9 +27,3 @@ export async function updateSceneMetadata(metadata: Partial<SceneMetadata>) {
     const newMetadata: SceneMetadata = { ...currentMetadata, ...metadata };
     await OBR.scene.setMetadata({ [METADATA_KEY]: newMetadata });
 }
-
-export const watchSceneMetadata = makeWatcher(
-    getSceneMetadata,
-    (cb) => OBR.scene.onMetadataChange(cb),
-    getSceneMetadata,
-);

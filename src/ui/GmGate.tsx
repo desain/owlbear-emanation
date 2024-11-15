@@ -1,23 +1,9 @@
-import OBR from "@owlbear-rodeo/sdk";
-import { useEffect, useState } from "react";
-
-function isGmRole(role: string) {
-    return role === "GM";
-}
+import { useOwlbearStore } from "../useOwlbearStore";
 
 export function GmGate({ children }: { children: React.ReactNode }) {
-    const [isGm, setIsGm] = useState(false);
+    const role = useOwlbearStore((store) => store.role);
 
-    useEffect(() => {
-        if (!isGm) {
-            void OBR.player.getRole().then(isGmRole).then(setIsGm);
-        }
-        return OBR.player.onChange((player) => {
-            setIsGm(isGmRole(player.role));
-        });
-    }, [isGm]);
-
-    if (isGm) {
+    if (role === "GM") {
         return <>{children}</>;
     } else {
         return null;

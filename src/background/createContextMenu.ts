@@ -7,7 +7,7 @@ import {
     CONTEXTMENU_EDIT_ID,
     METADATA_KEY,
 } from "../constants";
-import { getPlayerMetadata } from "../types/metadata/PlayerMetadata";
+import { getPlayerMetadataOrDefault } from "../types/metadata/PlayerMetadata";
 import { createAurasWithDefaults } from "../utils/createAuras";
 
 export default async function createContextMenu() {
@@ -29,7 +29,7 @@ export default async function createContextMenu() {
             },
         ],
         async onClick(context) {
-            const playerMetadata = await getPlayerMetadata();
+            const playerMetadata = await getPlayerMetadataOrDefault();
             return createAurasWithDefaults(
                 context.items as Image[],
                 playerMetadata,

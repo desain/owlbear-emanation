@@ -8,15 +8,11 @@ import { OpacitySlider } from "../ui/components/OpacitySlider";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
 import { GmGate } from "../ui/GmGate";
-import { useGrid, usePlayerMetadata, useSceneMetadata } from "../ui/hooks";
+import { useOwlbearStore } from "../useOwlbearStore";
+import { useOwlbearStoreSync } from "../useOwlbearStoreSync";
 
 export function SceneSettings() {
-    const sceneMetadata = useSceneMetadata();
-
-    if (sceneMetadata === null) {
-        return null;
-    }
-
+    const sceneMetadata = useOwlbearStore((store) => store.sceneMetadata);
     return (
         <>
             <h4>Global Settings</h4>
@@ -41,11 +37,12 @@ export function SceneSettings() {
     );
 }
 
+const SYNC_PARAMS = { syncItems: false };
 export function Action() {
-    const playerMetadata = usePlayerMetadata();
-    const grid = useGrid();
+    const initialized = useOwlbearStoreSync(SYNC_PARAMS);
+    const playerMetadata = useOwlbearStore((store) => store.playerMetadata);
 
-    if (grid === null || playerMetadata === null) {
+    if (!initialized) {
         return null;
     }
 
@@ -61,7 +58,6 @@ export function Action() {
                     }
                 />
                 <SizeInput
-                    grid={grid}
                     value={playerMetadata.size}
                     onChange={(size) => updatePlayerMetadata({ size })}
                 />

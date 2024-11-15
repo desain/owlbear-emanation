@@ -1,23 +1,19 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import buildAura from "../builders/buildAura";
-import { METADATA_KEY } from "../constants";
-import { Aura, isAura, updateDrawingParams } from "../types/Aura";
-import { GridParsed, watchGrid } from "../types/GridParsed";
-import {
-    SceneMetadata,
-    watchSceneMetadata,
-} from "../types/metadata/SceneMetadata";
+import buildAura from "./builders/buildAura";
+import { METADATA_KEY } from "./constants";
+import { Aura, isAura, updateDrawingParams } from "./types/Aura";
 import {
     AuraEntry,
     buildParamsChanged,
     drawingParamsChanged,
-} from "../types/metadata/SourceMetadata";
-import { getEntry, isSource, Source } from "../types/Source";
-import { assertItem, didChangeScale, hasId } from "./itemUtils";
-import { deferCallAll, getOrInsert } from "./jsUtils";
-import { watcherToLatest } from "./watchers";
+} from "./types/metadata/SourceMetadata";
+import { getEntry, isSource, Source } from "./types/Source";
+import { useOwlbearStore } from "./useOwlbearStore";
+import { startSyncing as startOwlbearStoreSync } from "./useOwlbearStoreSync";
+import { assertItem, didChangeScale, hasId } from "./utils/itemUtils";
+import { deferCallAll, getOrInsert } from "./utils/jsUtils";
 
 type SourceAndAuras = {
     source: Source;
@@ -27,64 +23,71 @@ type SourceAndAuras = {
     auras: Map<string, string>;
 };
 
+type AsyncConsumer<T> = (t: T) => Promise<void>;
+type Sources = Map<string, SourceAndAuras>;
+
 function createLock() {
     const lock = new AwaitLock();
-    return async (runnable: () => Promise<void>) => {
+
+    async function withLock<T>(consumer: AsyncConsumer<T>, t: T) {
         await lock.acquireAsync();
         try {
-            await runnable();
+            await consumer(t);
         } finally {
             lock.release();
         }
-    };
+    }
+
+    function lockify<T>(asyncRunnable: AsyncConsumer<T>): AsyncConsumer<T> {
+        return (t) => withLock(asyncRunnable, t);
+    }
+
+    return lockify;
 }
 
 /**
  * Class to track changes to remote item metadata and mirror it to local items.
- * TODO: Use the Reconciler/Reactor/Actor/Patcher design pattern from official OBR plugins.
+ * TODO: Use the Reconciler/Reactor/Actor/Patcher design pattern from official OBR plugins?
  */
 export default class AuraFixer {
-    private sources: Map<string, SourceAndAuras> = new Map();
+    private sources: Sources = new Map();
 
     static async install(): Promise<[AuraFixer, VoidFunction]> {
         const fixer = new AuraFixer();
-        const withLock = createLock();
+        const lockify = createLock();
 
-        const [
-            [getGrid, addGridWatcher, unsubscribeGrid],
-            [
-                getSceneMetadata,
-                addSceneMetadataWatcher,
-                unsubscribeSceneMetadata,
-            ],
-        ] = await Promise.all([
-            watcherToLatest(watchGrid),
-            watcherToLatest(watchSceneMetadata),
-        ]);
+        const [initialized, unsubscribeStore] = startOwlbearStoreSync({
+            syncItems: false,
+        });
+        await initialized;
 
-        addGridWatcher(async (grid) => {
-            return await withLock(async () => {
-                const items = await OBR.scene.items.getItems();
-                return await fixer.fix(grid, items, getSceneMetadata(), true);
-            });
-        });
-        addSceneMetadataWatcher(async (sceneMetadata) => {
-            return await withLock(async () => {
-                const items = await OBR.scene.items.getItems();
-                return await fixer.fix(getGrid(), items, sceneMetadata, true);
-            });
-        });
-        const unsubscribeItems = OBR.scene.items.onChange(async (items) => {
-            return await withLock(async () => {
-                return await fixer.fix(getGrid(), items, getSceneMetadata());
-            });
-        });
+        let latestItems = await OBR.scene.items.getItems();
+        const unsubscribeItems = OBR.scene.items.onChange(
+            lockify(async (items) => {
+                latestItems = items;
+                await fixer.fix(items);
+            }),
+        );
+
+        const unsubscribeGrid = useOwlbearStore.subscribe(
+            (store) => store.grid,
+            lockify(async () => fixer.fix(latestItems, true)),
+        );
+
+        const unsubscribeSceneMetadata = useOwlbearStore.subscribe(
+            (store) => store.sceneMetadata,
+            lockify(async () => fixer.fix(latestItems, true)),
+        );
+
+        await fixer.fix(latestItems);
+
         return [
             fixer,
             deferCallAll(
+                unsubscribeStore,
+                unsubscribeItems,
                 unsubscribeGrid,
                 unsubscribeSceneMetadata,
-                unsubscribeItems,
             ),
         ];
     }
@@ -101,12 +104,8 @@ export default class AuraFixer {
         );
     }
 
-    async fix(
-        grid: GridParsed,
-        networkItems: Item[],
-        sceneMetadata: SceneMetadata,
-        rebuildAll: boolean = false,
-    ) {
+    async fix(networkItems: Item[], rebuildAll: boolean = false) {
+        const store = useOwlbearStore.getState();
         const toAdd: Aura[] = [];
         const toDelete: string[] = [];
         const toUpdate: string[] = [];
@@ -129,8 +128,8 @@ export default class AuraFixer {
                 source,
                 entry.style,
                 entry.size,
-                sceneMetadata,
-                grid,
+                store.sceneMetadata,
+                store.grid,
             );
             toAdd.push(aura);
             saveAuraId(source, entry, aura.id);
@@ -151,6 +150,7 @@ export default class AuraFixer {
             auras: oldAuras,
         } of this.sources.values()) {
             // check for deleted sources
+            // TODO: hashmap lookup rather than linear search
             const newSource = networkItems.find(hasId(oldSource.id));
             if (newSource === undefined || !isSource(newSource)) {
                 // source was deleted or all auras were removed
@@ -223,6 +223,7 @@ export default class AuraFixer {
     }
 
     async destroy() {
+        console.log("Destroying local items");
         await OBR.scene.local.deleteItems(
             Array.from(this.sources.values()).flatMap((sourceAndAuras) =>
                 Array.from(sourceAndAuras.auras.values()),
@@ -231,66 +232,3 @@ export default class AuraFixer {
         this.sources = new Map();
     }
 }
-
-// const key = LocalItemFixer.key(sourceId, oldEntry);
-
-// // Remove auras if they have no source or the source has deleted their entry
-// const source = networkItems.find(hasId(sourceId));
-// const newEntry = getEntry(source, oldEntry.sourceScopedId);
-// if (
-//     source === undefined ||
-//     !isSource(source) ||
-//     newEntry === undefined
-// ) {
-//     toDelete.push(localItemId);
-//     this.sources.delete(key);
-// } else if (buildParamsChanged(oldEntry, newEntry)) {
-//     toDelete.push(localItemId);
-//     this.sources.delete(key);
-//     this.add(toAdd, source, newEntry, sceneMetadata, grid);
-// } else if (drawingParamsChanged(oldEntry, newEntry)) {
-//     toUpdate.push(localItemId);
-//     this.sources.set(key, {
-//         sourceId,
-//         localItemId,
-//         entry: newEntry,
-//     });
-//     const updater = (item: Item) => {
-//         if (isAura(item)) {
-//             updateDrawingParams(item, newEntry);
-//         }
-//     };
-//     const updaterList = updaters.get(localItemId);
-//     if (updaterList !== undefined) {
-//         updaterList.push(updater);
-//     } else {
-//         updaters.set(localItemId, [updater]);
-//     }
-// }
-
-// for (const aura of localItems) {
-//     if (!isAura(aura)) {
-//         continue;
-//     }
-//     const source = getSource(aura, networkItems);
-//     const entry = this.getEntry(source, aura);
-//     if (!entry) {
-//         // Remove auras that shouldn't exist anymore
-//         this.remove(toDelete, aura);
-//     } else if (this.buildParamsChanged(aura, entry)) {
-//         // Update auras that have changed size or style and need rebuilding
-//         this.remove(toDelete, aura);
-//         LocalItemFixer.add(toAdd, source, entry, sceneMetadata, grid);
-//     } else if (this.drawingParamsChanged(aura, entry)) {
-//         // Update auras that have changed drawing params but don't need rebuilding
-//         toUpdate.push(aura);
-//         if (updaters.get(aura.id) === undefined) {
-//             updaters.set(aura.id, []);
-//         }
-//         updaters.get(aura.id)?.push((item: Item) => {
-//             if (isAura(item)) {
-//                 updateDrawingParams(item, entry);
-//             }
-//         });
-//     }
-// }

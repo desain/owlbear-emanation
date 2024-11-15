@@ -2,6 +2,7 @@ import { Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
 import { isDeepEqual } from "../../utils/jsUtils";
 import { AuraStyle } from "../AuraStyle";
+import { Source } from "../Source";
 
 /**
  * Metadata on an aura source to list what effects it should have locally.
@@ -24,16 +25,12 @@ export interface SourceMetadata {
     auras: AuraEntry[];
 }
 
-export function getItemMetadata(item: Item): SourceMetadata | undefined {
-    return item.metadata[METADATA_KEY] as SourceMetadata | undefined;
-}
-
-function getItemMetadataOrDefault(item: Item): SourceMetadata {
-    return getItemMetadata(item) ?? { auras: [] };
-}
-
 export function addEntry(item: Item, style: AuraStyle, size: number) {
-    const metadata: SourceMetadata = getItemMetadataOrDefault(item);
+    const metadata: SourceMetadata = (item.metadata[METADATA_KEY] as
+        | SourceMetadata
+        | undefined) ?? {
+        auras: [],
+    };
 
     metadata.auras.push({
         style,
@@ -42,6 +39,12 @@ export function addEntry(item: Item, style: AuraStyle, size: number) {
     });
 
     item.metadata[METADATA_KEY] = metadata;
+}
+
+export function removeEntry(source: Source, sourceScopedId: string) {
+    source.metadata[METADATA_KEY].auras = source.metadata[
+        METADATA_KEY
+    ].auras.filter((entry) => entry.sourceScopedId !== sourceScopedId);
 }
 
 /**

@@ -1,19 +1,18 @@
 import { FormControlProps, InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { useState } from "react";
-import { GridParsed } from "../../types/GridParsed";
+import { useOwlbearStore } from "../../useOwlbearStore";
 import { Control } from "./Control";
 
 export function SizeInput({
     value,
     onChange,
-    grid,
     ...props
 }: {
     value: number;
     onChange: (size: number) => void;
-    grid: GridParsed;
 } & Omit<FormControlProps, "onChange">) {
+    const grid = useOwlbearStore((state) => state.grid);
     const [oldValue, setOldValue] = useState(value);
     const [displayValue, setDisplayValue] = useState(value.toString()); // value that's not necessarily valid
 
