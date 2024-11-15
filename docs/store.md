@@ -29,6 +29,8 @@ This extension allows you to add auras to any character in a variety of styles.
 
 Select one or more character tokens, then right click and click the 'Add Aura' item that appears on the context menu. You can also press 'E' (for Emanation - A for Aura was taken :P) while the context menu is open to add one quickly.
 
+The aura will be centered on the source's origin point (the center of the controls you edit the item). This means that if the image's center is offset from the origin, the aura will not appear in the center of the image. This is intentional, to allow things like torches (with the origin at the head) to have glow auras emanate from the the head of the torch rather than the middle of the body.
+
 ### Editing aura parameters
 
 ![Edit Auras](https://github.com/user-attachments/assets/bf696d4f-e605-4792-a4de-30b78a6f9eae)
