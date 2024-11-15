@@ -22,7 +22,7 @@ export function SizeInput({
     }
 
     return (
-        <Control {...props} label="Size">
+        <Control {...props} sx={{ maxWidth: 90 }} label="Size">
             <TextField
                 type="number"
                 size="small"

@@ -202,7 +202,7 @@ function MenuSkeleton() {
         <>
             <TopControlRow>
                 <FormControlSkeleton />
-                <FormControlSkeleton />
+                <FormControlSkeleton width={90} />
             </TopControlRow>
             <BottomControlRow>
                 <FormControlSkeleton width={40} />
