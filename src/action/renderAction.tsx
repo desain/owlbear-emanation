@@ -8,19 +8,19 @@ import { PluginGate } from "../ui/PluginGate";
 import { PluginThemeProvider } from "../ui/PluginThemeProvider";
 import { Action } from "./Action";
 
-console.log("action");
+// console.log("renderAction");
 
 OBR.onReady(async () => {
-    console.log("onReady");
+    // console.log("onReady");
     let uninstall: VoidFunction = () => {};
 
     if (await OBR.scene.isReady()) {
-        console.log("isReady");
+        // console.log("isReady");
         uninstall = await installAuras();
     }
 
     OBR.scene.onReadyChange(async (ready) => {
-        console.log("onReadyChange", ready);
+        // console.log("onReadyChange", ready);
         if (ready) {
             uninstall = await installAuras();
         } else {
