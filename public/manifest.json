@@ -5,6 +5,7 @@
     "manifest_version": 1,
     "author": "desain",
     "icon": "/logo.png",
+    "homepage_url": "https://github.com/desain/owlbear-emanation",
     "action": {
         "title": "Aura Settings",
         "icon": "/logo.png",

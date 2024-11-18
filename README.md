@@ -12,7 +12,7 @@ The extension can be installed from https://owlbear-emanation.pages.dev/manifest
 
 ## Features
 
--   Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chevyshev / Chessboard D&D 5e distance, auras will be square)
+-   Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chebyshev / Chessboard D&D 5e distance, auras will be square)
 -   Auras will automatically resize after tokens are scaled, so that their boundary is the correct distance away.
 -   Manage any number of auras with any color, opacity, or style.
 
@@ -56,13 +56,14 @@ When you change the grid type or measurement type, auras will reshape to be appr
 
 ### Changing defaults and global settings
 
-![Defaults Menu](https://github.com/user-attachments/assets/f477f7e3-b41c-4893-a19e-f71eceb7b37c)
+![Defaults Menu](https://github.com/user-attachments/assets/648f7dde-35d9-4f95-8d50-c74c463ae5e7)
 
-To change the default settings for newly created auras, open the Auras actions menu in the top left. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser).
+To change the default settings for newly created auras, open the Aura Settings actions menu in the top left. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser).
 
-For the GM, this menu has an additional setting under 'Global Settings':
+For the GM, this menu has additional settings under 'Scene Settings':
 
 -   **Shape to grid**: When enabled, causes auras in the current scene to try to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
+-   **Override Shape**: When set, causes auras to take on the specified shape, rather than conforming to a shape that traces out the points a certain distance away from the source based on the grid's current measurement settings.
 
 https://github.com/user-attachments/assets/130b5f4f-14bb-41ed-9fa2-ecd1b1354b79
 
