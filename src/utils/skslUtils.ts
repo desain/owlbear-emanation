@@ -1,39 +1,35 @@
 import { Uniform } from "@owlbear-rodeo/sdk";
+import { AuraShape } from "../types/AuraShape";
 import { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
-import { SceneMetadata } from "../types/metadata/SceneMetadata";
-import { isHexGrid } from "./HexGridUtils";
 
 const PARAM = "p";
+const PI_6 = Math.PI / 6; // 30 deg
+const SQRT_3 = Math.sqrt(3);
 
-export function createDistanceFunction(
-    sceneMetadata: SceneMetadata,
-    grid: GridParsed,
-) {
+export function createDistanceFunction(shape: AuraShape) {
     return `float distance(vec2 ${PARAM}) {
-        return (${getMeasurementExpression(sceneMetadata, grid)});
+        return (${getMeasurementExpression(shape)});
     }`;
 }
 
-function getMeasurementExpression(
-    sceneMetadata: SceneMetadata,
-    grid: GridParsed,
-) {
-    if (grid.measurement === "CHEBYSHEV" && grid.type === "SQUARE") {
+function getMeasurementExpression(shape: AuraShape) {
+    if (shape === "square") {
         return `max(${PARAM}.x, ${PARAM}.y)`;
         // technically with SDF it should be:
         // vec2 d = ${PARAM} - radius
         // return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));
-    } else if (grid.measurement === "MANHATTAN" && grid.type === "SQUARE") {
+    } else if (shape === "manhattan" || shape === "manhattan_squares") {
         return `abs(${PARAM}.x) + abs(${PARAM}.y)`;
-    }
-    if (grid.measurement === "ALTERNATING" && grid.type === "SQUARE") {
+    } else if (shape === "alternating" || shape === "alternating_squares") {
         // sdf = octagon
         const baseDistance = `max(${PARAM}.x, ${PARAM}.y) + min(${PARAM}.x, ${PARAM}.y) / 2.0`;
         // diagonals calculate as .5 distance, so floor the distance if we only care about grid
         // cell distance
-        return sceneMetadata.gridMode ? `floor(${baseDistance})` : baseDistance;
-    } else if (grid.measurement === "CHEBYSHEV" && isHexGrid(grid.type)) {
+        return shape === "alternating_squares"
+            ? `floor(${baseDistance})`
+            : baseDistance;
+    } else if (shape === "hex" || shape === "hex_hexes") {
         // axial distance in hex coordinate space
         // param.x = q, param.y = r; s = -q-r
         return `(abs(${PARAM}.x) + abs(${PARAM}.x + ${PARAM}.y) + abs(${PARAM}.y)) / 2.0`;
@@ -106,12 +102,13 @@ export function declareUniforms(style: EffectStyle) {
     return uniforms;
 }
 
-function anchoredAtCorner(grid: GridParsed) {
+function anchoredAtCorner(shape: AuraShape) {
     return (
-        grid.type === "SQUARE" &&
-        (grid.measurement === "ALTERNATING" ||
-            grid.measurement === "MANHATTAN" ||
-            grid.measurement === "CHEBYSHEV")
+        shape === "square" ||
+        shape === "alternating" ||
+        shape === "alternating_squares" ||
+        shape === "manhattan" ||
+        shape === "manhattan_squares"
     );
 }
 
@@ -122,23 +119,25 @@ const PX_TO_HEX = `mat2(
   -0.333333333, 0.666666666
 )`;
 
-export function createTransformCoordinateSpace(grid: GridParsed) {
+export function createTransformCoordinateSpace(
+    grid: GridParsed,
+    shape: AuraShape,
+) {
     let expression: string;
-    if (isHexGrid(grid.type) && grid.measurement === "CHEBYSHEV") {
+    if (shape === "hex" || shape === "hex_hexes") {
         // why times sqrt3?
         // want xy / size
         // already have p = xy / width since width = dpi
         // size = width / sqrt3, width = size sqrt3
         // so p sqrt3 = sqrt3 xy / width = sqrt3 xy / size sqrt3 = xy / size
 
-        const PI_6 = Math.PI / 6; // 30 deg
         const rotation =
             grid.type === "HEX_HORIZONTAL"
                 ? `mat2(cos(${PI_6}), -sin(${PI_6}), sin(${PI_6}), cos(${PI_6}))`
                 : "mat2(1.0, 0.0, 0.0, 1.0)";
 
-        expression = `${PX_TO_HEX} * ${rotation} * p * ${Math.sqrt(3)}`;
-    } else if (anchoredAtCorner(grid)) {
+        expression = `${PX_TO_HEX} * ${rotation} * p * ${SQRT_3}`;
+    } else if (anchoredAtCorner(shape)) {
         expression = "max(vec2(0.0), p - itemRadiusUnits)";
     } else {
         expression = "p";
@@ -148,19 +147,17 @@ export function createTransformCoordinateSpace(grid: GridParsed) {
     }`;
 }
 
-export function createItemRadius(
-    sceneMetadata: SceneMetadata,
-    grid: GridParsed,
-) {
+export function createItemRadius(shape: AuraShape) {
     const TOLERANCE = 0.01;
     let expression: string;
-    if (isHexGrid(grid.type) && grid.measurement === "CHEBYSHEV") {
+    if (shape === "hex" || shape === "hex_hexes") {
         // in grid mode,
-        const itemRadius = sceneMetadata.gridMode
-            ? "floor(itemRadiusUnits)"
-            : "itemRadiusUnits";
+        const itemRadius =
+            shape === "hex_hexes"
+                ? "floor(itemRadiusUnits)"
+                : "itemRadiusUnits";
         expression = `${itemRadius} + ${TOLERANCE}`;
-    } else if (grid.measurement === "EUCLIDEAN") {
+    } else if (shape === "circle") {
         expression = "itemRadiusUnits";
     } else {
         // anchored at corner, so item width is already subtracted away

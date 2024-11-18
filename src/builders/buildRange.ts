@@ -1,6 +1,5 @@
+import { AuraShape } from "../types/AuraShape";
 import { GridParsed } from "../types/GridParsed";
-import { SceneMetadata } from "../types/metadata/SceneMetadata";
-import { isHexGrid } from "../utils/HexGridUtils";
 import {
     createDistanceFunction,
     createItemRadius,
@@ -9,15 +8,15 @@ import {
 import axialRound from "./shaders/axialRound.glsl";
 import range from "./shaders/range.glsl";
 
-function createRoundToCell(sceneMetadata: SceneMetadata, grid: GridParsed) {
+function createRoundToCell(shape: AuraShape) {
     let expression: string;
-    if (
-        sceneMetadata.gridMode &&
-        isHexGrid(grid.type) &&
-        grid.measurement !== "EUCLIDEAN"
-    ) {
+    if (shape === "hex_hexes") {
         expression = "axial_round(p)";
-    } else if (sceneMetadata.gridMode && grid.measurement !== "EUCLIDEAN") {
+    } else if (
+        shape === "square" ||
+        shape === "alternating_squares" ||
+        shape === "manhattan_squares"
+    ) {
         // starting from the corner, anything between 0 and 1 belongs to 1, etc
         expression = "ceil(p)";
     } else {
@@ -28,16 +27,13 @@ function createRoundToCell(sceneMetadata: SceneMetadata, grid: GridParsed) {
     }`;
 }
 
-export function getRangeSksl(
-    sceneMetadata: SceneMetadata,
-    grid: GridParsed,
-): string {
+export function getRangeSksl(grid: GridParsed, shape: AuraShape): string {
     return [
         axialRound,
-        createRoundToCell(sceneMetadata, grid),
-        createDistanceFunction(sceneMetadata, grid),
-        createTransformCoordinateSpace(grid),
-        createItemRadius(sceneMetadata, grid),
+        createRoundToCell(shape),
+        createDistanceFunction(shape),
+        createTransformCoordinateSpace(grid, shape),
+        createItemRadius(shape),
         range,
     ].join("\n");
 }

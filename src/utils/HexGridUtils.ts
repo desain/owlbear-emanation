@@ -19,9 +19,8 @@ export interface HexGridUtils {
 
 export function getHexGridUtils(
     hexSize: number,
-    gridType: HexGridType,
+    flatTop: boolean,
 ): HexGridUtils {
-    const flatTop = gridType === "HEX_HORIZONTAL";
     const absoluteSideLength = hexSize / Math.sqrt(3);
     return {
         absoluteSideLength,

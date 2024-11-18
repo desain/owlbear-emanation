@@ -1,7 +1,7 @@
 {
     "name": "Auras and Emanations",
     "description": "Add and manage measurement-aware auras in several styles with any character.",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "manifest_version": 1,
     "author": "desain",
     "icon": "/logo.png",
@@ -9,7 +9,7 @@
         "title": "Aura Settings",
         "icon": "/logo.png",
         "popover": "/action.html",
-        "height": 350,
+        "height": 500,
         "width": 250
     }
 }

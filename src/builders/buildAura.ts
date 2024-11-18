@@ -1,6 +1,7 @@
 import { Image } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import { Aura, IsAttached } from "../types/Aura";
+import { getAuraShape } from "../types/AuraShape";
 import { AuraStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
 import { HasMetadata } from "../types/metadata/metadataUtils";
@@ -21,6 +22,7 @@ export default function buildAura(
     sceneMetadata: SceneMetadata,
     grid: GridParsed,
 ): Aura {
+    const shape = getAuraShape(grid, sceneMetadata);
     const numUnits = size / grid.parsedScale.multiplier;
     const gridUnitsPerItemGridUnit = grid.dpi / item.grid.dpi;
     const absoluteItemSize =
@@ -32,20 +34,20 @@ export default function buildAura(
     const aura =
         style.type === "Simple"
             ? buildSimpleAura(
-                  sceneMetadata,
                   grid,
                   style,
                   item.position,
                   numUnits,
                   absoluteItemSize,
+                  shape,
               )
             : buildEffectAura(
-                  sceneMetadata,
                   grid,
                   style,
                   item.position,
                   numUnits,
                   absoluteItemSize,
+                  shape,
               );
 
     aura.locked = true;

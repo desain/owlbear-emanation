@@ -1,8 +1,8 @@
-import OBR, { buildCurve, Curve, Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import { buildCurve, Curve, Math2, Vector2 } from "@owlbear-rodeo/sdk";
 import { SimpleAuraDrawable } from "../types/Aura";
+import { AuraShape } from "../types/AuraShape";
 import { SimpleStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
-import { SceneMetadata } from "../types/metadata/SceneMetadata";
 import {
     buildAlternatingPreciseOctant,
     buildAlternatingSquareOctant,
@@ -61,39 +61,29 @@ function octantToCurve(
 }
 
 function buildDrawable(
-    sceneMetadata: SceneMetadata,
     grid: GridParsed,
     position: Vector2,
     numUnits: number,
     absoluteItemSize: number,
+    shape: AuraShape,
 ): SimpleAuraDrawable {
-    if (grid.measurement === "CHEBYSHEV" && grid.type === "SQUARE") {
-        return buildChebyshevSquareAura(
-            position,
-            numUnits,
-            grid.dpi,
-            absoluteItemSize,
-        );
-    } else if (
-        grid.measurement === "CHEBYSHEV" &&
-        (grid.type === "HEX_HORIZONTAL" || grid.type === "HEX_VERTICAL")
-    ) {
-        if (sceneMetadata.gridMode) {
-            return buildHexagonGridAura(
+    switch (shape) {
+        case "square":
+            return buildChebyshevSquareAura(
                 position,
-                Math.round(numUnits),
+                numUnits,
                 grid.dpi,
                 absoluteItemSize,
-                grid.type,
             );
-        } else {
+        case "hex": {
             // TODO normal hexagon building code, this is hacky
+            const flatTop = grid.type === "HEX_HORIZONTAL";
             const aura = buildHexagonGridAura(
                 position,
                 0,
                 grid.dpi,
                 0,
-                grid.type,
+                flatTop,
             );
             const cornerToCorner = 2 * numUnits * grid.dpi + absoluteItemSize;
             const cornerToCornerNow = (2 * grid.dpi) / Math.sqrt(3);
@@ -106,52 +96,68 @@ function buildDrawable(
             );
             return aura;
         }
-    } else if (grid.measurement === "MANHATTAN") {
-        if (sceneMetadata.gridMode) {
-            return octantToCurve(
-                buildManhattanSquareOctant(numUnits),
+        case "hex_hexes": {
+            const flatTop = grid.type === "HEX_HORIZONTAL";
+            return buildHexagonGridAura(
+                position,
+                Math.round(numUnits),
                 grid.dpi,
                 absoluteItemSize,
-                position,
+                flatTop,
             );
-        } else {
+        }
+        case "manhattan":
             return buildManhattanPrecise(
                 position,
                 numUnits,
                 grid.dpi,
                 absoluteItemSize,
             );
-        }
-    } else if (grid.measurement === "ALTERNATING") {
-        const octant = sceneMetadata.gridMode
-            ? buildAlternatingSquareOctant(numUnits)
-            : buildAlternatingPreciseOctant(numUnits);
-        return octantToCurve(octant, grid.dpi, absoluteItemSize, position);
+        case "manhattan_squares":
+            return octantToCurve(
+                buildManhattanSquareOctant(numUnits),
+                grid.dpi,
+                absoluteItemSize,
+                position,
+            );
+        case "alternating":
+            return octantToCurve(
+                buildAlternatingPreciseOctant(numUnits),
+                grid.dpi,
+                absoluteItemSize,
+                position,
+            );
+        case "alternating_squares":
+            return octantToCurve(
+                buildAlternatingSquareOctant(numUnits),
+                grid.dpi,
+                absoluteItemSize,
+                position,
+            );
+        case "circle":
+            return buildEuclideanAura(
+                position,
+                numUnits,
+                grid.dpi,
+                absoluteItemSize,
+            );
     }
-
-    if (grid.measurement !== "EUCLIDEAN") {
-        void OBR.notification.show(
-            `Can't create simple aura for measurement type ${grid.measurement} on grid ${grid.type}, defaulting to Euclidean`,
-            "WARNING",
-        );
-    }
-    return buildEuclideanAura(position, numUnits, grid.dpi, absoluteItemSize);
 }
 
 export function buildSimpleAura(
-    sceneMetadata: SceneMetadata,
     grid: GridParsed,
     style: SimpleStyle,
     position: Vector2,
     numUnits: number,
     absoluteItemSize: number,
+    shape: AuraShape,
 ): SimpleAuraDrawable {
     const drawable: SimpleAuraDrawable = buildDrawable(
-        sceneMetadata,
         grid,
         position,
         numUnits,
         absoluteItemSize,
+        shape,
     );
     drawable.style.fillColor = style.itemStyle.fillColor;
     drawable.style.fillOpacity = style.itemStyle.fillOpacity;

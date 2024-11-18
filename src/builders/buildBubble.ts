@@ -1,5 +1,5 @@
+import { AuraShape } from "../types/AuraShape";
 import { GridParsed } from "../types/GridParsed";
-import { SceneMetadata } from "../types/metadata/SceneMetadata";
 import {
     createDistanceFunction,
     createItemRadius,
@@ -7,13 +7,20 @@ import {
 } from "../utils/skslUtils";
 import bubble from "./shaders/bubble.frag";
 
-export function getBubbleSksl(sceneMetadata: SceneMetadata, grid: GridParsed) {
-    sceneMetadata = { ...sceneMetadata, gridMode: false }; // bubble doesn't support grid mode, pretend it's always off
+export function getBubbleSksl(grid: GridParsed, shape: AuraShape) {
+    // bubble doesn't support concave shapes, so round them to the nearest convex shape
+    if (shape === "alternating_squares") {
+        shape = "alternating";
+    } else if (shape === "manhattan_squares") {
+        shape = "manhattan";
+    } else if (shape === "hex_hexes") {
+        shape = "hex";
+    }
 
     return [
-        createTransformCoordinateSpace(grid),
-        createDistanceFunction(sceneMetadata, grid),
-        createItemRadius(sceneMetadata, grid),
+        createTransformCoordinateSpace(grid, shape),
+        createDistanceFunction(shape),
+        createItemRadius(shape),
         bubble,
     ].join("\n");
 }
