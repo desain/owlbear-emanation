@@ -9,7 +9,7 @@
         "title": "Aura Settings",
         "icon": "/logo.png",
         "popover": "/action.html",
-        "height": "350",
-        "width": "250"
+        "height": 350,
+        "width": 250
     }
 }
