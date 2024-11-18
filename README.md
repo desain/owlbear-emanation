@@ -127,7 +127,7 @@ interface CreateAurasMessage {
     style?: "Simple" | "Bubble" | "Glow" | "Range" | "Spirits";
 ;
     /**
-     * Hex code, e.g #d00dad. If not provided, the current player's default color will be used.
+     * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
     color?: string;
     /**
@@ -139,7 +139,7 @@ interface CreateAurasMessage {
 interface RemoveAurasMessage {
     type: "REMOVE_AURAS";
     /**
-     *  Item IDs for character images that will receive auras.
+     *  Item IDs for character images that will have all auras removed.
      */
     sources: string[];
 }
@@ -189,8 +189,10 @@ To make a production build run:
 
 -   Update auras when image alignment changes
 -   Find more ways to skip rebuilds (debounce, track builder)
+-   Optimize item update handler
 -   More effects!
-    -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects)
+    -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects, yolande's)
+    -   Figure out how to shape the bubble aura to the grid
 -   https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
 
 ## License

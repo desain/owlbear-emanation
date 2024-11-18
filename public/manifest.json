@@ -1,10 +1,9 @@
 {
     "name": "Auras and Emanations",
-    "description": "Add smart auras in one of several styles to any character",
+    "description": "Add and manage measurement-aware auras in several styles with any character.",
     "version": "1.0.0",
     "manifest_version": 1,
     "author": "desain",
-    "homepage_url": "https://github.com/desain/owlbear-emanation",
     "icon": "/logo.png",
     "action": {
         "title": "Aura Settings",

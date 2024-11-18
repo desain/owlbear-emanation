@@ -24,7 +24,7 @@ interface CreateAurasMessage {
      */
     style?: AuraStyleType;
     /**
-     * Hex code, e.g #d00dad. If not provided, the current player's default color will be used.
+     * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
     color?: string;
     /**
@@ -62,7 +62,7 @@ function isCreateAuraMessage(message: unknown): message is CreateAurasMessage {
 interface RemoveAurasMessage {
     type: typeof REMOVE_AURAS_TYPE;
     /**
-     *  Item IDs for character images that will receive auras.
+     *  Item IDs for character images that will have all auras removed.
      */
     sources: string[];
 }
@@ -93,12 +93,14 @@ export async function handleMessage(data: unknown) {
                 data.size,
                 createStyle(style, color, opacity),
             );
+        } else {
+            console.warn("[Auras] No images found for sources", data.sources);
         }
     } else if (isRemoveAurasMessage(data)) {
         if (data.sources.length > 0) {
             return await removeAuras(data.sources);
         }
     } else {
-        console.warn("Unknown Auras message", data);
+        console.warn("[Auras] Unknown Auras message", data);
     }
 }

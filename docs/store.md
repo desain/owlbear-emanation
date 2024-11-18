@@ -1,6 +1,6 @@
 ---
 title: Auras and Emanations
-description: Add smart auras in one of several styles to any character.
+description: Add and manage measurement-aware auras in several styles with any character.
 author: desain
 image: https://github.com/user-attachments/assets/1231da26-2939-4877-a023-3444ed2018b7
 icon: https://github.com/desain/owlbear-emanation/blob/main/public/logo.png
@@ -132,7 +132,7 @@ interface CreateAurasMessage {
     style?: "Simple" | "Bubble" | "Glow" | "Range" | "Spirits";
 ;
     /**
-     * Hex code, e.g #d00dad. If not provided, the current player's default color will be used.
+     * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
     color?: string;
     /**
@@ -144,7 +144,7 @@ interface CreateAurasMessage {
 interface RemoveAurasMessage {
     type: "REMOVE_AURAS";
     /**
-     *  Item IDs for character images that will receive auras.
+     *  Item IDs for character images that will have all auras removed.
      */
     sources: string[];
 }
