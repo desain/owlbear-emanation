@@ -3,10 +3,10 @@ import OBR from "@owlbear-rodeo/sdk";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "../../assets/style.css";
-import installAuras from "../background/install";
 import { PluginGate } from "../ui/PluginGate";
 import { PluginThemeProvider } from "../ui/PluginThemeProvider";
 import { Action } from "./Action";
+import installAuras from "./install";
 
 // console.log("renderAction");
 
