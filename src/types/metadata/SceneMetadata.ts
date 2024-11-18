@@ -1,17 +1,22 @@
 import OBR, { Metadata } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
+import { AuraShape } from "../AuraShape";
 
 export interface SceneMetadata {
     gridMode: boolean;
+    shapeOverride?: AuraShape;
 }
 
-export const DEFAULT_SCENE_METADATA: SceneMetadata = { gridMode: true };
+export const DEFAULT_SCENE_METADATA: SceneMetadata = {
+    gridMode: true,
+};
 
-export function extractSceneMetadataOrDefault(metadata: Metadata) {
+export function extractSceneMetadataOrDefault(
+    metadata: Metadata,
+): SceneMetadata {
     return (
-        (metadata[METADATA_KEY] as SceneMetadata | undefined) ?? {
-            gridMode: true,
-        }
+        (metadata[METADATA_KEY] as SceneMetadata | undefined) ??
+        DEFAULT_SCENE_METADATA
     );
 }
 

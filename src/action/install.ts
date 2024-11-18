@@ -1,5 +1,6 @@
 import OBR from "@owlbear-rodeo/sdk";
 
+import { version } from "../../package.json";
 import AuraFixer from "../AuraFixer";
 import { MESSAGE_CHANNEL } from "../constants";
 import { deferCallAll } from "../utils/jsUtils";
@@ -11,7 +12,7 @@ import createContextMenu from "./createContextMenu";
  */
 
 export default async function installAuras(): Promise<VoidFunction> {
-    console.log("Auras and Emanations version 1.0.0");
+    console.log(`Auras and Emanations version ${version}`);
     await createContextMenu();
 
     const uninstallers: VoidFunction[] = [];

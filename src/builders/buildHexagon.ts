@@ -1,5 +1,5 @@
 import { Math2, Vector2, buildCurve } from "@owlbear-rodeo/sdk";
-import { HexGridType, getHexGridUtils } from "../utils/HexGridUtils";
+import { getHexGridUtils } from "../utils/HexGridUtils";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
     return Math2.rotate(point, { x: 0, y: 0 }, degrees);
@@ -10,9 +10,9 @@ export function buildHexagonGridAura(
     numHexes: number,
     hexSize: number,
     absoluteItemSize: number,
-    gridType: HexGridType,
+    flatTop: boolean,
 ) {
-    const utils = getHexGridUtils(hexSize, gridType);
+    const utils = getHexGridUtils(hexSize, flatTop);
     const radius = utils.getAuraRadius(numHexes, absoluteItemSize);
     const rightHexOffset = { x: utils.mainAxisSpacing, y: 0 };
 

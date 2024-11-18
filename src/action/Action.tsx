@@ -1,8 +1,18 @@
-import { FormControlLabel, FormGroup, Switch } from "@mui/material";
+import {
+    Divider,
+    FormControlLabel,
+    FormGroup,
+    FormHelperText,
+    MenuItem,
+    Select,
+    Switch,
+} from "@mui/material";
 import Stack from "@mui/material/Stack";
 
+import { isAuraShape } from "../types/AuraShape";
 import { updateSceneMetadata } from "../types/metadata/SceneMetadata";
 import { ColorInput } from "../ui/components/ColorInput";
+import { Control } from "../ui/components/Control";
 import { OpacitySlider } from "../ui/components/OpacitySlider";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
@@ -15,7 +25,7 @@ export function SceneSettings() {
     const sceneMetadata = useOwlbearStore((store) => store.sceneMetadata);
     return (
         <>
-            <h4>Global Settings</h4>
+            <h4>Scene Settings (GM Only)</h4>
             <SceneReadyGate>
                 <FormGroup>
                     <FormControlLabel
@@ -29,11 +39,35 @@ export function SceneSettings() {
                         }
                         label="Shape to grid"
                     />
-                    {/* <FormHelperText>
-                    When enabled, configures aura styles which support
-                    highlighting grid cells to do so.
-                </FormHelperText> */}
+                    <FormHelperText>
+                        Makes aura styles which support highlighting grid cells
+                        do so.
+                    </FormHelperText>
                 </FormGroup>
+                <Divider sx={{ mt: 1, mb: 1 }} />
+                <Control label="Override Shape" fullWidth>
+                    <Select
+                        size="small"
+                        value={sceneMetadata.shapeOverride ?? "none"}
+                        onChange={(event) => {
+                            const value = event.target.value;
+                            void updateSceneMetadata({
+                                shapeOverride: isAuraShape(value)
+                                    ? value
+                                    : undefined,
+                            });
+                        }}
+                    >
+                        <MenuItem value="none">
+                            <em>No Override</em>
+                        </MenuItem>
+                        <MenuItem value="circle">Circle</MenuItem>
+                        <MenuItem value="square">Square</MenuItem>
+                    </Select>
+                    <FormHelperText>
+                        Sets the shape of all auras, overriding grid defaults.
+                    </FormHelperText>
+                </Control>
             </SceneReadyGate>
         </>
     );
@@ -60,7 +94,7 @@ export function Action() {
 
     return (
         <>
-            <h4>Defaults</h4>
+            <h4>Aura Defaults</h4>
             <Stack direction="row" gap={1} sx={{ mb: 2 }}>
                 <StyleSelector
                     fullWidth
