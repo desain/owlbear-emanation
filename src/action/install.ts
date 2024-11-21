@@ -5,7 +5,7 @@ import AuraFixer from "../AuraFixer";
 import { MESSAGE_CHANNEL } from "../constants";
 import { deferCallAll } from "../utils/jsUtils";
 import { handleMessage } from "../utils/messaging";
-import createContextMenu from "./createContextMenu";
+import createContextMenu from "../contextmenu/createContextMenu";
 /**
  * This file represents the background script run when the plugin loads.
  * It creates the context menu item for the aura.

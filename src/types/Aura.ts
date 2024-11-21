@@ -3,13 +3,12 @@ import {
     Effect,
     isCurve,
     isEffect,
-    isShape,
     Item,
-    Shape,
     Uniform,
 } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { METADATA_KEY } from "../constants";
+import { Circle, isCircle } from "./Circle";
 import { AuraEntry } from "./metadata/SourceMetadata";
 import { HasMetadata } from "./metadata/metadataUtils";
 
@@ -19,11 +18,6 @@ export interface IsAttached {
 
 interface AuraMetadata {
     isAura: true;
-}
-
-export type Circle = Shape & { shapeType: "CIRCLE" };
-function isCircle(item: Item): item is Circle {
-    return isShape(item) && item.shapeType === "CIRCLE";
 }
 
 export type SimpleAuraDrawable = Circle | Curve;

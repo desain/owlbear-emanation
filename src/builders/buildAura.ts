@@ -1,8 +1,8 @@
-import { Image } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import { Aura, IsAttached } from "../types/Aura";
 import { getAuraShape } from "../types/AuraShape";
 import { AuraStyle } from "../types/AuraStyle";
+import { CandidateSource, getAbsoluteItemSize } from "../types/CandidateSource";
 import { GridParsed } from "../types/GridParsed";
 import { HasMetadata } from "../types/metadata/metadataUtils";
 import { SceneMetadata } from "../types/metadata/SceneMetadata";
@@ -16,7 +16,7 @@ import { buildSimpleAura } from "./simple";
  * @param size the size of the aura in grid units. E.g size=10ft on a 5-foot grid creates a 2-square aura.
  */
 export default function buildAura(
-    item: Image,
+    item: CandidateSource,
     style: AuraStyle,
     size: number,
     sceneMetadata: SceneMetadata,
@@ -24,12 +24,7 @@ export default function buildAura(
 ): Aura {
     const shape = getAuraShape(grid, sceneMetadata);
     const numUnits = size / grid.parsedScale.multiplier;
-    const gridUnitsPerItemGridUnit = grid.dpi / item.grid.dpi;
-    const absoluteItemSize =
-        Math.max(
-            item.image.width * item.scale.x,
-            item.image.height * item.scale.y,
-        ) * gridUnitsPerItemGridUnit;
+    const absoluteItemSize = getAbsoluteItemSize(item, grid);
 
     const aura =
         style.type === "Simple"

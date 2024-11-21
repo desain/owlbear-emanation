@@ -1,16 +1,17 @@
-import OBR, { Image, isImage, Item } from "@owlbear-rodeo/sdk";
+import OBR, { Item } from "@owlbear-rodeo/sdk";
 
 import { METADATA_KEY } from "../constants";
 import { assertItem } from "../utils/itemUtils";
+import { CandidateSource, isCandidateSource } from "./CandidateSource";
 import { HasMetadata } from "./metadata/metadataUtils";
 import { AuraEntry, SourceMetadata } from "./metadata/SourceMetadata";
 import { Specifier } from "./Specifier";
 
-export type Source = Image & HasMetadata<SourceMetadata>;
+export type Source = CandidateSource & HasMetadata<SourceMetadata>;
 
 export function isSource(item: Item): item is Source {
     return (
-        isImage(item) &&
+        isCandidateSource(item) &&
         METADATA_KEY in item.metadata &&
         typeof item.metadata[METADATA_KEY] === "object"
     );

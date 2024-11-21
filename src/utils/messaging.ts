@@ -1,5 +1,6 @@
-import OBR, { isImage } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { AuraStyleType, createStyle, isAuraStyle } from "../types/AuraStyle";
+import { isCandidateSource } from "../types/CandidateSource";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
@@ -81,7 +82,7 @@ function isRemoveAurasMessage(message: unknown): message is RemoveAurasMessage {
 export async function handleMessage(data: unknown) {
     if (isCreateAuraMessage(data)) {
         const sources = (await OBR.scene.items.getItems(data.sources)).filter(
-            isImage,
+            isCandidateSource,
         );
         if (sources.length > 0) {
             const playerSettings = usePlayerSettings.getState();
