@@ -6,8 +6,8 @@ import { AuraStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
 import { HasMetadata } from "../types/metadata/metadataUtils";
 import { SceneMetadata } from "../types/metadata/SceneMetadata";
-import { buildEffectAura } from "./buildEffectAura";
-import { buildSimpleAura } from "./buildSimple";
+import { buildEffectAura } from "./effect";
+import { buildSimpleAura } from "./simple";
 
 /**
  * Helper to build an aura item.

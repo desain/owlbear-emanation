@@ -1,4 +1,5 @@
-import { Uniform } from "@owlbear-rodeo/sdk";
+import { Uniform, Vector2 } from "@owlbear-rodeo/sdk";
+import { getPoints } from "../builders/points";
 import { AuraShape } from "../types/AuraShape";
 import { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
@@ -7,8 +8,26 @@ const PARAM = "p";
 const PI_6 = Math.PI / 6; // 30 deg
 const SQRT_3 = Math.sqrt(3);
 
+export function createSignedDistanceFunction(
+    grid: GridParsed,
+    numUnits: number,
+    absoluteItemSize: number,
+    shape: AuraShape,
+) {
+    if (shape === "circle") {
+        const radius = numUnits * grid.dpi + absoluteItemSize / 2;
+        return `
+            float distance(in vec2 ${PARAM}) {
+                return (${getMeasurementExpression(shape)}) - ${radius};
+            }`;
+    } else {
+        const points = getPoints(grid, numUnits, absoluteItemSize, shape);
+        return createPolygonSignedDistanceFunction(points);
+    }
+}
+
 export function createDistanceFunction(shape: AuraShape) {
-    return `float distance(vec2 ${PARAM}) {
+    return `float distance(in vec2 ${PARAM}) {
         return (${getMeasurementExpression(shape)});
     }`;
 }
@@ -166,4 +185,56 @@ export function createItemRadius(shape: AuraShape) {
     return `float getItemRadius() {
         return ${expression};
     }`;
+}
+
+/**
+ * https://iquilezles.org/articles/distfunctions2d/ - polygon
+ * TODO: take advantage of symmetry by only getting points in one octant or quadrant.
+ * @param points Points in uv space (-1 to 1 across)
+ * @returns
+ */
+function createPolygonSignedDistanceFunction(points: Vector2[]) {
+    let sksl = "";
+
+    function pointName(idx: number) {
+        return `p${idx}`;
+    }
+
+    points.forEach(({ x, y }, idx) => {
+        sksl += `const vec2 ${pointName(idx)} = vec2(${x}, ${y});\n`;
+    });
+
+    sksl += `
+float distance(in vec2 p)
+{
+    float d = dot(p-${pointName(0)},p-${pointName(0)});
+    float s = 1.0;
+
+    vec2 e;
+    vec2 w;
+    vec2 b;
+    bvec3 c;
+    // for(int i=0, j=numPoints-1; i < numPoints; j=i, i++) { // start unrolled loop
+    `;
+
+    for (let i = 0, j = points.length - 1; i < points.length; j = i, i++) {
+        const p_i = pointName(i);
+        const p_j = pointName(j);
+        sksl += `
+        // iteration ${i}
+        e = ${p_j} - ${p_i};
+        w =    p - ${p_i};
+        b = w - e*clamp( dot(w,e)/dot(e,e), 0.0, 1.0 );
+        d = min( d, dot(b,b) );
+        c = bvec3( p.y>=${p_i}.y, p.y <${p_j}.y, e.x*w.y>e.y*w.x );
+        if( all(c) || all(not(c)) ) s=-s;
+        `;
+    }
+
+    sksl += `
+    // } // end unrolled loop
+    return s * sqrt(d);
+}`;
+
+    return sksl;
 }
