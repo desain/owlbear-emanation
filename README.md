@@ -85,8 +85,6 @@ An area with a gradient that gets more opaque towards the edges. High opacity va
 
 Inspired by [these AoE tokens](https://drive.google.com/drive/folders/16EoOnBMzu2oerC98bZ3HdF4nfk9Fpw_5).
 
-All grid types are supported, but this style will not conform its edges to grid squares when that would lead to a concave outline.
-
 #### Glow
 
 ![Glow](https://github.com/user-attachments/assets/78afaee3-1adc-4bfe-b357-3a04a214bf4c)
@@ -188,12 +186,14 @@ To make a production build run:
 
 ## To do
 
+-   Allow auras on shapes
+-   Different blend modes?
 -   Update auras when image alignment changes
 -   Find more ways to skip rebuilds (debounce, track builder)
 -   Optimize item update handler
 -   More effects!
     -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects, yolande's)
-    -   Figure out how to shape the bubble aura to the grid
+    -   Split out style picker into a larger modal (maybe move all settings to a settings modal?)
 -   https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
 
 ## License
