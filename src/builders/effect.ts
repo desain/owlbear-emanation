@@ -3,22 +3,26 @@ import { AuraShape } from "../types/AuraShape";
 import { EffectStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
-import { getBubbleSksl } from "./buildBubble";
-import { getRangeSksl } from "./buildRange";
-import { getSpiritsSksl } from "./buildSpirits";
+import { getBubbleSksl } from "./bubble";
+import { getRangeSksl } from "./range";
 import glow from "./shaders/glow.frag";
+import { getSpiritsSksl } from "./spirits";
 
 function getSksl(
     grid: GridParsed,
     style: EffectStyle,
     numUnits: number,
+    absoluteItemSize: number,
     shape: AuraShape,
 ): string {
     switch (style.type) {
         case "Spirits":
             return declareUniforms(style) + getSpiritsSksl(numUnits);
         case "Bubble":
-            return declareUniforms(style) + getBubbleSksl(grid, shape);
+            return (
+                declareUniforms(style) +
+                getBubbleSksl(grid, numUnits, absoluteItemSize, shape)
+            );
         case "Glow":
             return declareUniforms(style) + glow;
         case "Range":
@@ -34,7 +38,7 @@ export function buildEffectAura(
     absoluteItemSize: number,
     shape: AuraShape,
 ): Effect {
-    const sksl = getSksl(grid, style, numUnits, shape);
+    const sksl = getSksl(grid, style, numUnits, absoluteItemSize, shape);
     // console.log(sksl);
     // give the effect one extra grid space for overdraw
     const wh = 2 * (numUnits + 1) * grid.dpi + absoluteItemSize;

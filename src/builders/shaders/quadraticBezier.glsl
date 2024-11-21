@@ -1,4 +1,6 @@
 // https://thebookofshaders.com/05/
+// x from 0 to 1, a in the first quadrant unit square
+// output 0 to 1
 float quadraticBezier (float x, vec2 a){
   // adapted from BEZMATH.PS (1993)
   // by Don Lancaster, SYNERGETICS Inc.
