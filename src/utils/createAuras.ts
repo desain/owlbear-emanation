@@ -1,10 +1,11 @@
-import OBR, { Image } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 
 import { AuraStyle, createStyle } from "../types/AuraStyle";
+import { CandidateSource } from "../types/CandidateSource";
 import { addEntry } from "../types/metadata/SourceMetadata";
 import { usePlayerSettings } from "../usePlayerSettings";
 
-export function createAurasWithDefaults(items: Image[]) {
+export function createAurasWithDefaults(items: CandidateSource[]) {
     const playerSettings = usePlayerSettings.getState();
     return createAuras(
         items,
@@ -24,7 +25,7 @@ export function createAurasWithDefaults(items: Image[]) {
  * @param effectOverride Effect to use for auras. Defaults to 'Simple'.
  */
 export async function createAuras(
-    items: Image[],
+    items: CandidateSource[],
     size: number,
     style: AuraStyle,
 ) {

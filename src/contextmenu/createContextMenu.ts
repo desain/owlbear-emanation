@@ -9,6 +9,9 @@ import {
 } from "../constants";
 import { createAurasWithDefaults } from "../utils/createAuras";
 
+/**
+ * Creates context menu - but should be called from background or action.
+ */
 export default async function createContextMenu() {
     await OBR.contextMenu.create({
         id: CONTEXTMENU_CREATE_ID,
@@ -19,8 +22,20 @@ export default async function createContextMenu() {
                 label: "Add Aura",
                 filter: {
                     every: [
-                        { key: "type", value: "IMAGE" },
+                        { key: "type", value: "IMAGE", coordinator: "||" },
                         { key: "layer", value: "CHARACTER" },
+                        { key: ["metadata", METADATA_KEY], value: undefined },
+                    ],
+                    permissions: ["UPDATE"],
+                },
+            },
+            {
+                icon: add,
+                label: "Add Aura",
+                filter: {
+                    every: [
+                        { key: "type", value: "SHAPE" },
+                        { key: "shapeType", value: "CIRCLE" },
                         { key: ["metadata", METADATA_KEY], value: undefined },
                     ],
                     permissions: ["UPDATE"],
@@ -41,6 +56,24 @@ export default async function createContextMenu() {
                     every: [
                         { key: "type", value: "IMAGE" },
                         { key: "layer", value: "CHARACTER" },
+                    ],
+                    some: [
+                        {
+                            key: ["metadata", METADATA_KEY],
+                            operator: "!=",
+                            value: undefined,
+                        },
+                    ],
+                    permissions: ["UPDATE"],
+                },
+            },
+            {
+                icon: edit,
+                label: "Edit Auras",
+                filter: {
+                    every: [
+                        { key: "type", value: "SHAPE" },
+                        { key: "shapeType", value: "CIRCLE" },
                     ],
                     some: [
                         {

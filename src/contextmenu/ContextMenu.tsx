@@ -2,7 +2,7 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { Button, Divider, IconButton, Skeleton, Stack } from "@mui/material";
-import OBR, { Image, isImage, Item } from "@owlbear-rodeo/sdk";
+import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import {
     AuraStyleType,
@@ -12,6 +12,7 @@ import {
     setColor,
     setOpacity,
 } from "../types/AuraStyle";
+import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
 import { ColorInput } from "../ui/components/ColorInput";
 import { Control } from "../ui/components/Control";
@@ -156,7 +157,9 @@ export function ContextMenu() {
                     variant="outlined"
                     startIcon={<AddCircleIcon />}
                     onClick={() =>
-                        createAurasWithDefaults(selectedItems.filter(isImage))
+                        createAurasWithDefaults(
+                            selectedItems.filter(isCandidateSource),
+                        )
                     }
                     sx={{
                         borderTopRightRadius: 0,

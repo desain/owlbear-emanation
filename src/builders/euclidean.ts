@@ -1,5 +1,5 @@
 import { Vector2, buildShape } from "@owlbear-rodeo/sdk";
-import { Circle } from "../types/Aura";
+import { Circle } from "../types/Circle";
 
 /**
  * Build basic shape.
