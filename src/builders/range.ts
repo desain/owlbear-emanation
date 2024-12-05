@@ -1,12 +1,13 @@
 import { AuraShape } from "../types/AuraShape";
 import { GridParsed } from "../types/GridParsed";
+import { PI_6, SQRT_3 } from "../utils/mathUtils";
 import {
+    createAxonometricTransform,
     createDistanceFunction,
     createItemRadius,
-    createTransformCoordinateSpace,
 } from "../utils/skslUtils";
 import axialRound from "./shaders/axialRound.glsl";
-import range from "./shaders/range.glsl";
+import range from "./shaders/range.frag";
 
 function createRoundToCell(shape: AuraShape) {
     let expression: string;
@@ -27,11 +28,55 @@ function createRoundToCell(shape: AuraShape) {
     }`;
 }
 
+function anchoredAtCorner(shape: AuraShape) {
+    return (
+        shape === "square" ||
+        shape === "alternating" ||
+        shape === "alternating_squares" ||
+        shape === "manhattan" ||
+        shape === "manhattan_squares"
+    );
+}
+
+// sqrt3/3  -1/3
+// 0        2/3
+const PX_TO_HEX = `mat2(
+  0.577350269, 0.0,
+  -0.333333333, 0.666666666
+)`;
+
+function createTransformCoordinateSpace(grid: GridParsed, shape: AuraShape) {
+    let expression: string;
+    if (shape === "hex" || shape === "hex_hexes") {
+        // why times sqrt3?
+        // want xy / size
+        // already have p = xy / width since width = dpi
+        // size = width / sqrt3, width = size sqrt3
+        // so p sqrt3 = sqrt3 xy / width = sqrt3 xy / size sqrt3 = xy / size
+
+        const rotation =
+            grid.type === "HEX_HORIZONTAL"
+                ? `mat2(cos(${PI_6}), -sin(${PI_6}), sin(${PI_6}), cos(${PI_6}))`
+                : "mat2(1.0, 0.0, 0.0, 1.0)";
+
+        expression = `${PX_TO_HEX} * ${rotation} * p * ${SQRT_3}`;
+    } else if (anchoredAtCorner(shape)) {
+        expression = "max(vec2(0.0), abs(p) - itemRadiusUnits)";
+    } else {
+        expression = "p";
+    }
+
+    return `vec2 transformCoordinateSpace(vec2 p) {
+        return ${expression};
+    }`;
+}
+
 export function getRangeSksl(grid: GridParsed, shape: AuraShape): string {
     return [
         axialRound,
         createRoundToCell(shape),
         createDistanceFunction(shape),
+        createAxonometricTransform(grid.type),
         createTransformCoordinateSpace(grid, shape),
         createItemRadius(shape),
         range,

@@ -1,12 +1,14 @@
-import { Uniform, Vector2 } from "@owlbear-rodeo/sdk";
+import { GridType, Matrix, Uniform, Vector2 } from "@owlbear-rodeo/sdk";
 import { getPoints } from "../builders/points";
 import { AuraShape } from "../types/AuraShape";
 import { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
+import {
+    INVERSE_TRANSFORM_DIMETRIC,
+    INVERSE_TRANSFORM_ISOMETRIC,
+} from "./axonometricUtils";
 
 const PARAM = "p";
-const PI_6 = Math.PI / 6; // 30 deg
-const SQRT_3 = Math.sqrt(3);
 
 export function createSignedDistanceFunction(
     grid: GridParsed,
@@ -121,51 +123,6 @@ export function declareUniforms(style: EffectStyle) {
     return uniforms;
 }
 
-function anchoredAtCorner(shape: AuraShape) {
-    return (
-        shape === "square" ||
-        shape === "alternating" ||
-        shape === "alternating_squares" ||
-        shape === "manhattan" ||
-        shape === "manhattan_squares"
-    );
-}
-
-// sqrt3/3  -1/3
-// 0        2/3
-const PX_TO_HEX = `mat2(
-  0.577350269, 0.0,
-  -0.333333333, 0.666666666
-)`;
-
-export function createTransformCoordinateSpace(
-    grid: GridParsed,
-    shape: AuraShape,
-) {
-    let expression: string;
-    if (shape === "hex" || shape === "hex_hexes") {
-        // why times sqrt3?
-        // want xy / size
-        // already have p = xy / width since width = dpi
-        // size = width / sqrt3, width = size sqrt3
-        // so p sqrt3 = sqrt3 xy / width = sqrt3 xy / size sqrt3 = xy / size
-
-        const rotation =
-            grid.type === "HEX_HORIZONTAL"
-                ? `mat2(cos(${PI_6}), -sin(${PI_6}), sin(${PI_6}), cos(${PI_6}))`
-                : "mat2(1.0, 0.0, 0.0, 1.0)";
-
-        expression = `${PX_TO_HEX} * ${rotation} * p * ${SQRT_3}`;
-    } else if (anchoredAtCorner(shape)) {
-        expression = "max(vec2(0.0), p - itemRadiusUnits)";
-    } else {
-        expression = "p";
-    }
-    return `vec2 transformCoordinateSpace(vec2 p) {
-        return ${expression};
-    }`;
-}
-
 export function createItemRadius(shape: AuraShape) {
     const TOLERANCE = 0.01;
     let expression: string;
@@ -237,4 +194,25 @@ float distance(in vec2 p)
 }`;
 
     return sksl;
+}
+
+function skslMatrix(matrix: Matrix): string {
+    const [a, b, c, d, e, f, g, h, i] = matrix;
+    return `mat3(
+        ${a}, ${d}, ${g},
+        ${b}, ${e}, ${h},
+        ${c}, ${f}, ${i}
+    )`;
+}
+
+export function createAxonometricTransform(gridType: GridType) {
+    const expression =
+        gridType === "ISOMETRIC"
+            ? `((${skslMatrix(INVERSE_TRANSFORM_ISOMETRIC)}) * vec3(p, 1.0)).xy`
+            : gridType === "DIMETRIC"
+            ? `((${skslMatrix(INVERSE_TRANSFORM_DIMETRIC)}) * vec3(p, 1.0)).xy`
+            : "p";
+    return `vec2 axonometricTransform(in vec2 p) {
+        return ${expression};
+    }`;
 }

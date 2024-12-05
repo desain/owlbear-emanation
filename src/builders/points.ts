@@ -62,17 +62,16 @@ export function getPoints(
             return buildChebyshevSquarePoints(grid, numUnits, absoluteItemSize);
         case "hex": {
             // TODO normal hexagon building code, this is hacky
-            let points = buildHexagonGridPoints(grid, 0, 0);
+            const points = buildHexagonGridPoints(grid, 0, 0);
             const cornerToCorner = 2 * numUnits * grid.dpi + absoluteItemSize;
             const cornerToCornerNow = (2 * grid.dpi) / Math.sqrt(3);
-            points = points.map((point) =>
+            return points.map((point) =>
                 Math2.rotate(
                     Math2.multiply(point, cornerToCorner / cornerToCornerNow),
                     { x: 0, y: 0 },
                     30,
                 ),
             );
-            return points;
         }
         case "hex_hexes":
             return buildHexagonGridPoints(
@@ -92,6 +91,7 @@ export function getPoints(
                 buildManhattanSquareOctant(numUnits),
                 absoluteItemSize,
             );
+            break;
         case "alternating":
             return octantToPoints(
                 grid,

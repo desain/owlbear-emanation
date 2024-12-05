@@ -1,8 +1,12 @@
+import { GridParsed } from "../types/GridParsed";
+import { createAxonometricTransform } from "../utils/skslUtils";
 import spirits from "./shaders/spirits.frag";
 
-export function getSpiritsSksl(numUnits: number) {
-    const numParticles = 3 + 3 * numUnits;
-    return `const float NUM_PARTICLES = ${numParticles};` + spirits;
+export function getSpiritsSksl(grid: GridParsed, numUnits: number) {
+    const numParticles = `const float NUM_PARTICLES = ${3 + 3 * numUnits};`;
+    return [numParticles, createAxonometricTransform(grid.type), spirits].join(
+        "\n",
+    );
 }
 
 // CIRCLE WAVES THING

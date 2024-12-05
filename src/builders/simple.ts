@@ -3,6 +3,11 @@ import { SimpleAuraDrawable } from "../types/Aura";
 import { AuraShape } from "../types/AuraShape";
 import { SimpleStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
+import {
+    getAxonometricTransformMatrix,
+    getScale,
+} from "../utils/axonometricUtils";
+import { matrixMultiply } from "../utils/mathUtils";
 import { buildEuclideanAura } from "./euclidean";
 import { getPoints } from "./points";
 
@@ -23,13 +28,28 @@ export function buildSimpleAura(
     absoluteItemSize: number,
     shape: AuraShape,
 ): SimpleAuraDrawable {
-    const drawable: SimpleAuraDrawable =
-        shape === "circle"
-            ? buildEuclideanAura(position, numUnits, grid.dpi, absoluteItemSize)
-            : pointsToCurve(
-                  position,
-                  getPoints(grid, numUnits, absoluteItemSize, shape),
-              );
+    let drawable: SimpleAuraDrawable;
+    if (shape === "circle") {
+        drawable = buildEuclideanAura(
+            grid,
+            position,
+            numUnits,
+            absoluteItemSize,
+        );
+        drawable.scale = getScale(grid.type);
+    } else {
+        const curve = pointsToCurve(
+            position,
+            getPoints(grid, numUnits, absoluteItemSize, shape),
+        );
+        const matrix = getAxonometricTransformMatrix(grid.type);
+        if (matrix !== null) {
+            curve.points = curve.points.map((point) =>
+                matrixMultiply(matrix, point),
+            );
+        }
+        drawable = curve;
+    }
     drawable.style.fillColor = style.itemStyle.fillColor;
     drawable.style.fillOpacity = style.itemStyle.fillOpacity;
     drawable.style.strokeColor = style.itemStyle.strokeColor;

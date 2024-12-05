@@ -58,6 +58,7 @@ vec4 trail(vec2 p, float i) {
 
 vec4 main(in vec2 fragCoord) {
     vec2 xy = cellCoords(fragCoord);
+    xy = axonometricTransform(xy);
     vec4 col = vec4(0);
     for (float i = 0.0; i < NUM_PARTICLES; i++) {
         col += trail(xy, i);
