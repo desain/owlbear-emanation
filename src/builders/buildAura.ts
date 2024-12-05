@@ -57,6 +57,7 @@ export default function buildAura(
         ...(aura.metadata[METADATA_KEY] ?? {}),
         ...metadata,
     };
+    // aura.scale.x = 1 + 2 / 3;
 
     return aura as typeof aura & IsAttached & HasMetadata<typeof metadata>; // typescript can't figure out these keys are set now;
 }

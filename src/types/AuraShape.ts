@@ -1,4 +1,4 @@
-import OBR from "@owlbear-rodeo/sdk";
+import OBR, { GridType } from "@owlbear-rodeo/sdk";
 import { isHexGrid } from "../utils/HexGridUtils";
 import { GridParsed } from "./GridParsed";
 import { SceneMetadata } from "./metadata/SceneMetadata";
@@ -26,6 +26,14 @@ export function isAuraShape(s: string) {
     );
 }
 
+function isSquareType(gridType: GridType) {
+    return (
+        gridType === "SQUARE" ||
+        gridType === "ISOMETRIC" ||
+        gridType === "DIMETRIC"
+    );
+}
+
 export function getAuraShape(
     grid: GridParsed,
     sceneMetadata: SceneMetadata,
@@ -34,7 +42,7 @@ export function getAuraShape(
         return sceneMetadata.shapeOverride;
     }
 
-    if (grid.measurement === "CHEBYSHEV" && grid.type === "SQUARE") {
+    if (grid.measurement === "CHEBYSHEV" && isSquareType(grid.type)) {
         return "square";
     } else if (grid.measurement === "CHEBYSHEV" && isHexGrid(grid.type)) {
         return sceneMetadata.gridMode ? "hex_hexes" : "hex";

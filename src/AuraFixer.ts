@@ -88,6 +88,7 @@ export default class AuraFixer {
                 unsubscribeItems,
                 unsubscribeGrid,
                 unsubscribeSceneMetadata,
+                () => fixer.destroy(),
             ),
         ];
     }
@@ -224,11 +225,13 @@ export default class AuraFixer {
 
     async destroy() {
         console.log("Destroying local items");
-        await OBR.scene.local.deleteItems(
-            Array.from(this.sources.values()).flatMap((sourceAndAuras) =>
-                Array.from(sourceAndAuras.auras.values()),
-            ),
-        );
+        if (await OBR.scene.isReady()) {
+            await OBR.scene.local.deleteItems(
+                Array.from(this.sources.values()).flatMap((sourceAndAuras) =>
+                    Array.from(sourceAndAuras.auras.values()),
+                ),
+            );
+        }
         this.sources = new Map();
     }
 }

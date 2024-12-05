@@ -6,7 +6,8 @@ float getOpacity(float pct) { // opacity from distance
 }
 
 half4 main(float2 fragCoord) {
-  vec2 xy = fragCoord - size/2;
+  vec2 xy = fragCoord - size/2; // put origin in center
+  xy = axonometricTransform(xy);
   float d = distance(xy); // distance in pixels
   if (d > 0.0) return vec4(0.0);
   float pct = -d / ((numUnits + itemRadiusUnits) * dpi);

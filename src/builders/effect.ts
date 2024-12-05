@@ -17,7 +17,7 @@ function getSksl(
 ): string {
     switch (style.type) {
         case "Spirits":
-            return declareUniforms(style) + getSpiritsSksl(numUnits);
+            return declareUniforms(style) + getSpiritsSksl(grid, numUnits);
         case "Bubble":
             return (
                 declareUniforms(style) +
@@ -41,13 +41,15 @@ export function buildEffectAura(
     const sksl = getSksl(grid, style, numUnits, absoluteItemSize, shape);
     // console.log(sksl);
     // give the effect one extra grid space for overdraw
-    const wh = 2 * (numUnits + 1) * grid.dpi + absoluteItemSize;
+    const extent = 2 * (numUnits + 1) * grid.dpi + absoluteItemSize;
+    const width = extent * 2; // TODO better scale
+    const height = extent;
     return buildEffect()
         .effectType("STANDALONE")
-        .width(wh)
-        .height(wh)
+        .width(width)
+        .height(height)
         .sksl(sksl)
         .uniforms(getUniforms(grid, style, numUnits, absoluteItemSize))
-        .position({ x: position.x - wh / 2, y: position.y - wh / 2 })
+        .position({ x: position.x - width / 2, y: position.y - height / 2 })
         .build();
 }

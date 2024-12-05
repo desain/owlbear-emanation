@@ -8,11 +8,21 @@ import { PluginThemeProvider } from "../ui/PluginThemeProvider";
 import { Action } from "./Action";
 import installAuras from "./install";
 
-// console.log("renderAction");
+let uninstall: VoidFunction = () => {};
+let root: ReactDOM.Root | null = null;
+
+if (import.meta.hot) {
+    import.meta.hot.accept();
+    import.meta.hot.dispose(() => {
+        console.log("Disposing");
+        uninstall();
+        root?.unmount();
+        root = null;
+    });
+}
 
 OBR.onReady(async () => {
     // console.log("onReady");
-    let uninstall: VoidFunction = () => {};
 
     if (await OBR.scene.isReady()) {
         // console.log("isReady");
@@ -29,7 +39,8 @@ OBR.onReady(async () => {
         }
     });
 
-    ReactDOM.createRoot(document.getElementById("reactApp")!).render(
+    root = ReactDOM.createRoot(document.getElementById("reactApp")!);
+    root.render(
         <React.StrictMode>
             <PluginGate>
                 <PluginThemeProvider>
