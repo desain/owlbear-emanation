@@ -2,6 +2,7 @@ import { Effect, Vector2, buildEffect } from "@owlbear-rodeo/sdk";
 import { AuraShape } from "../types/AuraShape";
 import { EffectStyle } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
+import { getScale } from "../utils/axonometricUtils";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
 import { getBubbleSksl } from "./bubble";
 import { getRangeSksl } from "./range";
@@ -42,12 +43,13 @@ export function buildEffectAura(
     // console.log(sksl);
     // give the effect one extra grid space for overdraw
     const extent = 2 * (numUnits + 1) * grid.dpi + absoluteItemSize;
-    const width = extent * 2; // TODO better scale
+    const scale = getScale(grid.type);
     const height = extent;
+    const width = (extent * scale.x) / scale.y;
     return buildEffect()
         .effectType("STANDALONE")
-        .width(width)
         .height(height)
+        .width(width)
         .sksl(sksl)
         .uniforms(getUniforms(grid, style, numUnits, absoluteItemSize))
         .position({ x: position.x - width / 2, y: position.y - height / 2 })

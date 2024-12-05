@@ -35,8 +35,8 @@ export function buildSimpleAura(
             position,
             numUnits,
             absoluteItemSize,
+            getScale(grid.type),
         );
-        drawable.scale = getScale(grid.type);
     } else {
         const curve = pointsToCurve(
             position,

@@ -14,11 +14,12 @@ export function buildEuclideanAura(
     position: Vector2,
     numUnits: number,
     absoluteItemSize: number,
+    scale: Vector2,
 ): Circle {
     const diameter = numUnits * grid.dpi * 2 + absoluteItemSize;
     return buildShape()
-        .width(diameter)
-        .height(diameter)
+        .width(diameter * scale.x)
+        .height(diameter * scale.y)
         .position(position)
         .shapeType("CIRCLE")
         .build() as Circle; // typescript doesn't know about builders
