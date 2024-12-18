@@ -186,6 +186,7 @@ To make a production build run:
 
 ## To do
 
+-   Auras from images
 -   Different blend modes?
 -   Update auras when image alignment changes
 -   Find more ways to skip rebuilds (debounce, track builder)
