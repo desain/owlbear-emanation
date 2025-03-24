@@ -194,6 +194,7 @@ To make a production build run:
     -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects, yolande's)
     -   Split out style picker into a larger modal (maybe move all settings to a settings modal?)
 -   https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
+-   Option for auras to be only visible to the creator
 
 ## License
 
