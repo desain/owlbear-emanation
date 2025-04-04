@@ -187,14 +187,13 @@ To make a production build run:
 ## To do
 
 -   Auras from images
--   Different blend modes?
 -   Update auras when image alignment changes
 -   Find more ways to skip rebuilds (debounce, track builder)
 -   Optimize item update handler
 -   More effects!
     -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects, yolande's)
     -   Split out style picker into a larger modal (maybe move all settings to a settings modal?)
--   Option for auras to be only visible to the creator
+-   UI for visibility and blend modes
 
 ## License
 

@@ -14,7 +14,6 @@ export default defineConfig({
         rollupOptions: {
             input: {
                 // must have a 'main' entry point
-                contextmenu: resolve(__dirname, "/contextmenu.html"),
                 action: resolve(__dirname, "/action.html"),
             },
         },

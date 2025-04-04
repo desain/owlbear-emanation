@@ -33,7 +33,8 @@ export const STYLE_TYPES: AuraStyleType[] = [
 ];
 
 export function isAuraStyle(style: string): style is AuraStyleType {
-    return STYLE_TYPES.includes(style as AuraStyleType);
+    const styleTypes: string[] = STYLE_TYPES;
+    return styleTypes.includes(style);
 }
 
 export function createStyle(

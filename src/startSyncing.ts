@@ -1,16 +1,14 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { useEffect, useState } from "react";
 import { useOwlbearStore } from "./useOwlbearStore";
 import { deferCallAll } from "./utils/jsUtils";
 
-interface SyncParams {
-    syncItems: boolean;
-}
-
-// store should be accessible from background
-export function startSyncing(
-    syncParams: SyncParams,
-): [Promise<void>, VoidFunction] {
+/**
+ *
+ * @param syncParams
+ * @returns [Promise that resolves once store has initialized, function to stop syncing]
+ */
+export function startSyncing(): [Promise<void>, VoidFunction] {
+    console.log("start syncing");
     const store = useOwlbearStore.getState();
 
     const roleInitialized = OBR.player.getRole().then(store.setRole);
@@ -38,9 +36,9 @@ export function startSyncing(
     );
     const unsubscribeGrid = OBR.scene.grid.onChange(store.setGrid);
 
-    const unsubscribeItems = syncParams.syncItems
-        ? OBR.scene.items.onChange((items) => store.updateItems(items))
-        : () => {};
+    const unsubscribeItems = OBR.scene.items.onChange((items) =>
+        store.updateItems(items),
+    );
 
     return [
         Promise.all([
@@ -56,14 +54,4 @@ export function startSyncing(
             unsubscribeItems,
         ),
     ];
-}
-
-export function useOwlbearStoreSync(syncParams: SyncParams) {
-    const [initialized, setInitialized] = useState(false);
-    useEffect(() => {
-        const [initializedPromise, unsubscribe] = startSyncing(syncParams);
-        void initializedPromise.then(() => setInitialized(true));
-        return unsubscribe;
-    }, [syncParams]);
-    return initialized;
 }

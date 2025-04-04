@@ -1,7 +1,5 @@
-import { FormControlProps } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import { AuraStyleType, STYLE_TYPES } from "../../types/AuraStyle";
+import { FormControlProps, MenuItem, Select } from "@mui/material";
+import { AuraStyleType, isAuraStyle, STYLE_TYPES } from "../../types/AuraStyle";
 import { Control } from "./Control";
 
 export function StyleSelector({
@@ -14,14 +12,20 @@ export function StyleSelector({
 } & Omit<FormControlProps, "onChange">) {
     return (
         <Control {...props} label="Style">
-            <Autocomplete
-                options={STYLE_TYPES}
-                renderInput={(params) => <TextField {...params} />}
-                disableClearable={true}
+            <Select
                 size="small"
                 value={value}
-                onChange={(_, styleType) => onChange(styleType)}
-            />
+                onChange={(e) => {
+                    const value = e.target.value;
+                    if (isAuraStyle(value)) {
+                        onChange(value);
+                    }
+                }}
+            >
+                {...STYLE_TYPES.map((styleType) => (
+                    <MenuItem value={styleType}>{styleType}</MenuItem>
+                ))}
+            </Select>
         </Control>
     );
 }
