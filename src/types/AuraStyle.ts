@@ -13,17 +13,38 @@ export interface ColorOpacityShaderStyle {
     color: Vector3;
     opacity: number;
 }
+function isColorOpacityShaderStyle(
+    style: AuraStyle,
+): style is ColorOpacityShaderStyle {
+    return (
+        (style.type === "Bubble" ||
+            style.type === "Glow" ||
+            style.type === "Range") &&
+        "opacity" in style &&
+        typeof style.opacity === "number"
+    );
+}
 
 export interface SpiritsStyle {
     type: "Spirits";
+}
+function isSpiritsStyle(style: AuraStyle): style is SpiritsStyle {
+    return style.type === "Spirits";
 }
 
 export type EffectStyle = (ColorOpacityShaderStyle | SpiritsStyle) & {
     blendMode?: BlendMode;
 };
+export function isEffectStyle(style: AuraStyle): style is EffectStyle {
+    return (
+        (isColorOpacityShaderStyle(style) || isSpiritsStyle(style)) &&
+        (!("blendMode" in style) || typeof style.blendMode === "string")
+    );
+}
 export type EffectStyleType = EffectStyle["type"];
 export type AuraStyle = SimpleStyle | EffectStyle;
 export type AuraStyleType = AuraStyle["type"];
+
 export const STYLE_TYPES: AuraStyleType[] = [
     "Simple",
     "Bubble",
@@ -31,7 +52,6 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Range",
     "Spirits",
 ];
-
 export function isAuraStyle(style: string): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
     return styleTypes.includes(style);

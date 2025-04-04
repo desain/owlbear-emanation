@@ -7,13 +7,16 @@ import { METADATA_KEY } from "../constants";
 import {
     AuraStyleType,
     createStyle,
+    getBlendMode,
     getColor,
     getOpacity,
+    isEffectStyle,
     setColor,
     setOpacity,
 } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
+import { BlendModeSelector } from "../ui/components/BlendModeSelector";
 import { ColorInput } from "../ui/components/ColorInput";
 import { Control } from "../ui/components/Control";
 import { OpacitySlider } from "../ui/components/OpacitySlider";
@@ -106,15 +109,30 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
             </BottomControlRow>
             <details>
                 <summary>Advanced Options</summary>
-                <VisibilitySelector
-                    fullWidth
-                    value={menuItem.aura.visibleTo}
-                    onChange={(visibleTo) =>
-                        updateEntry(menuItem.toSpecifier(), (entry) => {
-                            entry.visibleTo = visibleTo;
-                        })
-                    }
-                />
+                <Stack spacing={2} sx={{ mt: 2 }}>
+                    <VisibilitySelector
+                        fullWidth
+                        value={menuItem.aura.visibleTo}
+                        onChange={(visibleTo) =>
+                            updateEntry(menuItem.toSpecifier(), (entry) => {
+                                entry.visibleTo = visibleTo;
+                            })
+                        }
+                    />
+                    {isEffectStyle(menuItem.aura.style) && (
+                        <BlendModeSelector
+                            fullWidth
+                            value={getBlendMode(menuItem.aura.style)}
+                            onChange={(blendMode) =>
+                                updateEntry(menuItem.toSpecifier(), (entry) => {
+                                    if (isEffectStyle(entry.style)) {
+                                        entry.style.blendMode = blendMode;
+                                    }
+                                })
+                            }
+                        />
+                    )}
+                </Stack>
             </details>
             <AuraDivider />
         </>
