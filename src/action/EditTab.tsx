@@ -20,7 +20,6 @@ import { OpacitySlider } from "../ui/components/OpacitySlider";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
 import { useOwlbearStore } from "../useOwlbearStore";
-import { useOwlbearStoreSync } from "../useOwlbearStoreSync";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAuras, createAurasWithDefaults } from "../utils/createAuras";
 import { getId, hasId } from "../utils/itemUtils";
@@ -137,15 +136,17 @@ function ExtantAuras({ selectedItems }: { selectedItems: Item[] }) {
         ]);
 }
 
-const SYNC_PARAMS = { syncItems: true };
-export function ContextMenu() {
-    const initializedOwlbearStore = useOwlbearStoreSync(SYNC_PARAMS);
+export function EditTab() {
     const playerSettingsSensible = usePlayerSettings(
         (store) => store.hasSensibleValues,
     );
     const selectedItems = useOwlbearStore((store) => store.selectedItems);
 
-    if (!initializedOwlbearStore || !playerSettingsSensible) {
+    if (selectedItems.length === 0) {
+        return <p>Select items to add or edit auras</p>;
+    }
+
+    if (!playerSettingsSensible) {
         return <MenuSkeleton />;
     }
 

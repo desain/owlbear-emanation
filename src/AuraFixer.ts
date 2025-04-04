@@ -11,7 +11,6 @@ import {
 } from "./types/metadata/SourceMetadata";
 import { getEntry, isSource, Source } from "./types/Source";
 import { useOwlbearStore } from "./useOwlbearStore";
-import { startSyncing as startOwlbearStoreSync } from "./useOwlbearStoreSync";
 import { assertItem, didChangeScale, hasId } from "./utils/itemUtils";
 import { deferCallAll, getOrInsert } from "./utils/jsUtils";
 
@@ -53,16 +52,19 @@ export default class AuraFixer {
     private sources: Sources = new Map();
     private currentPlayerId: string;
 
+    /**
+     * Create fixer. Uses useOwlbearStore, so only works if store is syncing.
+     * @returns [fixer, function to uninstall fixer]
+     */
     static async install(): Promise<[AuraFixer, VoidFunction]> {
-        const fixer = new AuraFixer(await OBR.player.getId());
+        const [playerId, currentLatestItems] = await Promise.all([
+            OBR.player.getId(),
+            OBR.scene.items.getItems(),
+        ]);
+        const fixer = new AuraFixer(playerId);
         const lockify = createLock();
 
-        const [initialized, unsubscribeStore] = startOwlbearStoreSync({
-            syncItems: false,
-        });
-        await initialized;
-
-        let latestItems = await OBR.scene.items.getItems();
+        let latestItems = currentLatestItems;
         const unsubscribeItems = OBR.scene.items.onChange(
             lockify(async (items) => {
                 latestItems = items;
@@ -85,7 +87,6 @@ export default class AuraFixer {
         return [
             fixer,
             deferCallAll(
-                unsubscribeStore,
                 unsubscribeItems,
                 unsubscribeGrid,
                 unsubscribeSceneMetadata,

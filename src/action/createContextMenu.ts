@@ -13,7 +13,7 @@ import { createAurasWithDefaults } from "../utils/createAuras";
  * Creates context menu - but should be called from background or action.
  */
 export default async function createContextMenu() {
-    await OBR.contextMenu.create({
+    const createAuraItemCreated = OBR.contextMenu.create({
         id: CONTEXTMENU_CREATE_ID,
         shortcut: "E", // Emanation
         icons: [
@@ -46,7 +46,7 @@ export default async function createContextMenu() {
             return createAurasWithDefaults(context.items as Image[]); // Typecast OK because filter requires image
         },
     });
-    await OBR.contextMenu.create({
+    const editAuraItemCreated = OBR.contextMenu.create({
         id: CONTEXTMENU_EDIT_ID,
         icons: [
             {
@@ -86,9 +86,6 @@ export default async function createContextMenu() {
                 },
             },
         ],
-        embed: {
-            url: "/contextmenu.html",
-            height: 210,
-        },
     });
+    return Promise.all([createAuraItemCreated, editAuraItemCreated]);
 }
