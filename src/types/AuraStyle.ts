@@ -61,6 +61,7 @@ export function createStyle(
     styleType: AuraStyleType,
     color: string,
     opacity: number,
+    blendMode?: BlendMode,
 ): AuraStyle {
     return styleType === "Simple"
         ? {
@@ -81,9 +82,11 @@ export function createStyle(
               type: styleType,
               color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
               opacity: opacity,
+              blendMode,
           }
         : {
               type: styleType,
+              blendMode,
           };
 }
 

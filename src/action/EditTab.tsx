@@ -32,13 +32,20 @@ import { removeAura, removeAuras } from "../utils/removeAuras";
 import { MenuItem } from "./Menuitem";
 
 async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
+    const visibleTo = menuItem.aura.visibleTo;
     const size = menuItem.aura.size;
     const color = getColor(menuItem.aura.style);
     const opacity = getOpacity(menuItem.aura.style);
+    const blendMode = getBlendMode(menuItem.aura.style);
     const source = await OBR.scene.items.getItems<Image>([menuItem.sourceId]);
     // Need to create before removing, since removing the last aura destroys the
     // context menu before we can create the new one.
-    await createAuras(source, size, createStyle(styleType, color, opacity));
+    await createAuras(
+        source,
+        size,
+        createStyle(styleType, color, opacity, blendMode),
+        visibleTo,
+    );
     await removeAura(menuItem.toSpecifier());
 }
 

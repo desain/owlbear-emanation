@@ -32,6 +32,10 @@ interface CreateAurasMessage {
      * Number from 0 (fully transparent) to 1 (fully opaque). If not provided, the current player's default opacity will be used.
      */
     opacity?: number;
+    /**
+     * ID of player this aura will be visible to. If not provided, the aura will be visible to eveyrone.
+     */
+    visibleTo?: string;
 }
 
 function isCreateAuraMessage(message: unknown): message is CreateAurasMessage {
@@ -56,7 +60,8 @@ function isCreateAuraMessage(message: unknown): message is CreateAurasMessage {
         (!("opacity" in message) ||
             (typeof message.opacity === "number" &&
                 message.opacity >= 0 &&
-                message.opacity <= 1))
+                message.opacity <= 1)) &&
+        (!("visibleTo" in message) || typeof message.visibleTo === "string")
     );
 }
 
@@ -93,6 +98,7 @@ export async function handleMessage(data: unknown) {
                 sources,
                 data.size,
                 createStyle(style, color, opacity),
+                data.visibleTo,
             );
         } else {
             console.warn("[Auras] No images found for sources", data.sources);

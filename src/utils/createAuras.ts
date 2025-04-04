@@ -28,6 +28,7 @@ export async function createAuras(
     items: CandidateSource[],
     size: number,
     style: AuraStyle,
+    visibleTo?: string,
 ) {
     if (items.length === 0) {
         return;
@@ -35,7 +36,7 @@ export async function createAuras(
 
     return await OBR.scene.items.updateItems(items, (items) =>
         items.forEach((item) => {
-            addEntry(item, style, size);
+            addEntry(item, style, size, visibleTo);
         }),
     );
 }
