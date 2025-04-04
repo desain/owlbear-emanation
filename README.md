@@ -195,10 +195,8 @@ To make a production build run:
 -   Find more ways to skip rebuilds (debounce, track builder)
 -   Optimize item update handler
 -   More effects!
-    -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects, yolande's)
-    -   Split out style picker into a larger modal (maybe move all settings to a settings modal?)
--   Copy and paste aura
--   Card auras
+    -   Localized weather effects
+    -   Split out style picker into a larger modal?
 
 ## License
 
