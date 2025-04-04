@@ -158,7 +158,7 @@ If you need support for this extension you can message me in the [Owlbear Rodeo 
 
 ## Development
 
-After checkout, run `yarn dlx @yarnpkg/sdks vscode` to set up development in VS Code.
+After checkout, run `pnpm install`.
 
 ## How it Works
 
@@ -170,19 +170,19 @@ The `action.html` page is rendered as an action item, which controls global sett
 
 ## Building
 
-This project uses [Yarn](https://yarnpkg.com/) as a package manager.
+This project uses [pnpm](https://pnpm.io/) as a package manager.
 
 To install all the dependencies run:
 
-`yarn`
+`pnpm install`
 
 To run in a development mode run:
 
-`yarn dev`
+`pnpm dev`
 
 To make a production build run:
 
-`yarn build`
+`pnpm build`
 
 ## To do
 
@@ -194,7 +194,6 @@ To make a production build run:
 -   More effects!
     -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects, yolande's)
     -   Split out style picker into a larger modal (maybe move all settings to a settings modal?)
--   https://www.raulmelo.me/en/blog/making-the-switch-to-pnpm
 -   Option for auras to be only visible to the creator
 
 ## License
