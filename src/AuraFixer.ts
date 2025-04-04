@@ -51,9 +51,10 @@ function createLock() {
  */
 export default class AuraFixer {
     private sources: Sources = new Map();
+    private currentPlayerId: string;
 
     static async install(): Promise<[AuraFixer, VoidFunction]> {
-        const fixer = new AuraFixer();
+        const fixer = new AuraFixer(await OBR.player.getId());
         const lockify = createLock();
 
         const [initialized, unsubscribeStore] = startOwlbearStoreSync({
@@ -93,15 +94,28 @@ export default class AuraFixer {
         ];
     }
 
-    private constructor() {}
+    private constructor(currentPlayerId: string) {
+        this.currentPlayerId = currentPlayerId;
+    }
+
+    private isAuraVisibleToCurrentPlayer(entry: AuraEntry): boolean {
+        return (
+            entry.visibleTo === undefined ||
+            entry.visibleTo === this.currentPlayerId
+        );
+    }
 
     private getNewAuras(source: Source): AuraEntry[] {
         const oldEntry = this.sources.get(source.id);
         if (oldEntry === undefined) {
-            return source.metadata[METADATA_KEY].auras;
+            return source.metadata[METADATA_KEY].auras.filter((entry) =>
+                this.isAuraVisibleToCurrentPlayer(entry),
+            );
         }
         return source.metadata[METADATA_KEY].auras.filter(
-            (aura) => !oldEntry.auras.has(aura.sourceScopedId),
+            (aura) =>
+                !oldEntry.auras.has(aura.sourceScopedId) &&
+                this.isAuraVisibleToCurrentPlayer(aura),
         );
     }
 
@@ -177,8 +191,11 @@ export default class AuraFixer {
             for (const [scopedId, localItemId] of oldAuras) {
                 const oldEntry = getEntry(oldSource, scopedId)!; // never null if this is kept in sync
                 const newEntry = getEntry(newSource, scopedId);
-                if (newEntry === undefined) {
-                    // aura was deleted
+                if (
+                    newEntry === undefined ||
+                    !this.isAuraVisibleToCurrentPlayer(newEntry)
+                ) {
+                    // aura was deleted or made invisible
                     toDelete.push(localItemId);
                 } else if (
                     rebuildAll ||
