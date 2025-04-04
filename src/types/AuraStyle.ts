@@ -7,13 +7,16 @@ export interface SimpleStyle {
     type: "Simple";
     itemStyle: ShapeStyle | CurveStyle;
 }
+export function isSimpleStyle(style: AuraStyle): style is SimpleStyle {
+    return style.type === "Simple";
+}
 
 export interface ColorOpacityShaderStyle {
     type: "Bubble" | "Glow" | "Range";
     color: Vector3;
     opacity: number;
 }
-function isColorOpacityShaderStyle(
+export function isColorOpacityShaderStyle(
     style: AuraStyle,
 ): style is ColorOpacityShaderStyle {
     return (
