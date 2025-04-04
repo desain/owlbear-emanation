@@ -10,7 +10,7 @@ import { removeAuras } from "./removeAuras";
 const CREATE_AURAS_TYPE = "CREATE_AURAS";
 const REMOVE_AURAS_TYPE = "REMOVE_AURAS";
 
-interface CreateAurasMessage {
+export interface CreateAurasMessage {
     type: typeof CREATE_AURAS_TYPE;
     /**
      *  Item IDs for character images that will receive auras.
@@ -37,8 +37,9 @@ interface CreateAurasMessage {
      */
     visibleTo?: string;
 }
-
-function isCreateAuraMessage(message: unknown): message is CreateAurasMessage {
+export function isCreateAuraMessage(
+    message: unknown,
+): message is CreateAurasMessage {
     return (
         isObject(message) &&
         "type" in message &&

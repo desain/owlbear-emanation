@@ -1,4 +1,5 @@
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import CopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import {
@@ -10,6 +11,7 @@ import {
     Stack,
 } from "@mui/material";
 import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
+import PasteButton from "../components/PasteButton";
 import { METADATA_KEY } from "../constants";
 import {
     AuraStyleType,
@@ -36,8 +38,24 @@ import { usePlayerSettings } from "../usePlayerSettings";
 import { createAuras, createAurasWithDefaults } from "../utils/createAuras";
 import { getId, hasId } from "../utils/itemUtils";
 import { groupBy } from "../utils/jsUtils";
+import { CreateAurasMessage } from "../utils/messaging";
 import { removeAura, removeAuras } from "../utils/removeAuras";
 import { MenuItem } from "./Menuitem";
+
+async function copyToClipboard(message: CreateAurasMessage) {
+    try {
+        await navigator.clipboard.writeText(JSON.stringify(message));
+        await OBR.notification.show(
+            "Copied aura style settings to clipboard",
+            "SUCCESS",
+        );
+    } catch (error) {
+        await OBR.notification.show(
+            "Failed to copy aura style settings to clipboard",
+            "ERROR",
+        );
+    }
+}
 
 async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
     const visibleTo = menuItem.aura.visibleTo;
@@ -145,6 +163,24 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                 >
                     Delete
                 </Button>
+                <Button
+                    aria-label="copy"
+                    startIcon={<CopyIcon />}
+                    onClick={() => {
+                        const message: CreateAurasMessage = {
+                            type: "CREATE_AURAS",
+                            sources: [],
+                            size: menuItem.aura.size,
+                            style: menuItem.aura.style.type,
+                            color: getColor(menuItem.aura.style),
+                            opacity: getOpacity(menuItem.aura.style),
+                            visibleTo: menuItem.aura.visibleTo,
+                        };
+                        copyToClipboard(message);
+                    }}
+                >
+                    Copy
+                </Button>
             </CardActions>
         </Card>
     );
@@ -213,6 +249,16 @@ export function EditTab() {
                 >
                     New
                 </Button>
+                <PasteButton
+                    sx={{
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                        borderLeftWidth: 0,
+                        borderRightWidth: 0,
+                    }}
+                />
                 <Button
                     variant="outlined"
                     startIcon={<DeleteForeverIcon />}
@@ -221,7 +267,6 @@ export function EditTab() {
                     sx={{
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,
-                        borderLeftWidth: 0,
                     }}
                 >
                     Delete All
