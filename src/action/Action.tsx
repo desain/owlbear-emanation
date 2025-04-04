@@ -12,11 +12,16 @@ export function Action() {
         <>
             <Tabs
                 value={currentTab}
+                variant="fullWidth"
                 onChange={(_, value) => setCurrentTab(value)}
                 sx={{ mb: 2 }}
             >
-                <Tab icon={<EditIcon />} label="Edit" />
-                <Tab icon={<SettingsIcon />} label="Settings" />
+                <Tab icon={<EditIcon />} iconPosition="start" label="Edit" />
+                <Tab
+                    icon={<SettingsIcon />}
+                    iconPosition="start"
+                    label="Settings"
+                />
             </Tabs>
             {currentTab === 0 ? <EditTab /> : <SettingsTab />}
         </>

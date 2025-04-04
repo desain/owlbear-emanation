@@ -12,11 +12,13 @@ type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
 
 export interface OwlbearStore {
     role: Role;
+    playerId: string;
     sceneMetadata: SceneMetadata;
     grid: GridParsed;
     selection: string[];
     selectedItems: Item[];
     setRole: (role: Role) => void;
+    setPlayerId: (playerId: string) => void;
     setSceneMetadata: (metadata: Metadata) => void;
     setGrid: (grid: GridParams) => Promise<void>;
     setSelection: (selection: string[] | undefined) => Promise<void>;
@@ -27,6 +29,7 @@ export const useOwlbearStore = create<OwlbearStore>()(
     subscribeWithSelector((set) => ({
         // dummy values
         role: "PLAYER",
+        playerId: "NONE",
         sceneMetadata: DEFAULT_SCENE_METADATA,
         grid: {
             dpi: -1,
@@ -41,6 +44,7 @@ export const useOwlbearStore = create<OwlbearStore>()(
         selection: [],
         selectedItems: [],
         setRole: (role: Role) => set({ role }),
+        setPlayerId: (playerId: string) => set({ playerId }),
         setSceneMetadata: (metadata: Metadata) =>
             set({ sceneMetadata: extractSceneMetadataOrDefault(metadata) }),
         setGrid: async (grid: GridParams) => {

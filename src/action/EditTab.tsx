@@ -19,6 +19,7 @@ import { Control } from "../ui/components/Control";
 import { OpacitySlider } from "../ui/components/OpacitySlider";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
+import { VisibilitySelector } from "../ui/components/VisibilitySelector";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAuras, createAurasWithDefaults } from "../utils/createAuras";
@@ -48,7 +49,7 @@ function TopControlRow({ children }: { children: React.ReactNode }) {
 
 function BottomControlRow({ children }: { children: React.ReactNode }) {
     return (
-        <Stack direction="row" gap={1} sx={{ width: "100%" }}>
+        <Stack direction="row" gap={1} sx={{ width: "100%", mb: 2 }}>
             {children}
         </Stack>
     );
@@ -103,6 +104,18 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                     </IconButton>
                 </Control>
             </BottomControlRow>
+            <details>
+                <summary>Advanced Options</summary>
+                <VisibilitySelector
+                    fullWidth
+                    value={menuItem.aura.visibleTo}
+                    onChange={(visibleTo) =>
+                        updateEntry(menuItem.toSpecifier(), (entry) => {
+                            entry.visibleTo = visibleTo;
+                        })
+                    }
+                />
+            </details>
             <AuraDivider />
         </>
     );

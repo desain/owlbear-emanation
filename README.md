@@ -193,7 +193,7 @@ To make a production build run:
 -   More effects!
     -   Common 5e emanations? (Conjure woodland beings, land and sea druid effects, yolande's)
     -   Split out style picker into a larger modal (maybe move all settings to a settings modal?)
--   UI for visibility and blend modes
+-   UI for blend modes
 
 ## License
 
