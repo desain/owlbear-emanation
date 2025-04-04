@@ -2,14 +2,16 @@ import { FormControlProps, MenuItem, Select } from "@mui/material";
 import { AuraStyleType, isAuraStyle, STYLE_TYPES } from "../../types/AuraStyle";
 import { Control } from "./Control";
 
+interface StyleSelectorProps {
+    value: AuraStyleType;
+    onChange: (styleType: AuraStyleType) => void;
+}
+
 export function StyleSelector({
     value,
     onChange,
     ...props
-}: {
-    value: AuraStyleType;
-    onChange: (styleType: AuraStyleType) => void;
-} & Omit<FormControlProps, "onChange">) {
+}: StyleSelectorProps & Omit<FormControlProps, "onChange">) {
     return (
         <Control {...props} label="Style">
             <Select

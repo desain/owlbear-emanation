@@ -86,6 +86,9 @@ export default async function createContextMenu() {
                 },
             },
         ],
+        async onClick() {
+            return OBR.action.open();
+        },
     });
     return Promise.all([createAuraItemCreated, editAuraItemCreated]);
 }
