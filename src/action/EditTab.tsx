@@ -38,8 +38,6 @@ async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
     const opacity = getOpacity(menuItem.aura.style);
     const blendMode = getBlendMode(menuItem.aura.style);
     const source = await OBR.scene.items.getItems<Image>([menuItem.sourceId]);
-    // Need to create before removing, since removing the last aura destroys the
-    // context menu before we can create the new one.
     await createAuras(
         source,
         size,
@@ -190,6 +188,7 @@ export function EditTab() {
 
     return (
         <>
+            <h4>Edit Auras</h4>
             <ExtantAuras selectedItems={selectedItems} />
             <Stack direction="row" justifyContent="center">
                 <Button
