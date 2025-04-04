@@ -1,7 +1,7 @@
-import { BlendMode, Item } from "@owlbear-rodeo/sdk";
+import { Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
 import { isDeepEqual } from "../../utils/jsUtils";
-import { AuraStyle } from "../AuraStyle";
+import { AuraStyle, getBlendMode } from "../AuraStyle";
 import { Source } from "../Source";
 
 /**
@@ -58,7 +58,10 @@ export function removeEntry(source: Source, sourceScopedId: string) {
 export function buildParamsChanged(oldEntry: AuraEntry, newEntry: AuraEntry) {
     return (
         oldEntry.size !== newEntry.size ||
-        oldEntry.style.type !== newEntry.style.type
+        oldEntry.style.type !== newEntry.style.type ||
+        // Not sure why, but updating the blend mode directly on effect items doesn't work,
+        // so we need to rebuild the aura if the blend mode changes.
+        getBlendMode(oldEntry.style) !== getBlendMode(newEntry.style)
     );
 }
 

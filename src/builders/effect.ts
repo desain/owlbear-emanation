@@ -1,6 +1,6 @@
 import { Effect, Vector2, buildEffect } from "@owlbear-rodeo/sdk";
 import { AuraShape } from "../types/AuraShape";
-import { EffectStyle } from "../types/AuraStyle";
+import { EffectStyle, getBlendMode } from "../types/AuraStyle";
 import { GridParsed } from "../types/GridParsed";
 import { getScale } from "../utils/axonometricUtils";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
@@ -48,6 +48,7 @@ export function buildEffectAura(
     const width = (extent * scale.x) / scale.y;
     return buildEffect()
         .effectType("STANDALONE")
+        .blendMode(getBlendMode(style))
         .height(height)
         .width(width)
         .sksl(sksl)
