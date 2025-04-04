@@ -1,7 +1,14 @@
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { Button, Divider, IconButton, Skeleton, Stack } from "@mui/material";
+import {
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Divider,
+    Stack,
+} from "@mui/material";
 import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import {
@@ -18,7 +25,6 @@ import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
 import { BlendModeSelector } from "../ui/components/BlendModeSelector";
 import { ColorInput } from "../ui/components/ColorInput";
-import { Control } from "../ui/components/Control";
 import { OpacitySlider } from "../ui/components/OpacitySlider";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
@@ -63,84 +69,88 @@ function BottomControlRow({ children }: { children: React.ReactNode }) {
     );
 }
 
-function AuraDivider() {
-    return <Divider sx={{ mt: 2, mb: 2 }} />;
-}
-
 function AuraControls({ menuItem }: { menuItem: MenuItem }) {
     return (
-        <>
-            <TopControlRow>
-                <StyleSelector
-                    fullWidth
-                    value={menuItem.aura.style.type}
-                    onChange={(styleType) => changeStyle(styleType, menuItem)}
-                />
-                <SizeInput
-                    value={menuItem.aura.size}
-                    onChange={(size) =>
-                        updateEntry(menuItem.toSpecifier(), (entry) => {
-                            entry.size = size;
-                        })
-                    }
-                />
-            </TopControlRow>
-            <BottomControlRow>
-                <ColorInput
-                    value={getColor(menuItem.aura.style)}
-                    onChange={(color) =>
-                        updateEntry(menuItem.toSpecifier(), (entry) => {
-                            setColor(entry.style, color);
-                        })
-                    }
-                />
-                <OpacitySlider
-                    sx={{ flexGrow: 1 }}
-                    value={getOpacity(menuItem.aura.style)}
-                    onChange={(opacity) =>
-                        updateEntry(menuItem.toSpecifier(), (entry) => {
-                            setOpacity(entry.style, opacity);
-                        })
-                    }
-                />
-                <Control label="Delete" sx={{ alignItems: "center" }}>
-                    <IconButton
-                        aria-label="remove"
-                        onClick={() => removeAura(menuItem.toSpecifier())}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
-                </Control>
-            </BottomControlRow>
-            <details>
-                <summary>Advanced Options</summary>
-                <Stack spacing={2} sx={{ mt: 2 }}>
-                    <VisibilitySelector
+        <Card sx={{ mb: 1 }}>
+            <CardContent>
+                <TopControlRow>
+                    <StyleSelector
                         fullWidth
-                        value={menuItem.aura.visibleTo}
-                        onChange={(visibleTo) =>
+                        value={menuItem.aura.style.type}
+                        onChange={(styleType) =>
+                            changeStyle(styleType, menuItem)
+                        }
+                    />
+                    <SizeInput
+                        value={menuItem.aura.size}
+                        onChange={(size) =>
                             updateEntry(menuItem.toSpecifier(), (entry) => {
-                                entry.visibleTo = visibleTo;
+                                entry.size = size;
                             })
                         }
                     />
-                    {isEffectStyle(menuItem.aura.style) && (
-                        <BlendModeSelector
+                </TopControlRow>
+                <BottomControlRow>
+                    <ColorInput
+                        value={getColor(menuItem.aura.style)}
+                        onChange={(color) =>
+                            updateEntry(menuItem.toSpecifier(), (entry) => {
+                                setColor(entry.style, color);
+                            })
+                        }
+                    />
+                    <OpacitySlider
+                        sx={{ flexGrow: 1 }}
+                        value={getOpacity(menuItem.aura.style)}
+                        onChange={(opacity) =>
+                            updateEntry(menuItem.toSpecifier(), (entry) => {
+                                setOpacity(entry.style, opacity);
+                            })
+                        }
+                    />
+                </BottomControlRow>
+                <details>
+                    <summary>Advanced Options</summary>
+                    <Stack spacing={2} sx={{ mt: 2 }}>
+                        <VisibilitySelector
                             fullWidth
-                            value={getBlendMode(menuItem.aura.style)}
-                            onChange={(blendMode) =>
+                            value={menuItem.aura.visibleTo}
+                            onChange={(visibleTo) =>
                                 updateEntry(menuItem.toSpecifier(), (entry) => {
-                                    if (isEffectStyle(entry.style)) {
-                                        entry.style.blendMode = blendMode;
-                                    }
+                                    entry.visibleTo = visibleTo;
                                 })
                             }
                         />
-                    )}
-                </Stack>
-            </details>
-            <AuraDivider />
-        </>
+                        {isEffectStyle(menuItem.aura.style) && (
+                            <BlendModeSelector
+                                fullWidth
+                                value={getBlendMode(menuItem.aura.style)}
+                                onChange={(blendMode) =>
+                                    updateEntry(
+                                        menuItem.toSpecifier(),
+                                        (entry) => {
+                                            if (isEffectStyle(entry.style)) {
+                                                entry.style.blendMode =
+                                                    blendMode;
+                                            }
+                                        },
+                                    )
+                                }
+                            />
+                        )}
+                    </Stack>
+                </details>
+            </CardContent>
+            <CardActions>
+                <Button
+                    aria-label="remove"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => removeAura(menuItem.toSpecifier())}
+                >
+                    Delete
+                </Button>
+            </CardActions>
+        </Card>
     );
 }
 
@@ -183,7 +193,7 @@ export function EditTab() {
     }
 
     if (!playerSettingsSensible) {
-        return <MenuSkeleton />;
+        return null;
     }
 
     return (
@@ -220,41 +230,6 @@ export function EditTab() {
                 >
                     Delete All
                 </Button>
-            </Stack>
-        </>
-    );
-}
-
-// taken from https://github.com/owlbear-rodeo/weather/blob/main/src/menu/Menu.tsx
-function FormControlSkeleton({ width = "100%" }: { width?: string | number }) {
-    return (
-        <Stack width={width} gap={0.5}>
-            <Skeleton height={17.25} width={40} />
-            <Skeleton variant="rounded" height={40} width={width} />
-        </Stack>
-    );
-}
-
-function MenuSkeleton() {
-    return (
-        <>
-            <TopControlRow>
-                <FormControlSkeleton />
-                <FormControlSkeleton width={90} />
-            </TopControlRow>
-            <BottomControlRow>
-                <FormControlSkeleton width={40} />
-                <FormControlSkeleton />
-                <FormControlSkeleton width={40} />
-            </BottomControlRow>
-            <AuraDivider />
-            <Stack direction="row" justifyContent="center">
-                <Skeleton>
-                    <Button startIcon={<AddCircleIcon />}>New</Button>
-                    <Button startIcon={<DeleteForeverIcon />}>
-                        Delete All
-                    </Button>
-                </Skeleton>
             </Stack>
         </>
     );
