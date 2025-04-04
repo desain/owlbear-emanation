@@ -1,4 +1,4 @@
-import { CurveStyle, ShapeStyle } from "@owlbear-rodeo/sdk";
+import { BlendMode, CurveStyle, ShapeStyle } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { hexToRgb, rgbToHex } from "../utils/colorUtils";
@@ -18,7 +18,9 @@ export interface SpiritsStyle {
     type: "Spirits";
 }
 
-export type EffectStyle = ColorOpacityShaderStyle | SpiritsStyle;
+export type EffectStyle = (ColorOpacityShaderStyle | SpiritsStyle) & {
+    blendMode?: BlendMode;
+};
 export type EffectStyleType = EffectStyle["type"];
 export type AuraStyle = SimpleStyle | EffectStyle;
 export type AuraStyleType = AuraStyle["type"];
@@ -75,6 +77,13 @@ export function getColor(style: AuraStyle): string {
         case "Spirits":
             return usePlayerSettings.getState().color;
     }
+}
+
+export function getBlendMode(style: AuraStyle): BlendMode {
+    if ("blendMode" in style && style.blendMode) {
+        return style.blendMode;
+    }
+    return "SRC_OVER";
 }
 
 export function setColor(style: AuraStyle, color: string) {
