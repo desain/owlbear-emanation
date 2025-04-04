@@ -1,4 +1,4 @@
-import { Item } from "@owlbear-rodeo/sdk";
+import { BlendMode, Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
 import { isDeepEqual } from "../../utils/jsUtils";
 import { AuraStyle } from "../AuraStyle";
@@ -16,6 +16,10 @@ export interface AuraEntry {
     sourceScopedId: string;
     style: AuraStyle;
     size: number;
+    /**
+     * Player IDs that can see this aura. If not set, the aura is visible to all players.
+     */
+    visibleTo?: string;
 }
 
 /**
