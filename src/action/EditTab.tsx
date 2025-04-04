@@ -17,7 +17,9 @@ import {
     getBlendMode,
     getColor,
     getOpacity,
+    isColorOpacityShaderStyle,
     isEffectStyle,
+    isSimpleStyle,
     setColor,
     setOpacity,
 } from "../types/AuraStyle";
@@ -53,27 +55,15 @@ async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
     await removeAura(menuItem.toSpecifier());
 }
 
-function TopControlRow({ children }: { children: React.ReactNode }) {
-    return (
-        <Stack direction="row" gap={1} sx={{ mb: 2 }}>
-            {children}
-        </Stack>
-    );
-}
-
-function BottomControlRow({ children }: { children: React.ReactNode }) {
-    return (
-        <Stack direction="row" gap={1} sx={{ width: "100%", mb: 2 }}>
-            {children}
-        </Stack>
-    );
-}
-
 function AuraControls({ menuItem }: { menuItem: MenuItem }) {
+    const hasColorOpacityControls =
+        isSimpleStyle(menuItem.aura.style) ||
+        isColorOpacityShaderStyle(menuItem.aura.style);
+
     return (
         <Card sx={{ mb: 1 }}>
             <CardContent>
-                <TopControlRow>
+                <Stack direction="row" gap={1} sx={{ mb: 2 }}>
                     <StyleSelector
                         fullWidth
                         value={menuItem.aura.style.type}
@@ -89,26 +79,32 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                             })
                         }
                     />
-                </TopControlRow>
-                <BottomControlRow>
-                    <ColorInput
-                        value={getColor(menuItem.aura.style)}
-                        onChange={(color) =>
-                            updateEntry(menuItem.toSpecifier(), (entry) => {
-                                setColor(entry.style, color);
-                            })
-                        }
-                    />
-                    <OpacitySlider
-                        sx={{ flexGrow: 1 }}
-                        value={getOpacity(menuItem.aura.style)}
-                        onChange={(opacity) =>
-                            updateEntry(menuItem.toSpecifier(), (entry) => {
-                                setOpacity(entry.style, opacity);
-                            })
-                        }
-                    />
-                </BottomControlRow>
+                </Stack>
+                {hasColorOpacityControls && (
+                    <Stack
+                        direction="row"
+                        gap={1}
+                        sx={{ width: "100%", mb: 2 }}
+                    >
+                        <ColorInput
+                            value={getColor(menuItem.aura.style)}
+                            onChange={(color) =>
+                                updateEntry(menuItem.toSpecifier(), (entry) => {
+                                    setColor(entry.style, color);
+                                })
+                            }
+                        />
+                        <OpacitySlider
+                            sx={{ flexGrow: 1 }}
+                            value={getOpacity(menuItem.aura.style)}
+                            onChange={(opacity) =>
+                                updateEntry(menuItem.toSpecifier(), (entry) => {
+                                    setOpacity(entry.style, opacity);
+                                })
+                            }
+                        />
+                    </Stack>
+                )}
                 <details>
                     <summary>Advanced Options</summary>
                     <Stack spacing={2} sx={{ mt: 2 }}>
