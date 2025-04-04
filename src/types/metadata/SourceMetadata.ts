@@ -29,7 +29,12 @@ export interface SourceMetadata {
     auras: AuraEntry[];
 }
 
-export function addEntry(item: Item, style: AuraStyle, size: number) {
+export function addEntry(
+    item: Item,
+    style: AuraStyle,
+    size: number,
+    visibleTo?: string,
+) {
     const metadata: SourceMetadata = (item.metadata[METADATA_KEY] as
         | SourceMetadata
         | undefined) ?? {
@@ -40,6 +45,7 @@ export function addEntry(item: Item, style: AuraStyle, size: number) {
         style,
         size,
         sourceScopedId: crypto.randomUUID(),
+        visibleTo,
     });
 
     item.metadata[METADATA_KEY] = metadata;

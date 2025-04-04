@@ -133,6 +133,10 @@ interface CreateAurasMessage {
      * Number from 0 (fully transparent) to 1 (fully opaque). If not provided, the current player's default opacity will be used.
      */
     opacity?: number;
+    /**
+     * ID of player this aura will be visible to. If not provided, the aura will be visible to eveyrone.
+     */
+    visibleTo?: string;
 }
 
 interface RemoveAurasMessage {
@@ -195,7 +199,6 @@ To make a production build run:
     -   Split out style picker into a larger modal (maybe move all settings to a settings modal?)
 -   Copy and paste aura
 -   Card auras
--   Keep blend modes when change effect type
 
 ## License
 
