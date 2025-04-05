@@ -10,32 +10,16 @@ import {
     Divider,
     Stack,
 } from "@mui/material";
-import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
+import OBR, { Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
-import {
-    AuraStyleType,
-    getBlendMode,
-    getColor,
-    getOpacity,
-    isColorOpacityShaderStyle,
-    isEffectStyle,
-    isSimpleStyle,
-    setColor,
-    setOpacity,
-    setStyleType,
-} from "../types/AuraStyle";
+import { getColor, getOpacity } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
-import { BlendModeSelector } from "../ui/components/BlendModeSelector";
-import { ColorInput } from "../ui/components/ColorInput";
-import { OpacitySlider } from "../ui/components/OpacitySlider";
+import { AuraEntryEditor } from "../ui/components/AuraEntryEditor";
 import PasteButton from "../ui/components/PasteButton";
-import { SizeInput } from "../ui/components/SizeInput";
-import { StyleSelector } from "../ui/components/StyleSelector";
-import { VisibilitySelector } from "../ui/components/VisibilitySelector";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
-import { createAuras, createAurasWithDefaults } from "../utils/createAuras";
+import { createAurasWithDefaults } from "../utils/createAuras";
 import { getId, hasId } from "../utils/itemUtils";
 import { groupBy } from "../utils/jsUtils";
 import { CreateAurasMessage } from "../utils/messaging";
@@ -57,100 +41,30 @@ async function copyToClipboard(message: CreateAurasMessage) {
     }
 }
 
-async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
-    const visibleTo = menuItem.aura.visibleTo;
-    const size = menuItem.aura.size;
-    const source = await OBR.scene.items.getItems<Image>([menuItem.sourceId]);
-    await createAuras(
-        source,
-        size,
-        setStyleType(menuItem.aura.style, styleType),
-        visibleTo,
-    );
-    await removeAura(menuItem.toSpecifier());
-}
-
 function AuraControls({ menuItem }: { menuItem: MenuItem }) {
-    const hasColorOpacityControls =
-        isSimpleStyle(menuItem.aura.style) ||
-        isColorOpacityShaderStyle(menuItem.aura.style);
-
     return (
         <Card sx={{ mb: 1 }}>
             <CardContent>
-                <Stack direction="row" gap={1} sx={{ mb: 2 }}>
-                    <StyleSelector
-                        fullWidth
-                        value={menuItem.aura.style.type}
-                        onChange={(styleType) =>
-                            changeStyle(styleType, menuItem)
-                        }
-                    />
-                    <SizeInput
-                        value={menuItem.aura.size}
-                        onChange={(size) =>
-                            updateEntry(menuItem.toSpecifier(), (entry) => {
-                                entry.size = size;
-                            })
-                        }
-                    />
-                </Stack>
-                {hasColorOpacityControls && (
-                    <Stack
-                        direction="row"
-                        gap={1}
-                        sx={{ width: "100%", mb: 2 }}
-                    >
-                        <ColorInput
-                            value={getColor(menuItem.aura.style)}
-                            onChange={(color) =>
-                                updateEntry(menuItem.toSpecifier(), (entry) => {
-                                    setColor(entry.style, color);
-                                })
-                            }
-                        />
-                        <OpacitySlider
-                            sx={{ flexGrow: 1 }}
-                            value={getOpacity(menuItem.aura.style)}
-                            onChange={(opacity) =>
-                                updateEntry(menuItem.toSpecifier(), (entry) => {
-                                    setOpacity(entry.style, opacity);
-                                })
-                            }
-                        />
-                    </Stack>
-                )}
-                <details>
-                    <summary>Advanced Options</summary>
-                    <Stack spacing={2} sx={{ mt: 2 }}>
-                        <VisibilitySelector
-                            fullWidth
-                            value={menuItem.aura.visibleTo}
-                            onChange={(visibleTo) =>
-                                updateEntry(menuItem.toSpecifier(), (entry) => {
-                                    entry.visibleTo = visibleTo;
-                                })
-                            }
-                        />
-                        {isEffectStyle(menuItem.aura.style) && (
-                            <BlendModeSelector
-                                fullWidth
-                                value={getBlendMode(menuItem.aura.style)}
-                                onChange={(blendMode) =>
-                                    updateEntry(
-                                        menuItem.toSpecifier(),
-                                        (entry) => {
-                                            if (isEffectStyle(entry.style)) {
-                                                entry.style.blendMode =
-                                                    blendMode;
-                                            }
-                                        },
-                                    )
-                                }
-                            />
-                        )}
-                    </Stack>
-                </details>
+                <AuraEntryEditor
+                    style={menuItem.aura.style}
+                    setStyle={(style) =>
+                        updateEntry(menuItem.toSpecifier(), (entry) => {
+                            entry.style = style;
+                        })
+                    }
+                    size={menuItem.aura.size}
+                    setSize={(size) =>
+                        updateEntry(menuItem.toSpecifier(), (entry) => {
+                            entry.size = size;
+                        })
+                    }
+                    visibleTo={menuItem.aura.visibleTo}
+                    setVisibility={(visibleTo) =>
+                        updateEntry(menuItem.toSpecifier(), (entry) => {
+                            entry.visibleTo = visibleTo;
+                        })
+                    }
+                />
             </CardContent>
             <CardActions>
                 <Button

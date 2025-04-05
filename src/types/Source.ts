@@ -30,12 +30,9 @@ export function getEntry(
 }
 
 export async function updateEntry(
-    specifier: Specifier | null,
+    specifier: Specifier,
     updater: (aura: AuraEntry) => void,
 ) {
-    if (specifier === null) {
-        return;
-    }
     return await OBR.scene.items.updateItems([specifier.sourceId], (items) =>
         items.forEach((item) => {
             assertItem(item, isSource);
