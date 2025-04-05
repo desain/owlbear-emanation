@@ -7,7 +7,12 @@ import { usePlayerSettings } from "../usePlayerSettings";
 
 export function createAurasWithDefaults(items: CandidateSource[]) {
     const playerSettings = usePlayerSettings.getState();
-    return createAuras(items, playerSettings.size, playerSettings.style);
+    return createAuras(
+        items,
+        playerSettings.size,
+        playerSettings.style,
+        playerSettings.visibleTo,
+    );
 }
 
 /**
