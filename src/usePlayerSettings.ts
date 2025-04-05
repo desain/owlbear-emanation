@@ -2,8 +2,7 @@ import OBR from "@owlbear-rodeo/sdk";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { PLAYER_SETTINGS_STORE_NAME } from "./constants";
-import { AuraStyleType } from "./types/AuraStyle";
-import { isHexColor } from "./utils/colorUtils";
+import { AuraStyle, createStyle, setColor } from "./types/AuraStyle";
 
 const ObrSceneReady = new Promise<void>((resolve) => {
     OBR.onReady(async () => {
@@ -20,9 +19,7 @@ const ObrSceneReady = new Promise<void>((resolve) => {
     });
 });
 
-async function fetchDefaults(): Promise<
-    Pick<PlayerSettingsStore, "color" | "size">
-> {
+async function fetchDefaults(): Promise<{ color: string; size: number }> {
     await ObrSceneReady;
     const [color, scale] = await Promise.all([
         OBR.player.getColor(),
@@ -36,15 +33,11 @@ async function fetchDefaults(): Promise<
 
 export interface PlayerSettingsStore {
     hasSensibleValues: boolean;
-    styleType: AuraStyleType;
-    color: string;
     size: number;
-    opacity: number;
+    style: AuraStyle;
     _markSensible(this: void): void;
-    setStyleType(this: void, styleType: AuraStyleType): void;
-    setColor(this: void, color: string): void;
     setSize(this: void, size: number): void;
-    setOpacity(this: void, opacity: number): void;
+    setStyle(style: AuraStyle): void;
 }
 
 export const usePlayerSettings = create<PlayerSettingsStore>()(
@@ -55,22 +48,15 @@ export const usePlayerSettings = create<PlayerSettingsStore>()(
             color: "#FFFFFF",
             size: 5,
             opacity: 0.5,
+            style: createStyle("Simple", "#FFFFFF", 0.5),
             _markSensible() {
                 set({ hasSensibleValues: true });
-            },
-            setStyleType(styleType: AuraStyleType) {
-                set({ styleType });
-            },
-            setColor(color: string) {
-                if (isHexColor(color)) {
-                    set({ color });
-                }
             },
             setSize(size: number) {
                 set({ size });
             },
-            setOpacity(opacity: number) {
-                set({ opacity });
+            setStyle(style: AuraStyle) {
+                set({ style });
             },
         }),
         {
@@ -83,7 +69,9 @@ export const usePlayerSettings = create<PlayerSettingsStore>()(
                         if (!state.hasSensibleValues) {
                             // console.log("Not sensible, fetching defaults");
                             void fetchDefaults().then(({ color, size }) => {
-                                state.setColor(color);
+                                const newStyle = { ...state.style };
+                                setColor(newStyle, color);
+                                state.setStyle(newStyle);
                                 state.setSize(size);
                                 // console.log("Fetched defaults", color, size);
                                 state._markSensible();

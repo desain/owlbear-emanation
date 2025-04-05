@@ -14,7 +14,6 @@ import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import {
     AuraStyleType,
-    createStyle,
     getBlendMode,
     getColor,
     getOpacity,
@@ -23,6 +22,7 @@ import {
     isSimpleStyle,
     setColor,
     setOpacity,
+    setStyleType,
 } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
@@ -60,14 +60,11 @@ async function copyToClipboard(message: CreateAurasMessage) {
 async function changeStyle(styleType: AuraStyleType, menuItem: MenuItem) {
     const visibleTo = menuItem.aura.visibleTo;
     const size = menuItem.aura.size;
-    const color = getColor(menuItem.aura.style);
-    const opacity = getOpacity(menuItem.aura.style);
-    const blendMode = getBlendMode(menuItem.aura.style);
     const source = await OBR.scene.items.getItems<Image>([menuItem.sourceId]);
     await createAuras(
         source,
         size,
-        createStyle(styleType, color, opacity, blendMode),
+        setStyleType(menuItem.aura.style, styleType),
         visibleTo,
     );
     await removeAura(menuItem.toSpecifier());

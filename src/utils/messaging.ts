@@ -1,5 +1,11 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { AuraStyleType, createStyle, isAuraStyle } from "../types/AuraStyle";
+import {
+    AuraStyleType,
+    createStyle,
+    getColor,
+    getOpacity,
+    isAuraStyle,
+} from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { isHexColor } from "./colorUtils";
@@ -93,9 +99,10 @@ export async function handleMessage(data: unknown) {
         );
         if (sources.length > 0) {
             const playerSettings = usePlayerSettings.getState();
-            const style: AuraStyleType = data.style ?? playerSettings.styleType;
-            const color = data.color ?? playerSettings.color;
-            const opacity = data.opacity ?? playerSettings.opacity;
+            const style: AuraStyleType =
+                data.style ?? playerSettings.style.type;
+            const color = data.color ?? getColor(playerSettings.style);
+            const opacity = data.opacity ?? getOpacity(playerSettings.style);
             return await createAuras(
                 sources,
                 data.size,
