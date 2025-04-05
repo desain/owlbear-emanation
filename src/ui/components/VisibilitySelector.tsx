@@ -3,10 +3,11 @@ import { useOwlbearStore } from "../../useOwlbearStore";
 import { Control } from "./Control";
 
 const EVERYONE = "everyone";
+const NOBODY = "nobody";
 
 interface VisibilitySelectorProps {
-    onChange: (value: string | undefined) => void;
-    value: string | undefined;
+    onChange: (value: string | null | undefined) => void;
+    value: string | null | undefined;
 }
 
 export function VisibilitySelector({
@@ -15,22 +16,31 @@ export function VisibilitySelector({
     ...props
 }: VisibilitySelectorProps & Omit<FormControlProps, "onChange">) {
     const playerId = useOwlbearStore((store) => store.playerId);
+    const textValue =
+        value === undefined ? EVERYONE : value === null ? NOBODY : value;
     const currentlyVisibleToOther = value && value !== playerId;
     return (
-        <Control {...props} label="Visible to">
+        <Control {...props} label="Visibility">
             <Select
                 size="small"
-                value={value ?? EVERYONE}
+                value={textValue}
                 onChange={(e) => {
                     const value = e.target.value;
-                    onChange(value === EVERYONE ? undefined : value);
+                    onChange(
+                        value === EVERYONE
+                            ? undefined
+                            : value === NOBODY
+                            ? null
+                            : value,
+                    );
                 }}
             >
                 <MenuItem value={EVERYONE}>Visible to Everyone</MenuItem>
                 <MenuItem value={playerId}>Visible to Only Me</MenuItem>
+                <MenuItem value={NOBODY}>Invisible</MenuItem>
                 {currentlyVisibleToOther && (
                     <MenuItem disabled value={value}>
-                        <em>Other Player</em>
+                        <em>Visible to Another Player</em>
                     </MenuItem>
                 )}
             </Select>

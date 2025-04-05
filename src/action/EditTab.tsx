@@ -11,7 +11,6 @@ import {
     Stack,
 } from "@mui/material";
 import OBR, { Image, Item } from "@owlbear-rodeo/sdk";
-import PasteButton from "../components/PasteButton";
 import { METADATA_KEY } from "../constants";
 import {
     AuraStyleType,
@@ -30,6 +29,7 @@ import { isSource, updateEntry } from "../types/Source";
 import { BlendModeSelector } from "../ui/components/BlendModeSelector";
 import { ColorInput } from "../ui/components/ColorInput";
 import { OpacitySlider } from "../ui/components/OpacitySlider";
+import PasteButton from "../ui/components/PasteButton";
 import { SizeInput } from "../ui/components/SizeInput";
 import { StyleSelector } from "../ui/components/StyleSelector";
 import { VisibilitySelector } from "../ui/components/VisibilitySelector";
@@ -179,7 +179,7 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                         copyToClipboard(message);
                     }}
                 >
-                    Copy
+                    Copy to Clipboard
                 </Button>
             </CardActions>
         </Card>

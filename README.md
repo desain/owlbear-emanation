@@ -135,8 +135,9 @@ interface CreateAurasMessage {
     opacity?: number;
     /**
      * ID of player this aura will be visible to. If not provided, the aura will be visible to eveyrone.
+     * If set to null, the aura will not be visible.
      */
-    visibleTo?: string;
+    visibleTo?: string | null;
 }
 
 interface RemoveAurasMessage {

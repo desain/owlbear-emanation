@@ -1,8 +1,8 @@
 import PasteIcon from "@mui/icons-material/ContentPaste";
 import { Button, ButtonProps } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
-import { MESSAGE_CHANNEL } from "../constants";
-import { isCreateAuraMessage } from "../utils/messaging";
+import { MESSAGE_CHANNEL } from "../../constants";
+import { isCreateAuraMessage } from "../../utils/messaging";
 
 function PasteButton(props: ButtonProps) {
     return (

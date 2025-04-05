@@ -8,6 +8,7 @@ import {
 } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { METADATA_KEY } from "../constants";
+import { assertItem } from "../utils/itemUtils";
 import { Circle, isCircle } from "./Circle";
 import { AuraEntry } from "./metadata/SourceMetadata";
 import { HasMetadata } from "./metadata/metadataUtils";
@@ -42,21 +43,18 @@ export function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
         case "Bubble":
         case "Glow":
         case "Range":
-            if (isEffect(aura)) {
-                setColorUniform(aura, auraEntry.style.color);
-                setOpacityUniform(aura, auraEntry.style.opacity);
-            }
+            assertItem(aura, isEffect);
+            setColorUniform(aura, auraEntry.style.color);
+            setOpacityUniform(aura, auraEntry.style.opacity);
             break;
         case "Simple":
-            if (isDrawable(aura)) {
-                aura.style.fillColor = auraEntry.style.itemStyle.fillColor;
-                aura.style.fillOpacity = auraEntry.style.itemStyle.fillOpacity;
-                aura.style.strokeColor = auraEntry.style.itemStyle.strokeColor;
-                aura.style.strokeDash = auraEntry.style.itemStyle.strokeDash;
-                aura.style.strokeOpacity =
-                    auraEntry.style.itemStyle.strokeOpacity;
-                aura.style.strokeWidth = auraEntry.style.itemStyle.strokeWidth;
-            }
+            assertItem(aura, isDrawable);
+            aura.style.fillColor = auraEntry.style.itemStyle.fillColor;
+            aura.style.fillOpacity = auraEntry.style.itemStyle.fillOpacity;
+            aura.style.strokeColor = auraEntry.style.itemStyle.strokeColor;
+            aura.style.strokeDash = auraEntry.style.itemStyle.strokeDash;
+            aura.style.strokeOpacity = auraEntry.style.itemStyle.strokeOpacity;
+            aura.style.strokeWidth = auraEntry.style.itemStyle.strokeWidth;
             break;
         case "Spirits":
             break; // nothing to set
