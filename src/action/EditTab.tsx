@@ -1,5 +1,4 @@
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import CopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import {
@@ -10,36 +9,20 @@ import {
     Divider,
     Stack,
 } from "@mui/material";
-import OBR, { Item } from "@owlbear-rodeo/sdk";
+import { Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
-import { getColor, getOpacity } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
 import { AuraEntryEditor } from "../ui/components/AuraEntryEditor";
+import { CopyButton } from "../ui/components/CopyButton";
 import PasteButton from "../ui/components/PasteButton";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAurasWithDefaults } from "../utils/createAuras";
 import { getId, hasId } from "../utils/itemUtils";
 import { groupBy } from "../utils/jsUtils";
-import { CreateAurasMessage } from "../utils/messaging";
 import { removeAura, removeAuras } from "../utils/removeAuras";
 import { MenuItem } from "./Menuitem";
-
-async function copyToClipboard(message: CreateAurasMessage) {
-    try {
-        await navigator.clipboard.writeText(JSON.stringify(message));
-        await OBR.notification.show(
-            "Copied aura style settings to clipboard",
-            "SUCCESS",
-        );
-    } catch (error) {
-        await OBR.notification.show(
-            "Failed to copy aura style settings to clipboard",
-            "ERROR",
-        );
-    }
-}
 
 function AuraControls({ menuItem }: { menuItem: MenuItem }) {
     return (
@@ -74,24 +57,11 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                 >
                     Delete
                 </Button>
-                <Button
-                    aria-label="copy"
-                    startIcon={<CopyIcon />}
-                    onClick={() => {
-                        const message: CreateAurasMessage = {
-                            type: "CREATE_AURAS",
-                            sources: [],
-                            size: menuItem.aura.size,
-                            style: menuItem.aura.style.type,
-                            color: getColor(menuItem.aura.style),
-                            opacity: getOpacity(menuItem.aura.style),
-                            visibleTo: menuItem.aura.visibleTo,
-                        };
-                        copyToClipboard(message);
-                    }}
-                >
-                    Copy to Clipboard
-                </Button>
+                <CopyButton
+                    size={menuItem.aura.size}
+                    style={menuItem.aura.style}
+                    visibleTo={menuItem.aura.visibleTo}
+                />
             </CardActions>
         </Card>
     );
@@ -155,7 +125,6 @@ export function EditTab() {
                     sx={{
                         borderTopRightRadius: 0,
                         borderBottomRightRadius: 0,
-                        borderRightColor: "gray",
                     }}
                 >
                     New
