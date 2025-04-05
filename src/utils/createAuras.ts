@@ -28,7 +28,7 @@ export async function createAuras(
     items: CandidateSource[],
     size: number,
     style: AuraStyle,
-    visibleTo?: string,
+    visibleTo?: string | null,
 ) {
     if (items.length === 0) {
         return;

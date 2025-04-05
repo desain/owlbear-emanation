@@ -18,8 +18,9 @@ export interface AuraEntry {
     size: number;
     /**
      * Player IDs that can see this aura. If not set, the aura is visible to all players.
+     * If null, the aura is visible to no one.
      */
-    visibleTo?: string;
+    visibleTo?: string | null;
 }
 
 /**
@@ -33,7 +34,7 @@ export function addEntry(
     item: Item,
     style: AuraStyle,
     size: number,
-    visibleTo?: string,
+    visibleTo?: string | null,
 ) {
     const metadata: SourceMetadata = (item.metadata[METADATA_KEY] as
         | SourceMetadata
