@@ -1,7 +1,6 @@
 import { BlendMode, CurveStyle, ShapeStyle } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
-import { usePlayerSettings } from "../usePlayerSettings";
-import { hexToRgb, rgbToHex } from "../utils/colorUtils";
+import { hexToRgb, isHexColor, rgbToHex } from "../utils/colorUtils";
 
 export interface SimpleStyle {
     type: "Simple";
@@ -66,6 +65,10 @@ export function createStyle(
     opacity: number,
     blendMode?: BlendMode,
 ): AuraStyle {
+    if (!isHexColor(color)) {
+        throw new Error(`Color '${color}' must be a hex color`);
+    }
+
     return styleType === "Simple"
         ? {
               type: styleType,
@@ -102,7 +105,7 @@ export function getColor(style: AuraStyle): string {
         case "Simple":
             return style.itemStyle.fillColor;
         case "Spirits":
-            return usePlayerSettings.getState().color;
+            return "#FFFFFF";
     }
 }
 
@@ -131,7 +134,7 @@ export function getOpacity(style: AuraStyle): number {
         case "Simple":
             return style.itemStyle.fillOpacity;
         case "Spirits":
-            return usePlayerSettings.getState().opacity;
+            return 1.0;
     }
 }
 
@@ -141,4 +144,14 @@ export function setOpacity(style: AuraStyle, opacity: number) {
     } else if ("itemStyle" in style) {
         style.itemStyle.fillOpacity = opacity;
     }
+}
+
+export function setStyleType(
+    style: AuraStyle,
+    styleType: AuraStyleType,
+): AuraStyle {
+    const color = getColor(style);
+    const opacity = getOpacity(style);
+    const blendMode = getBlendMode(style);
+    return createStyle(styleType, color, opacity, blendMode);
 }
