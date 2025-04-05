@@ -7,6 +7,7 @@ import { isCreateAuraMessage } from "../../utils/messaging";
 function PasteButton(props: ButtonProps) {
     return (
         <Button
+            {...props}
             variant="outlined"
             startIcon={<PasteIcon />}
             onClick={async () => {
@@ -43,7 +44,6 @@ function PasteButton(props: ButtonProps) {
                     }
                 }
             }}
-            {...props}
         >
             Paste
         </Button>

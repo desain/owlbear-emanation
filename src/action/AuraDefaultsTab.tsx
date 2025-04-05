@@ -1,5 +1,6 @@
-import { Card, CardContent } from "@mui/material";
+import { Card, CardActions, CardContent } from "@mui/material";
 import { AuraEntryEditor } from "../ui/components/AuraEntryEditor";
+import { CopyButton } from "../ui/components/CopyButton";
 import { usePlayerSettings } from "../usePlayerSettings";
 
 export function AuraDefaultsTab() {
@@ -31,6 +32,13 @@ export function AuraDefaultsTab() {
                         setVisibility={setVisibility}
                     />
                 </CardContent>
+                <CardActions>
+                    <CopyButton
+                        size={size}
+                        style={style}
+                        visibleTo={visibleTo}
+                    />
+                </CardActions>
             </Card>
         </>
     );
