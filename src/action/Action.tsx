@@ -13,7 +13,7 @@ import { SceneSettingsTab } from "./SettingsTab";
 const BASE_HEIGHT = 100;
 const MAX_HEIGHT = 700;
 
-function useActionResizer(tabContainer: React.RefObject<HTMLElement>) {
+function useActionResizer(tabContainer: React.RefObject<HTMLElement | null>) {
     useEffect(() => {
         if (!tabContainer.current) {
             return;
@@ -100,7 +100,7 @@ export function Action() {
         });
     });
 
-    const tabContainer = useRef(null);
+    const tabContainer: React.RefObject<HTMLElement | null> = useRef(null);
     useActionResizer(tabContainer);
 
     useUndoRedoHandler();
