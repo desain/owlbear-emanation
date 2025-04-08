@@ -51,13 +51,13 @@ interface AuraListItem extends SourceListItem {
 }
 
 function SourceChips({ auras }: { auras: AuraListItem[] }) {
-    const sortedUniqueSources = useMemo(() => {
+    const sortedUniqueSources: SourceListItem[] = useMemo(() => {
         const ids = new Set();
         const sources = [];
-        for (const { name, image, sourceId } of auras) {
-            if (!ids.has(sourceId)) {
-                ids.add(sourceId);
-                sources.push({ name, image, sourceId });
+        for (const aura of auras) {
+            if (!ids.has(aura.sourceId)) {
+                ids.add(aura.sourceId);
+                sources.push(aura);
             }
         }
         return sources.sort(({ name: nameA }, { name: nameB }) =>
@@ -127,7 +127,7 @@ function AuraControls({
     );
 }
 
-function deduplicationKey(config: AuraConfig): string {
+function deduplicationKey({ entry: config }: { entry: AuraConfig }): string {
     // don't just pass the object because it might have extra keys
     const configCopy: AuraConfig = {
         style: config.style,
@@ -137,57 +137,71 @@ function deduplicationKey(config: AuraConfig): string {
     return objectHash(configCopy);
 }
 
+function getAllAnnotatedAuras(source: Source) {
+    return source.metadata[METADATA_KEY].auras.map((entry) => ({
+        name: getSourceName(source),
+        image: getSourceImage(source),
+        sourceId: source.id,
+        entry,
+    }));
+}
+
 function ExtantAuras({
-    selectedItems,
+    targetedItems,
 }: {
-    selectedItems: Item[];
+    targetedItems: Item[];
 }): React.ReactNode {
-    const selectedSources = selectedItems.filter(isSource);
-
-    const getAllAnnotatedAuras = (source: Source) =>
-        source.metadata[METADATA_KEY].auras.map((entry) => ({
-            name: getSourceName(source),
-            image: getSourceImage(source),
-            sourceId: source.id,
-            entry,
-        }));
-    const getDeduplicationKey = ({ entry }: { entry: AuraConfig }) =>
-        deduplicationKey(entry);
-
-    return Object.values(
-        groupBy(
-            selectedSources.flatMap(getAllAnnotatedAuras),
-            getDeduplicationKey,
-        ),
-    )
-        .sort((aurasA, aurasB) => aurasB.length - aurasA.length)
-        .map((identicalAuras) => {
-            const config: AuraConfig = identicalAuras[0].entry;
-            const auras = identicalAuras.map(
-                ({ name, image, sourceId, entry }) => ({
-                    name,
-                    image,
-                    sourceId,
-                    sourceScopedId: entry.sourceScopedId,
+    return useMemo(
+        () =>
+            Object.values(
+                groupBy(
+                    targetedItems
+                        .filter(isSource)
+                        .flatMap(getAllAnnotatedAuras),
+                    deduplicationKey,
+                ),
+            )
+                .sort((aurasA, aurasB) => aurasB.length - aurasA.length)
+                .map((identicalAuras) => {
+                    const config: AuraConfig = identicalAuras[0].entry;
+                    const auras = identicalAuras.map(
+                        ({ name, image, sourceId, entry }) => ({
+                            name,
+                            image,
+                            sourceId,
+                            sourceScopedId: entry.sourceScopedId,
+                        }),
+                    );
+                    const reactKey = auras
+                        .map(({ sourceScopedId }) => sourceScopedId)
+                        .sort()
+                        .join("|");
+                    return (
+                        <AuraControls
+                            key={reactKey}
+                            config={config}
+                            auras={auras}
+                        />
+                    );
                 }),
-            );
-            const reactKey = auras
-                .map(({ sourceScopedId }) => sourceScopedId)
-                .sort()
-                .join("|");
-            return (
-                <AuraControls key={reactKey} config={config} auras={auras} />
-            );
-        });
+        [targetedItems],
+    );
 }
 
 export function EditTab() {
     const playerSettingsSensible = usePlayerSettings(
         (store) => store.hasSensibleValues,
     );
-    const selectedItems = useOwlbearStore((store) => store.selectedItems);
 
-    const noSelection = selectedItems.length === 0;
+    const usingEditMenuItems = useOwlbearStore(
+        (store) => store.editMenuClickedItems.length !== 0,
+    );
+    const targetedItems = useOwlbearStore((store) => store.targetedItems);
+
+    const noSelection = targetedItems.length === 0;
+    const header = noSelection
+        ? "Select items to add or edit auras"
+        : "Edit Auras" + (usingEditMenuItems ? "*" : "");
 
     if (!playerSettingsSensible) {
         return null;
@@ -196,18 +210,16 @@ export function EditTab() {
     return (
         <>
             <Typography variant="h6" sx={{ mb: 2 }}>
-                {noSelection
-                    ? "Select items to add or edit auras"
-                    : "Edit Auras"}
+                {header}
             </Typography>
-            <ExtantAuras selectedItems={selectedItems} />
+            <ExtantAuras targetedItems={targetedItems} />
             <Stack direction="row" justifyContent="center">
                 <Button
                     variant="outlined"
                     startIcon={<AddCircleIcon />}
                     onClick={() =>
                         createAurasWithDefaults(
-                            selectedItems.filter(isCandidateSource),
+                            targetedItems.filter(isCandidateSource),
                         )
                     }
                     disabled={noSelection}
@@ -245,7 +257,7 @@ export function EditTab() {
                     variant="outlined"
                     startIcon={<DeleteForeverIcon />}
                     color="error"
-                    onClick={() => removeAllAuras(selectedItems.map(getId))}
+                    onClick={() => removeAllAuras(targetedItems.map(getId))}
                     disabled={noSelection}
                     sx={{
                         borderTopLeftRadius: 0,

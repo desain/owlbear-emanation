@@ -16,12 +16,22 @@ export interface OwlbearStore {
     sceneMetadata: SceneMetadata;
     grid: GridParsed;
     selection: string[];
-    selectedItems: Item[];
+    /**
+     * Items the user clicked 'edit auras' on.
+     */
+    editMenuClickedItems: string[];
+    /**
+     * Items that are either selected, or were selected when the user clicked 'edit auras'.
+     */
+    targetedItems: Item[];
     setRole: (role: Role) => void;
     setPlayerId: (playerId: string) => void;
     setSceneMetadata: (metadata: Metadata) => void;
     setGrid: (grid: GridParams) => Promise<void>;
     setSelection: (selection: string[] | undefined) => Promise<void>;
+    setEditMenuClickedItems: (
+        editMenuClickedItems: string[] | undefined,
+    ) => Promise<void>;
     updateItems: (items: Item[]) => void;
 }
 
@@ -42,7 +52,8 @@ export const useOwlbearStore = create<OwlbearStore>()(
             },
         },
         selection: [],
-        selectedItems: [],
+        editMenuClickedItems: [],
+        targetedItems: [],
         setRole: (role: Role) => set({ role }),
         setPlayerId: (playerId: string) => set({ playerId }),
         setSceneMetadata: (metadata: Metadata) =>
@@ -60,15 +71,47 @@ export const useOwlbearStore = create<OwlbearStore>()(
         },
         setSelection: async (selection: string[] | undefined) => {
             selection = selection ?? [];
-            const selectedItems = await OBR.scene.items.getItems(selection);
-            return set({ selection, selectedItems: selectedItems });
+
+            if (selection.length !== 0) {
+                // user actually selected something, so target those items.
+                // also the previously edit-clicked items are no longer relevant,
+                // so clear them
+                const selectedItems = await OBR.scene.items.getItems(selection);
+                return set({
+                    selection,
+                    editMenuClickedItems: [],
+                    targetedItems: selectedItems,
+                });
+            } else {
+                return set((state) => {
+                    if (state.editMenuClickedItems.length !== 0) {
+                        // deselect was probably due to clicking off the context menu,
+                        // so leave the targeted items alone
+                        return { selection };
+                    } else {
+                        // no edit menu items, so actually detarget
+                        return { selection, targetedItems: [] };
+                    }
+                });
+            }
+        },
+        setEditMenuClickedItems: async (
+            editMenuClickedItems: string[] | undefined,
+        ) => {
+            editMenuClickedItems = editMenuClickedItems ?? [];
+            const items = await OBR.scene.items.getItems(editMenuClickedItems);
+            return set({ editMenuClickedItems, targetedItems: items });
         },
         updateItems: (items: Item[]) =>
             set((state) => {
-                const selectedItems = items.filter((item) =>
-                    state.selection.includes(item.id),
+                const targetList =
+                    state.selection.length !== 0
+                        ? state.selection
+                        : state.editMenuClickedItems;
+                const targetedItems = items.filter((item) =>
+                    targetList.includes(item.id),
                 );
-                return { selectedItems };
+                return { targetedItems };
             }),
     })),
 );
