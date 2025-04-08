@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
 import { produce } from "immer";
-import { AuraConfig } from "../../types/AuraConfig";
+import { AuraConfig } from "../types/AuraConfig";
 import {
     getBlendMode,
     getColor,
@@ -11,7 +11,7 @@ import {
     setColor,
     setOpacity,
     setStyleType,
-} from "../../types/AuraStyle";
+} from "../types/AuraStyle";
 import { BlendModeSelector } from "./BlendModeSelector";
 import { ColorInput } from "./ColorInput";
 import { OpacitySlider } from "./OpacitySlider";

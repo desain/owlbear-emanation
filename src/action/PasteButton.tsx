@@ -1,7 +1,7 @@
 import PasteIcon from "@mui/icons-material/ContentPaste";
 import { Button, ButtonProps } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
-import { CreateAurasMessage, isCreateAuraMessage } from "../../utils/messaging";
+import { CreateAurasMessage, isCreateAuraMessage } from "../utils/messaging";
 
 type PasteButtonProps = {
     onPaste: (message: CreateAurasMessage) => void;

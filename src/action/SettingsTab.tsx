@@ -7,9 +7,9 @@ import {
     Typography,
 } from "@mui/material";
 import { updateSceneMetadata } from "../types/metadata/SceneMetadata";
-import { OverrideShapeSelector } from "../ui/components/OverrideShapeSelector";
-import { SceneReadyGate } from "../ui/SceneReadyGate";
 import { useOwlbearStore } from "../useOwlbearStore";
+import { OverrideShapeSelector } from "./OverrideShapeSelector";
+import { SceneReadyGate } from "./SceneReadyGate";
 
 export function SceneSettingsTab() {
     const sceneMetadata = useOwlbearStore((store) => store.sceneMetadata);

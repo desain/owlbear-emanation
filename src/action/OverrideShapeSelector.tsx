@@ -1,5 +1,5 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
-import { AuraShape, isAuraShape } from "../../types/AuraShape";
+import { AuraShape, isAuraShape } from "../types/AuraShape";
 import { Control } from "./Control";
 
 interface OverrideShapeSelectorProps {
