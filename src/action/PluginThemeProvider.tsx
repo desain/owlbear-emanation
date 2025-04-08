@@ -1,8 +1,11 @@
 // stolen from https://github.com/owlbear-rodeo/weather/blob/main/src/menu/util/PluginThemeProvider.tsx
 
-import { Theme as MuiTheme, createTheme } from "@mui/material/styles";
-import ThemeProvider from "@mui/material/styles/ThemeProvider";
-import OBR, { Theme } from "@owlbear-rodeo/sdk";
+import {
+    Theme as MuiTheme,
+    ThemeProvider,
+    createTheme,
+} from "@mui/material/styles";
+import OBR, { Theme as ObrTheme } from "@owlbear-rodeo/sdk";
 import React, { useEffect, useState } from "react";
 
 import "@fontsource/roboto/300.css";
@@ -13,15 +16,15 @@ import "@fontsource/roboto/700.css";
 /**
  * Create a MUI theme based off of the current OBR theme
  */
-function getTheme(theme?: Theme) {
+function getTheme(obrTheme?: ObrTheme): MuiTheme {
     return createTheme({
-        palette: theme
+        palette: obrTheme
             ? {
-                  mode: theme.mode === "LIGHT" ? "light" : "dark",
-                  text: theme.text,
-                  primary: theme.primary,
-                  secondary: theme.secondary,
-                  background: theme.background,
+                  mode: obrTheme.mode === "LIGHT" ? "light" : "dark",
+                  text: obrTheme.text,
+                  primary: obrTheme.primary,
+                  secondary: obrTheme.secondary,
+                  background: obrTheme.background,
               }
             : undefined,
         shape: {
@@ -54,7 +57,7 @@ function getTheme(theme?: Theme) {
                             height: "12px",
                             marginLeft: "10px",
                             background:
-                                theme?.mode === "LIGHT"
+                                obrTheme?.mode === "LIGHT"
                                     ? "linear-gradient(45deg, rgba(0,0,0,0) 0%,rgba(0,0,0,0) 43%,#000 45%,#000 55%,rgba(0,0,0,0) 57%,rgba(0,0,0,0) 100%),linear-gradient(135deg, transparent 0%,transparent 43%,#000 45%,#000 55%,transparent 57%,transparent 100%)"
                                     : "linear-gradient(45deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 43%, rgb(255, 255, 255) 45%, rgb(255, 255, 255) 55%, rgba(0, 0, 0, 0) 57%, rgba(0, 0, 0, 0) 100%), linear-gradient(135deg, transparent 0%, transparent 43%, rgb(255, 255, 255) 45%, rgb(255, 255, 255) 55%, transparent 57%, transparent 100%)",
                         },
@@ -75,7 +78,7 @@ export function PluginThemeProvider({
 }) {
     const [theme, setTheme] = useState<MuiTheme>(() => getTheme());
     useEffect(() => {
-        const updateTheme = (theme: Theme) => {
+        const updateTheme = (theme: ObrTheme) => {
             setTheme(getTheme(theme));
         };
         void OBR.theme.getTheme().then(updateTheme);
