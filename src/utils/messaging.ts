@@ -1,5 +1,6 @@
-import OBR from "@owlbear-rodeo/sdk";
+import OBR, { BlendMode } from "@owlbear-rodeo/sdk";
 import {
+    AuraStyle,
     AuraStyleType,
     createStyle,
     getColor,
@@ -11,6 +12,7 @@ import { usePlayerSettings } from "../usePlayerSettings";
 import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
 import { isObject } from "./jsUtils";
+import { isBlendMode } from "./obrTypeUtils";
 import { removeAuras } from "./removeAuras";
 
 const CREATE_AURAS_TYPE = "CREATE_AURAS";
@@ -43,6 +45,11 @@ export interface CreateAurasMessage {
      * If set to null, the aura will not be visible.
      */
     visibleTo?: string | null;
+    /**
+     * Blend mode for effect-based auras. Only used if the `style` parameter is an effect type. If not provided,
+     * the default SRC_OVER value will be used.
+     */
+    blendMode?: BlendMode;
 }
 export function isCreateAuraMessage(
     message: unknown,
@@ -69,8 +76,19 @@ export function isCreateAuraMessage(
             (typeof message.opacity === "number" &&
                 message.opacity >= 0 &&
                 message.opacity <= 1)) &&
-        (!("visibleTo" in message) || typeof message.visibleTo === "string")
+        (!("visibleTo" in message) || typeof message.visibleTo === "string") &&
+        (!("blendMode" in message) ||
+            (typeof message.blendMode === "string" &&
+                isBlendMode(message.blendMode)))
     );
+}
+
+export function getStyle(message: CreateAurasMessage): AuraStyle {
+    const playerSettings = usePlayerSettings.getState();
+    const style: AuraStyleType = message.style ?? playerSettings.style.type;
+    const color = message.color ?? getColor(playerSettings.style);
+    const opacity = message.opacity ?? getOpacity(playerSettings.style);
+    return createStyle(style, color, opacity, message.blendMode);
 }
 
 interface RemoveAurasMessage {
@@ -98,15 +116,10 @@ export async function handleMessage(data: unknown) {
             isCandidateSource,
         );
         if (sources.length > 0) {
-            const playerSettings = usePlayerSettings.getState();
-            const style: AuraStyleType =
-                data.style ?? playerSettings.style.type;
-            const color = data.color ?? getColor(playerSettings.style);
-            const opacity = data.opacity ?? getOpacity(playerSettings.style);
             return await createAuras(
                 sources,
                 data.size,
-                createStyle(style, color, opacity),
+                getStyle(data),
                 data.visibleTo,
             );
         } else {

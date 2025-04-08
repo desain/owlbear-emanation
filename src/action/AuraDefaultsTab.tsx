@@ -1,7 +1,9 @@
 import { Card, CardActions, CardContent } from "@mui/material";
 import { AuraEntryEditor } from "../ui/components/AuraEntryEditor";
 import { CopyButton } from "../ui/components/CopyButton";
+import { PasteButton } from "../ui/components/PasteButton";
 import { usePlayerSettings } from "../usePlayerSettings";
+import { getStyle } from "../utils/messaging";
 
 export function AuraDefaultsTab() {
     const playerSettingsSensible = usePlayerSettings(
@@ -37,6 +39,13 @@ export function AuraDefaultsTab() {
                         size={size}
                         style={style}
                         visibleTo={visibleTo}
+                    />
+                    <PasteButton
+                        onPaste={(message) => {
+                            setSize(message.size);
+                            setVisibility(message.visibleTo);
+                            setStyle(getStyle(message));
+                        }}
                     />
                 </CardActions>
             </Card>
