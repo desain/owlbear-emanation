@@ -204,7 +204,6 @@ To make a production build run:
     -   Localized weather effects
     -   Split out style picker into a larger modal?
 -   When click edit in context menu, broadcast selected items. Edit menu will fallback to these broadcasted items if the selection goes away, but will clear the broadcasted items if anything new is selected.
--   Reorder blend modes
 
 ## License
 

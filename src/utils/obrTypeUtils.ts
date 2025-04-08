@@ -1,7 +1,25 @@
 import { BlendMode } from "@owlbear-rodeo/sdk";
 
 export const BLEND_MODES: BlendMode[] = [
-    "SRC_OVER",
+    "SRC_OVER", // Default/normal
+    "PLUS", // Commonly used for light effects
+    "MULTIPLY", // Good for shadows/darkening
+    "SCREEN", // Good for brightening
+    "OVERLAY", // Good for contrast
+    "SOFT_LIGHT", // Subtle blending
+    "HARD_LIGHT", // Strong blending
+    "LIGHTEN", // Maximum of both
+    "DARKEN", // Minimum of both
+    "COLOR_DODGE", // Brightening effect
+    "COLOR_BURN", // Darkening effect
+    "DIFFERENCE", // Special effects
+    "EXCLUSION", // Special effects
+    "HUE", // Color adjustments
+    "SATURATION", // Color adjustments
+    "COLOR", // Color adjustments
+    "LUMINOSITY", // Color adjustments
+    "MODULATE", // Technical blend modes below
+    "XOR",
     "CLEAR",
     "SRC",
     "DST",
@@ -12,24 +30,6 @@ export const BLEND_MODES: BlendMode[] = [
     "DST_OUT",
     "SRC_ATOP",
     "DST_ATOP",
-    "XOR",
-    "PLUS",
-    "MODULATE",
-    "SCREEN",
-    "OVERLAY",
-    "DARKEN",
-    "LIGHTEN",
-    "COLOR_DODGE",
-    "COLOR_BURN",
-    "HARD_LIGHT",
-    "SOFT_LIGHT",
-    "DIFFERENCE",
-    "EXCLUSION",
-    "MULTIPLY",
-    "HUE",
-    "SATURATION",
-    "COLOR",
-    "LUMINOSITY",
 ];
 
 export function isBlendMode(mode: string): mode is BlendMode {
