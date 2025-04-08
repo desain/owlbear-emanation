@@ -4,6 +4,7 @@ import {
     FormGroup,
     FormHelperText,
     Switch,
+    Typography,
 } from "@mui/material";
 import { updateSceneMetadata } from "../types/metadata/SceneMetadata";
 import { OverrideShapeSelector } from "../ui/components/OverrideShapeSelector";
@@ -14,7 +15,9 @@ export function SceneSettingsTab() {
     const sceneMetadata = useOwlbearStore((store) => store.sceneMetadata);
     return (
         <>
-            <h4>Scene Settings (GM Only)</h4>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+                Scene Settings (GM Only)
+            </Typography>
             <SceneReadyGate>
                 <FormGroup>
                     <FormControlLabel

@@ -46,3 +46,10 @@ export function getSourceName(source: Source): string {
     }
     return source.name;
 }
+
+export function getSourceImage(source: Source): string | undefined {
+    if (isImage(source)) {
+        return source.image.url;
+    }
+    return undefined;
+}

@@ -9,14 +9,16 @@ import {
     CardContent,
     Chip,
     Stack,
+    Typography,
 } from "@mui/material";
-import OBR, { isImage, Item } from "@owlbear-rodeo/sdk";
+import OBR, { Item } from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
 import React from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { AuraConfig } from "../types/AuraConfig";
 import { isCandidateSource } from "../types/CandidateSource";
 import {
+    getSourceImage,
     getSourceName,
     isSource,
     Source,
@@ -119,13 +121,6 @@ function deduplicationKey(config: AuraConfig): string {
     return objectHash(configCopy);
 }
 
-export function getSourceImage(source: Source): string | undefined {
-    if (isImage(source)) {
-        return source.image.url;
-    }
-    return undefined;
-}
-
 function ExtantAuras({
     selectedItems,
 }: {
@@ -176,9 +171,7 @@ export function EditTab() {
     );
     const selectedItems = useOwlbearStore((store) => store.selectedItems);
 
-    if (selectedItems.length === 0) {
-        return <p>Select items to add or edit auras</p>;
-    }
+    const noSelection = selectedItems.length === 0;
 
     if (!playerSettingsSensible) {
         return null;
@@ -186,7 +179,11 @@ export function EditTab() {
 
     return (
         <>
-            <h4>Edit Auras</h4>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+                {noSelection
+                    ? "Select items to add or edit auras"
+                    : "Edit Auras"}
+            </Typography>
             <ExtantAuras selectedItems={selectedItems} />
             <Stack direction="row" justifyContent="center">
                 <Button
@@ -197,6 +194,7 @@ export function EditTab() {
                             selectedItems.filter(isCandidateSource),
                         )
                     }
+                    disabled={noSelection}
                     sx={{
                         borderTopRightRadius: 0,
                         borderBottomRightRadius: 0,
@@ -217,6 +215,7 @@ export function EditTab() {
                             },
                         );
                     }}
+                    disabled={noSelection}
                     sx={{
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,
@@ -231,6 +230,7 @@ export function EditTab() {
                     startIcon={<DeleteForeverIcon />}
                     color="error"
                     onClick={() => removeAllAuras(selectedItems.map(getId))}
+                    disabled={noSelection}
                     sx={{
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,

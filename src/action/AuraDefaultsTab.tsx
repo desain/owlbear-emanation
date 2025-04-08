@@ -1,4 +1,4 @@
-import { Card, CardActions, CardContent } from "@mui/material";
+import { Card, CardActions, CardContent, Typography } from "@mui/material";
 import { AuraConfig } from "../types/AuraConfig";
 import { AuraConfigEditor } from "../ui/components/AuraConfigEditor";
 import { CopyButton } from "../ui/components/CopyButton";
@@ -25,7 +25,9 @@ export function AuraDefaultsTab() {
 
     return (
         <>
-            <h4>Default Settings for New Auras</h4>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+                Default Settings for New Auras
+            </Typography>
             <Card>
                 <CardContent>
                     <AuraConfigEditor
