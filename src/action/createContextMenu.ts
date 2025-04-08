@@ -1,4 +1,4 @@
-import OBR, { Image } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import add from "../../assets/add.svg";
 import edit from "../../assets/edit.svg";
 
@@ -8,6 +8,8 @@ import {
     METADATA_KEY,
     TAB_CHANNEL,
 } from "../constants";
+import { CandidateSource } from "../types/CandidateSource";
+import { useOwlbearStore } from "../useOwlbearStore";
 import { createAurasWithDefaults } from "../utils/createAuras";
 
 /**
@@ -44,11 +46,12 @@ export default async function createContextMenu() {
             },
         ],
         async onClick(context) {
-            return createAurasWithDefaults(context.items as Image[]); // Typecast OK because filter requires image
+            return createAurasWithDefaults(context.items as CandidateSource[]); // Typecast OK because filter checks type
         },
     });
     const editAuraItemCreated = OBR.contextMenu.create({
         id: CONTEXTMENU_EDIT_ID,
+        shortcut: "E", // Edit Emanation
         icons: [
             {
                 icon: edit,
@@ -88,6 +91,8 @@ export default async function createContextMenu() {
             },
         ],
         async onClick() {
+            const selection = await OBR.player.getSelection();
+            await useOwlbearStore.getState().setEditMenuClickedItems(selection);
             if (await OBR.action.isOpen()) {
                 await OBR.broadcast.sendMessage(TAB_CHANNEL, 0, {
                     destination: "LOCAL",
