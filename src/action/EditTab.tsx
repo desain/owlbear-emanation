@@ -6,43 +6,59 @@ import {
     Card,
     CardActions,
     CardContent,
-    Divider,
+    Chip,
     Stack,
 } from "@mui/material";
 import OBR, { Item } from "@owlbear-rodeo/sdk";
+import objectHash from "object-hash";
 import React from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
+import { AuraConfig } from "../types/AuraConfig";
 import { isCandidateSource } from "../types/CandidateSource";
-import { isSource, updateEntry } from "../types/Source";
+import { isSource, Source, updateEntries } from "../types/Source";
 import { AuraConfigEditor } from "../ui/components/AuraConfigEditor";
 import { CopyButton } from "../ui/components/CopyButton";
 import { PasteButton } from "../ui/components/PasteButton";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAurasWithDefaults } from "../utils/createAuras";
-import { getId, hasId } from "../utils/itemUtils";
+import { getId } from "../utils/itemUtils";
 import { groupBy } from "../utils/jsUtils";
-import { removeAura, removeAuras } from "../utils/removeAuras";
-import { MenuItem } from "./Menuitem";
+import { removeAllAuras, removeAuras } from "../utils/removeAuras";
 
-function AuraControls({ menuItem }: { menuItem: MenuItem }) {
+function AuraControls({
+    config,
+    auras,
+}: {
+    config: AuraConfig;
+    auras: {
+        name: string;
+        sourceId: string;
+        sourceScopedId: string;
+    }[];
+}) {
     return (
         <Card sx={{ mb: 1 }}>
             <CardContent>
+                <Stack direction={"row"} spacing={2}>
+                    {auras.map(({ name, sourceId }) => (
+                        <Chip key={sourceId} label={name} />
+                    ))}
+                </Stack>
                 <AuraConfigEditor
-                    config={menuItem.aura}
+                    config={config}
                     setStyle={(style) =>
-                        updateEntry(menuItem.toSpecifier(), (entry) => {
+                        updateEntries(auras, (entry) => {
                             entry.style = style;
                         })
                     }
                     setSize={(size) =>
-                        updateEntry(menuItem.toSpecifier(), (entry) => {
+                        updateEntries(auras, (entry) => {
                             entry.size = size;
                         })
                     }
                     setVisibility={(visibleTo) =>
-                        updateEntry(menuItem.toSpecifier(), (entry) => {
+                        updateEntries(auras, (entry) => {
                             entry.visibleTo = visibleTo;
                         })
                     }
@@ -52,14 +68,24 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                 <Button
                     aria-label="remove"
                     startIcon={<DeleteIcon />}
-                    onClick={() => removeAura(menuItem.toSpecifier())}
+                    onClick={() => removeAuras(auras)}
                 >
                     Delete
                 </Button>
-                <CopyButton config={menuItem.aura} />
+                <CopyButton config={config} />
             </CardActions>
         </Card>
     );
+}
+
+function deduplicationKey(config: AuraConfig): string {
+    // don't just pass the object because it might have extra keys
+    const configCopy: AuraConfig = {
+        style: config.style,
+        size: config.size,
+        visibleTo: config.visibleTo,
+    };
+    return objectHash(configCopy);
 }
 
 function ExtantAuras({
@@ -67,36 +93,39 @@ function ExtantAuras({
 }: {
     selectedItems: Item[];
 }): React.ReactNode {
-    const onlyOneSelection = selectedItems.length === 1;
     const selectedSources = selectedItems.filter(isSource);
 
-    const menuItems: MenuItem[] = selectedSources.flatMap((source) =>
-        source.metadata[METADATA_KEY].auras.map(
-            (aura) => new MenuItem(source.id, aura),
+    const getAllAnnotatedAuras = (source: Source) =>
+        source.metadata[METADATA_KEY].auras.map((entry) => ({
+            name: source.name,
+            sourceId: source.id,
+            entry,
+        }));
+    const getDeduplicationKey = ({ entry }: { entry: AuraConfig }) =>
+        deduplicationKey(entry);
+
+    return Object.values(
+        groupBy(
+            selectedSources.flatMap(getAllAnnotatedAuras),
+            getDeduplicationKey,
         ),
-    );
-
-    // group by hash
-    // resulting in {hash: [{item name, item id, aura entry}]}
-    // then extract entry
-    // resulting in {hash: {aura entry without scoped id, [{item name, item id, scoped id}]}}
-
-    const menuItemsByAttachedTo = groupBy(
-        menuItems,
-        (menuItem) => menuItem.sourceId,
-    );
-
-    return Object.keys(menuItemsByAttachedTo)
-        .map((id) => ({ id, name: selectedItems.find(hasId(id))!.name }))
-        .sort((a, b) => a.id.localeCompare(b.id))
-        .flatMap(({ id, name }) => [
-            onlyOneSelection ? null : <Divider key={id}>{name}</Divider>,
-            ...menuItemsByAttachedTo[id]
-                .sort(MenuItem.compare)
-                .map((menuItem) => (
-                    <AuraControls key={menuItem.toKey()} menuItem={menuItem} />
-                )),
-        ]);
+    )
+        .sort((aurasA, aurasB) => aurasB.length - aurasA.length)
+        .map((identicalAuras) => {
+            const config: AuraConfig = identicalAuras[0].entry;
+            const auras = identicalAuras.map(({ name, sourceId, entry }) => ({
+                name,
+                sourceId,
+                sourceScopedId: entry.sourceScopedId,
+            }));
+            const reactKey = auras
+                .map(({ sourceScopedId }) => sourceScopedId)
+                .sort()
+                .join("|");
+            return (
+                <AuraControls key={reactKey} config={config} auras={auras} />
+            );
+        });
 }
 
 export function EditTab() {
@@ -159,7 +188,7 @@ export function EditTab() {
                     variant="outlined"
                     startIcon={<DeleteForeverIcon />}
                     color="error"
-                    onClick={() => removeAuras(selectedItems.map(getId))}
+                    onClick={() => removeAllAuras(selectedItems.map(getId))}
                     sx={{
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,

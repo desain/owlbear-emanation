@@ -29,14 +29,18 @@ export function getEntry(
     );
 }
 
-export async function updateEntry(
-    specifier: Specifier,
+export async function updateEntries(
+    specifiers: Specifier[],
     updater: (aura: AuraEntry) => void,
 ) {
-    return await OBR.scene.items.updateItems([specifier.sourceId], (items) =>
-        items.forEach((item) => {
-            assertItem(item, isSource);
-            const entry = getEntry(item, specifier.sourceScopedId);
+    const sources = specifiers.map((specifier) => specifier.sourceId);
+    return await OBR.scene.items.updateItems(sources, (items) =>
+        items.forEach((source) => {
+            assertItem(source, isSource);
+            const sourceScopedId = specifiers.find(
+                (specifier) => specifier.sourceId === source.id,
+            )?.sourceScopedId!;
+            const entry = getEntry(source, sourceScopedId);
             if (entry) {
                 updater(entry);
             }
