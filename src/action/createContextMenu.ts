@@ -6,6 +6,7 @@ import {
     CONTEXTMENU_CREATE_ID,
     CONTEXTMENU_EDIT_ID,
     METADATA_KEY,
+    TAB_CHANNEL,
 } from "../constants";
 import { createAurasWithDefaults } from "../utils/createAuras";
 
@@ -87,7 +88,13 @@ export default async function createContextMenu() {
             },
         ],
         async onClick() {
-            return OBR.action.open();
+            if (await OBR.action.isOpen()) {
+                await OBR.broadcast.sendMessage(TAB_CHANNEL, 0, {
+                    destination: "LOCAL",
+                });
+            } else {
+                return OBR.action.open();
+            }
         },
     });
     return Promise.all([createAuraItemCreated, editAuraItemCreated]);

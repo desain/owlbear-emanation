@@ -4,4 +4,5 @@ export const CONTEXTMENU_CREATE_ID = `${PLUGIN_ID}/contextmenu-create`;
 export const CONTEXTMENU_EDIT_ID = `${PLUGIN_ID}/contextmenu-edit`;
 export const VECTOR2_COMPARE_EPSILON = 0.01;
 export const MESSAGE_CHANNEL = `${PLUGIN_ID}/message`;
+export const TAB_CHANNEL = `${PLUGIN_ID}/action-set-tab`;
 export const PLAYER_SETTINGS_STORE_NAME = `${PLUGIN_ID}/playerSettings`;
