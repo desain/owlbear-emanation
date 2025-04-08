@@ -13,7 +13,7 @@ import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
 import { isObject } from "./jsUtils";
 import { isBlendMode } from "./obrTypeUtils";
-import { removeAuras } from "./removeAuras";
+import { removeAllAuras } from "./removeAuras";
 
 const CREATE_AURAS_TYPE = "CREATE_AURAS";
 const REMOVE_AURAS_TYPE = "REMOVE_AURAS";
@@ -127,7 +127,7 @@ export async function handleMessage(data: unknown) {
         }
     } else if (isRemoveAurasMessage(data)) {
         if (data.sources.length > 0) {
-            return await removeAuras(data.sources);
+            return await removeAllAuras(data.sources);
         }
     } else {
         console.warn("[Auras] Unknown Auras message", data);
