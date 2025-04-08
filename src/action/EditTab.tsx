@@ -213,7 +213,7 @@ export function EditTab() {
                 {header}
             </Typography>
             <ExtantAuras targetedItems={targetedItems} />
-            <Stack direction="row" justifyContent="center">
+            <Stack direction="row" spacing={1} justifyContent="center">
                 <Button
                     variant="outlined"
                     startIcon={<AddCircleIcon />}
@@ -223,10 +223,6 @@ export function EditTab() {
                         )
                     }
                     disabled={noSelection}
-                    sx={{
-                        borderTopRightRadius: 0,
-                        borderBottomRightRadius: 0,
-                    }}
                 >
                     New
                 </Button>
@@ -244,14 +240,6 @@ export function EditTab() {
                         );
                     }}
                     disabled={noSelection}
-                    sx={{
-                        borderTopLeftRadius: 0,
-                        borderBottomLeftRadius: 0,
-                        borderTopRightRadius: 0,
-                        borderBottomRightRadius: 0,
-                        borderLeftWidth: 0,
-                        borderRightWidth: 0,
-                    }}
                 />
                 <Button
                     variant="outlined"
@@ -259,10 +247,6 @@ export function EditTab() {
                     color="error"
                     onClick={() => removeAllAuras(targetedItems.map(getId))}
                     disabled={noSelection}
-                    sx={{
-                        borderTopLeftRadius: 0,
-                        borderBottomLeftRadius: 0,
-                    }}
                 >
                     Delete All
                 </Button>
