@@ -5,10 +5,11 @@ import buildAura from "./builders/buildAura";
 import { METADATA_KEY } from "./constants";
 import { Aura, isAura, updateDrawingParams } from "./types/Aura";
 import {
-    AuraEntry,
+    AuraConfig,
     buildParamsChanged,
     drawingParamsChanged,
-} from "./types/metadata/SourceMetadata";
+} from "./types/AuraConfig";
+import { AuraEntry } from "./types/metadata/SourceMetadata";
 import { getEntry, isSource, Source } from "./types/Source";
 import { useOwlbearStore } from "./useOwlbearStore";
 import { assertItem, didChangeScale, hasId } from "./utils/itemUtils";
@@ -99,7 +100,7 @@ export default class AuraFixer {
         this.currentPlayerId = currentPlayerId;
     }
 
-    private isAuraVisibleToCurrentPlayer(entry: AuraEntry): boolean {
+    private isAuraVisibleToCurrentPlayer(entry: AuraConfig): boolean {
         return (
             entry.visibleTo === undefined ||
             entry.visibleTo === this.currentPlayerId

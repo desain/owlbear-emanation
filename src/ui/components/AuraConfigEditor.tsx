@@ -1,5 +1,6 @@
 import { Stack } from "@mui/material";
 import { produce } from "immer";
+import { AuraConfig } from "../../types/AuraConfig";
 import {
     getBlendMode,
     getColor,
@@ -11,7 +12,6 @@ import {
     setOpacity,
     setStyleType,
 } from "../../types/AuraStyle";
-import { AuraEntry } from "../../types/metadata/SourceMetadata";
 import { BlendModeSelector } from "./BlendModeSelector";
 import { ColorInput } from "./ColorInput";
 import { OpacitySlider } from "./OpacitySlider";
@@ -19,43 +19,39 @@ import { SizeInput } from "./SizeInput";
 import { StyleSelector } from "./StyleSelector";
 import { VisibilitySelector } from "./VisibilitySelector";
 
-export function AuraEntryEditor({
-    style,
-    size,
-    visibleTo,
+export function AuraConfigEditor({
+    config,
     setStyle,
     setSize,
     setVisibility,
 }: {
-    style: AuraEntry["style"];
-    size: AuraEntry["size"];
-    visibleTo: AuraEntry["visibleTo"];
-    setStyle: (style: AuraEntry["style"]) => void;
-    setSize: (size: AuraEntry["size"]) => void;
-    setVisibility: (visibleTo: AuraEntry["visibleTo"]) => void;
+    config: AuraConfig;
+    setStyle: (style: AuraConfig["style"]) => void;
+    setSize: (size: AuraConfig["size"]) => void;
+    setVisibility: (visibleTo: AuraConfig["visibleTo"]) => void;
 }) {
     const hasColorOpacityControls =
-        isSimpleStyle(style) || isColorOpacityShaderStyle(style);
+        isSimpleStyle(config.style) || isColorOpacityShaderStyle(config.style);
 
     return (
         <>
             <Stack direction="row" gap={1} sx={{ mb: 2 }}>
                 <StyleSelector
                     fullWidth
-                    value={style.type}
+                    value={config.style.type}
                     onChange={(styleType) =>
-                        setStyle(setStyleType(style, styleType))
+                        setStyle(setStyleType(config.style, styleType))
                     }
                 />
-                <SizeInput value={size} onChange={setSize} />
+                <SizeInput value={config.size} onChange={setSize} />
             </Stack>
             {hasColorOpacityControls && (
                 <Stack direction="row" gap={1}>
                     <ColorInput
-                        value={getColor(style)}
+                        value={getColor(config.style)}
                         onChange={(color) =>
                             setStyle(
-                                produce(style, (style) => {
+                                produce(config.style, (style) => {
                                     setColor(style, color);
                                 }),
                             )
@@ -63,10 +59,10 @@ export function AuraEntryEditor({
                     />
                     <OpacitySlider
                         sx={{ flexGrow: 1 }}
-                        value={getOpacity(style)}
+                        value={getOpacity(config.style)}
                         onChange={(opacity) =>
                             setStyle(
-                                produce(style, (style) => {
+                                produce(config.style, (style) => {
                                     setOpacity(style, opacity);
                                 }),
                             )
@@ -79,16 +75,16 @@ export function AuraEntryEditor({
                 <Stack spacing={2} sx={{ mt: 2 }}>
                     <VisibilitySelector
                         fullWidth
-                        value={visibleTo}
+                        value={config.visibleTo}
                         onChange={setVisibility}
                     />
-                    {isEffectStyle(style) && (
+                    {isEffectStyle(config.style) && (
                         <BlendModeSelector
                             fullWidth
-                            value={getBlendMode(style)}
+                            value={getBlendMode(config.style)}
                             onChange={(blendMode) =>
                                 setStyle(
-                                    produce(style, (style) => {
+                                    produce(config.style, (style) => {
                                         if (isEffectStyle(style)) {
                                             style.blendMode = blendMode;
                                         }

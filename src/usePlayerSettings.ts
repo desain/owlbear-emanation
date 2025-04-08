@@ -2,8 +2,8 @@ import OBR from "@owlbear-rodeo/sdk";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { PLAYER_SETTINGS_STORE_NAME } from "./constants";
-import { AuraStyle, createStyle, setColor } from "./types/AuraStyle";
-import { AuraEntry } from "./types/metadata/SourceMetadata";
+import { AuraConfig } from "./types/AuraConfig";
+import { createStyle, setColor } from "./types/AuraStyle";
 
 const ObrSceneReady = new Promise<void>((resolve) => {
     OBR.onReady(async () => {
@@ -32,15 +32,12 @@ async function fetchDefaults(): Promise<{ color: string; size: number }> {
     };
 }
 
-export interface PlayerSettingsStore {
+export interface PlayerSettingsStore extends AuraConfig {
     hasSensibleValues: boolean;
-    size: AuraEntry["size"];
-    style: AuraEntry["style"];
-    visibleTo: AuraEntry["visibleTo"];
     _markSensible(this: void): void;
-    setSize(this: void, size: number): void;
-    setStyle(style: AuraStyle): void;
-    setVisibility(visibleTo: AuraEntry["visibleTo"]): void;
+    setSize(this: void, size: PlayerSettingsStore["size"]): void;
+    setStyle(style: PlayerSettingsStore["style"]): void;
+    setVisibility(visibleTo: PlayerSettingsStore["visibleTo"]): void;
 }
 
 export const usePlayerSettings = create<PlayerSettingsStore>()(
@@ -49,17 +46,16 @@ export const usePlayerSettings = create<PlayerSettingsStore>()(
             hasSensibleValues: false,
             size: 5,
             style: createStyle("Simple", "#FFFFFF", 0.5),
-            visibleTo: undefined,
             _markSensible() {
                 set({ hasSensibleValues: true });
             },
-            setSize(size: AuraEntry["size"]) {
+            setSize(size: PlayerSettingsStore["size"]) {
                 set({ size });
             },
-            setStyle(style: AuraEntry["style"]) {
+            setStyle(style: PlayerSettingsStore["style"]) {
                 set({ style });
             },
-            setVisibility(visibleTo: AuraEntry["visibleTo"]) {
+            setVisibility(visibleTo: PlayerSettingsStore["visibleTo"]) {
                 set({ visibleTo });
             },
         }),
