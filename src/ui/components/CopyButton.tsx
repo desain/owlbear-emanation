@@ -1,7 +1,7 @@
 import CopyIcon from "@mui/icons-material/ContentCopy";
 import { Button } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
-import { getColor, getOpacity } from "../../types/AuraStyle";
+import { getBlendMode, getColor, getOpacity } from "../../types/AuraStyle";
 import { AuraEntry } from "../../types/metadata/SourceMetadata";
 import { CreateAurasMessage } from "../../utils/messaging";
 
@@ -25,7 +25,6 @@ type CopyButtonProps = Pick<AuraEntry, "size" | "style" | "visibleTo">;
 export function CopyButton({ size, style, visibleTo }: CopyButtonProps) {
     return (
         <Button
-            aria-label="copy"
             startIcon={<CopyIcon />}
             onClick={() => {
                 const message: CreateAurasMessage = {
@@ -36,6 +35,7 @@ export function CopyButton({ size, style, visibleTo }: CopyButtonProps) {
                     color: getColor(style),
                     opacity: getOpacity(style),
                     visibleTo: visibleTo,
+                    blendMode: getBlendMode(style),
                 };
                 copyToClipboard(message);
             }}

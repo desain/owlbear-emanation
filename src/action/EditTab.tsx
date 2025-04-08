@@ -9,13 +9,14 @@ import {
     Divider,
     Stack,
 } from "@mui/material";
-import { Item } from "@owlbear-rodeo/sdk";
-import { METADATA_KEY } from "../constants";
+import OBR, { Item } from "@owlbear-rodeo/sdk";
+import React from "react";
+import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
 import { AuraEntryEditor } from "../ui/components/AuraEntryEditor";
 import { CopyButton } from "../ui/components/CopyButton";
-import PasteButton from "../ui/components/PasteButton";
+import { PasteButton } from "../ui/components/PasteButton";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAurasWithDefaults } from "../utils/createAuras";
@@ -67,7 +68,11 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
     );
 }
 
-function ExtantAuras({ selectedItems }: { selectedItems: Item[] }) {
+function ExtantAuras({
+    selectedItems,
+}: {
+    selectedItems: Item[];
+}): React.ReactNode {
     const onlyOneSelection = selectedItems.length === 1;
     const selectedSources = selectedItems.filter(isSource);
 
@@ -130,6 +135,18 @@ export function EditTab() {
                     New
                 </Button>
                 <PasteButton
+                    onPaste={async (message) => {
+                        await OBR.broadcast.sendMessage(
+                            MESSAGE_CHANNEL,
+                            {
+                                ...message,
+                                sources: await OBR.player.getSelection(),
+                            },
+                            {
+                                destination: "LOCAL",
+                            },
+                        );
+                    }}
                     sx={{
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,

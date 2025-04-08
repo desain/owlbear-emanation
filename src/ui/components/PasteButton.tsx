@@ -1,10 +1,13 @@
 import PasteIcon from "@mui/icons-material/ContentPaste";
 import { Button, ButtonProps } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
-import { MESSAGE_CHANNEL } from "../../constants";
-import { isCreateAuraMessage } from "../../utils/messaging";
+import { CreateAurasMessage, isCreateAuraMessage } from "../../utils/messaging";
 
-function PasteButton(props: ButtonProps) {
+type PasteButtonProps = {
+    onPaste: (message: CreateAurasMessage) => void;
+} & Omit<ButtonProps, "onPaste">;
+
+export function PasteButton({ onPaste, ...props }: PasteButtonProps) {
     return (
         <Button
             {...props}
@@ -18,17 +21,7 @@ function PasteButton(props: ButtonProps) {
                     try {
                         const parsed = JSON.parse(clipboardText);
                         if (isCreateAuraMessage(parsed)) {
-                            const message = {
-                                ...parsed,
-                                sources: await OBR.player.getSelection(),
-                            };
-                            await OBR.broadcast.sendMessage(
-                                MESSAGE_CHANNEL,
-                                message,
-                                {
-                                    destination: "LOCAL",
-                                },
-                            );
+                            onPaste(parsed);
                         } else {
                             throw new Error("Invalid message format");
                         }
@@ -49,5 +42,3 @@ function PasteButton(props: ButtonProps) {
         </Button>
     );
 }
-
-export default PasteButton;
