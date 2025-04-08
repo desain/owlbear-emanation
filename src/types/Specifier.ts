@@ -24,10 +24,11 @@ export async function forEachSpecifier(
     return await OBR.scene.items.updateItems(sources, (items) =>
         items.forEach((source) => {
             assertItem(source, isSource);
-            const sourceScopedId = specifiers.find(
-                (specifier) => specifier.sourceId === source.id,
-            )?.sourceScopedId!;
-            handler(source, sourceScopedId);
+            for (const specifier of specifiers) {
+                if (specifier.sourceId === source.id) {
+                    handler(source, specifier.sourceScopedId);
+                }
+            }
         }),
     );
 }
