@@ -138,6 +138,11 @@ interface CreateAurasMessage {
      * If set to null, the aura will not be visible.
      */
     visibleTo?: string | null;
+    /**
+     * Blend mode for effect-based auras. Only used if the `style` parameter is an effect type. If not provided,
+     * the default SRC_OVER value will be used.
+     */
+    blendMode?: BlendMode;
 }
 
 interface RemoveAurasMessage {

@@ -1,5 +1,6 @@
 import { Card, CardActions, CardContent } from "@mui/material";
-import { AuraEntryEditor } from "../ui/components/AuraEntryEditor";
+import { AuraConfig } from "../types/AuraConfig";
+import { AuraConfigEditor } from "../ui/components/AuraConfigEditor";
 import { CopyButton } from "../ui/components/CopyButton";
 import { PasteButton } from "../ui/components/PasteButton";
 import { usePlayerSettings } from "../usePlayerSettings";
@@ -20,26 +21,22 @@ export function AuraDefaultsTab() {
         return null;
     }
 
+    const config: AuraConfig = { style, size, visibleTo };
+
     return (
         <>
             <h4>Aura Defaults</h4>
             <Card>
                 <CardContent>
-                    <AuraEntryEditor
-                        style={style}
+                    <AuraConfigEditor
+                        config={config}
                         setStyle={setStyle}
-                        size={size}
                         setSize={setSize}
-                        visibleTo={visibleTo}
                         setVisibility={setVisibility}
                     />
                 </CardContent>
                 <CardActions>
-                    <CopyButton
-                        size={size}
-                        style={style}
-                        visibleTo={visibleTo}
-                    />
+                    <CopyButton config={config} />
                     <PasteButton
                         onPaste={(message) => {
                             setSize(message.size);

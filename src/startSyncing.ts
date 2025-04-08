@@ -8,7 +8,7 @@ import { deferCallAll } from "./utils/jsUtils";
  * @returns [Promise that resolves once store has initialized, function to stop syncing]
  */
 export function startSyncing(): [Promise<void>, VoidFunction] {
-    console.log("start syncing");
+    // console.log("startSyncing");
     const store = useOwlbearStore.getState();
 
     const roleInitialized = OBR.player.getRole().then(store.setRole);

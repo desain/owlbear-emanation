@@ -14,7 +14,7 @@ import React from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { isCandidateSource } from "../types/CandidateSource";
 import { isSource, updateEntry } from "../types/Source";
-import { AuraEntryEditor } from "../ui/components/AuraEntryEditor";
+import { AuraConfigEditor } from "../ui/components/AuraConfigEditor";
 import { CopyButton } from "../ui/components/CopyButton";
 import { PasteButton } from "../ui/components/PasteButton";
 import { useOwlbearStore } from "../useOwlbearStore";
@@ -29,20 +29,18 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
     return (
         <Card sx={{ mb: 1 }}>
             <CardContent>
-                <AuraEntryEditor
-                    style={menuItem.aura.style}
+                <AuraConfigEditor
+                    config={menuItem.aura}
                     setStyle={(style) =>
                         updateEntry(menuItem.toSpecifier(), (entry) => {
                             entry.style = style;
                         })
                     }
-                    size={menuItem.aura.size}
                     setSize={(size) =>
                         updateEntry(menuItem.toSpecifier(), (entry) => {
                             entry.size = size;
                         })
                     }
-                    visibleTo={menuItem.aura.visibleTo}
                     setVisibility={(visibleTo) =>
                         updateEntry(menuItem.toSpecifier(), (entry) => {
                             entry.visibleTo = visibleTo;
@@ -58,11 +56,7 @@ function AuraControls({ menuItem }: { menuItem: MenuItem }) {
                 >
                     Delete
                 </Button>
-                <CopyButton
-                    size={menuItem.aura.size}
-                    style={menuItem.aura.style}
-                    visibleTo={menuItem.aura.visibleTo}
-                />
+                <CopyButton config={menuItem.aura} />
             </CardActions>
         </Card>
     );
@@ -81,6 +75,11 @@ function ExtantAuras({
             (aura) => new MenuItem(source.id, aura),
         ),
     );
+
+    // group by hash
+    // resulting in {hash: [{item name, item id, aura entry}]}
+    // then extract entry
+    // resulting in {hash: {aura entry without scoped id, [{item name, item id, scoped id}]}}
 
     const menuItemsByAttachedTo = groupBy(
         menuItems,

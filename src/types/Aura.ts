@@ -9,8 +9,8 @@ import {
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { METADATA_KEY } from "../constants";
 import { assertItem } from "../utils/itemUtils";
+import { AuraConfig } from "./AuraConfig";
 import { Circle, isCircle } from "./Circle";
-import { AuraEntry } from "./metadata/SourceMetadata";
 import { HasMetadata } from "./metadata/metadataUtils";
 
 export interface IsAttached {
@@ -38,7 +38,7 @@ export function isAura(item: Item): item is Aura {
     );
 }
 
-export function updateDrawingParams(aura: Aura, auraEntry: AuraEntry) {
+export function updateDrawingParams(aura: Aura, auraEntry: AuraConfig) {
     switch (auraEntry.style.type) {
         case "Bubble":
         case "Glow":
