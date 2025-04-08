@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
-import React from "react";
+import React, { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { AuraConfig } from "../types/AuraConfig";
 import { isCandidateSource } from "../types/CandidateSource";
@@ -35,26 +35,42 @@ import { CopyButton } from "./CopyButton";
 import { PasteButton } from "./PasteButton";
 
 /**
- * Represents a single aura on a single source.
+ * Info needed to render a source.
  */
-interface AuraListItem {
+interface SourceListItem {
     name: string;
     image?: string;
     sourceId: string;
+}
+
+/**
+ * Represents a single aura on a single source.
+ */
+interface AuraListItem extends SourceListItem {
     sourceScopedId: string;
 }
 
 function SourceChips({ auras }: { auras: AuraListItem[] }) {
-    const sortedAuras = auras.sort(({ name: nameA }, { name: nameB }) =>
-        nameA.localeCompare(nameB),
-    );
+    const sortedUniqueSources = useMemo(() => {
+        const ids = new Set();
+        const sources = [];
+        for (const { name, image, sourceId } of auras) {
+            if (!ids.has(sourceId)) {
+                ids.add(sourceId);
+                sources.push({ name, image, sourceId });
+            }
+        }
+        return sources.sort(({ name: nameA }, { name: nameB }) =>
+            nameA.localeCompare(nameB),
+        );
+    }, [auras]);
     return (
         <Stack
             direction={"row"}
             spacing={1}
             sx={{ mb: 1, flexWrap: "wrap", rowGap: 1 }}
         >
-            {sortedAuras.map(({ name, image, sourceId }) => (
+            {sortedUniqueSources.map(({ name, image, sourceId }) => (
                 <Chip
                     key={sourceId}
                     avatar={
