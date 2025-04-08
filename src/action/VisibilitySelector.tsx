@@ -1,5 +1,5 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
-import { useOwlbearStore } from "../../useOwlbearStore";
+import { useOwlbearStore } from "../useOwlbearStore";
 import { Control } from "./Control";
 
 const EVERYONE = "everyone";

@@ -7,12 +7,12 @@ import { version } from "../../package.json";
 import AuraFixer from "../AuraFixer";
 import { MESSAGE_CHANNEL } from "../constants";
 import { startSyncing } from "../startSyncing";
-import { PluginGate } from "../ui/PluginGate";
-import { PluginThemeProvider } from "../ui/PluginThemeProvider";
 import { deferCallAll } from "../utils/jsUtils";
 import { handleMessage } from "../utils/messaging";
 import { Action } from "./Action";
 import createContextMenu from "./createContextMenu";
+import { PluginGate } from "./PluginGate";
+import { PluginThemeProvider } from "./PluginThemeProvider";
 
 let uninstall: VoidFunction = () => {};
 let root: ReactDOM.Root | null = null;

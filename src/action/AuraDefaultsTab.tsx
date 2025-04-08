@@ -1,10 +1,10 @@
 import { Card, CardActions, CardContent, Typography } from "@mui/material";
 import { AuraConfig } from "../types/AuraConfig";
-import { AuraConfigEditor } from "../ui/components/AuraConfigEditor";
-import { CopyButton } from "../ui/components/CopyButton";
-import { PasteButton } from "../ui/components/PasteButton";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { getStyle } from "../utils/messaging";
+import { AuraConfigEditor } from "./AuraConfigEditor";
+import { CopyButton } from "./CopyButton";
+import { PasteButton } from "./PasteButton";
 
 export function AuraDefaultsTab() {
     const playerSettingsSensible = usePlayerSettings(

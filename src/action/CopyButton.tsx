@@ -1,9 +1,9 @@
 import CopyIcon from "@mui/icons-material/ContentCopy";
 import { Button } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
-import { AuraConfig } from "../../types/AuraConfig";
-import { getBlendMode, getColor, getOpacity } from "../../types/AuraStyle";
-import { CreateAurasMessage } from "../../utils/messaging";
+import { AuraConfig } from "../types/AuraConfig";
+import { getBlendMode, getColor, getOpacity } from "../types/AuraStyle";
+import { CreateAurasMessage } from "../utils/messaging";
 
 async function copyToClipboard(message: CreateAurasMessage) {
     try {

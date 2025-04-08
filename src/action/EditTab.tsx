@@ -24,15 +24,15 @@ import {
     Source,
     updateEntries,
 } from "../types/Source";
-import { AuraConfigEditor } from "../ui/components/AuraConfigEditor";
-import { CopyButton } from "../ui/components/CopyButton";
-import { PasteButton } from "../ui/components/PasteButton";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAurasWithDefaults } from "../utils/createAuras";
 import { getId } from "../utils/itemUtils";
 import { groupBy } from "../utils/jsUtils";
 import { removeAllAuras, removeAuras } from "../utils/removeAuras";
+import { AuraConfigEditor } from "./AuraConfigEditor";
+import { CopyButton } from "./CopyButton";
+import { PasteButton } from "./PasteButton";
 
 /**
  * Represents a single aura on a single source.
