@@ -7,14 +7,16 @@ import { useEffect, useState } from "react";
  * Gate that only renders its children when the OBR scene is ready
  */
 export function SceneReadyGate({ children }: { children: React.ReactNode }) {
-    const [sceneReady, setSceneReady] = useState(false);
+    const [sceneReady, setSceneReady] = useState<boolean | null>(null);
 
     useEffect(() => {
         void OBR.scene.isReady().then(setSceneReady);
         return OBR.scene.onReadyChange(setSceneReady);
     }, []);
 
-    if (sceneReady) {
+    if (sceneReady === null) {
+        return null;
+    } else if (sceneReady) {
         return <>{children}</>;
     } else {
         return (
