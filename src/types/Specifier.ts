@@ -1,3 +1,7 @@
+import OBR from "@owlbear-rodeo/sdk";
+import { assertItem } from "../utils/itemUtils";
+import { isSource, Source } from "./Source";
+
 /**
  * Way of specifying a specific aura.
  */
@@ -10,4 +14,20 @@ export interface Specifier {
      * Which item in the source's list of auras.
      */
     sourceScopedId: string;
+}
+
+export async function forEachSpecifier(
+    specifiers: Specifier[],
+    handler: (source: Source, sourceScopedId: string) => void,
+) {
+    const sources = specifiers.map((specifier) => specifier.sourceId);
+    return await OBR.scene.items.updateItems(sources, (items) =>
+        items.forEach((source) => {
+            assertItem(source, isSource);
+            const sourceScopedId = specifiers.find(
+                (specifier) => specifier.sourceId === source.id,
+            )?.sourceScopedId!;
+            handler(source, sourceScopedId);
+        }),
+    );
 }

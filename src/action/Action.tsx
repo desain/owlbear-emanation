@@ -2,7 +2,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import SettingsIcon from "@mui/icons-material/Settings";
 import TuneIcon from "@mui/icons-material/Tune";
 import { Tab, Tabs } from "@mui/material";
-import { useState } from "react";
+import OBR from "@owlbear-rodeo/sdk";
+import { useEffect, useState } from "react";
+import { TAB_CHANNEL } from "../constants";
 import { useOwlbearStore } from "../useOwlbearStore";
 import { AuraDefaultsTab } from "./AuraDefaultsTab";
 import { EditTab } from "./EditTab";
@@ -26,6 +28,14 @@ function TabContent({
 export function Action() {
     const [currentTab, setCurrentTab] = useState(0);
     const role = useOwlbearStore((store) => store.role);
+
+    useEffect(() => {
+        return OBR.broadcast.onMessage(TAB_CHANNEL, ({ data }) => {
+            if (typeof data === "number") {
+                setCurrentTab(data);
+            }
+        });
+    });
 
     return (
         <>

@@ -25,7 +25,7 @@ export function AuraDefaultsTab() {
 
     return (
         <>
-            <h4>Aura Defaults</h4>
+            <h4>Default Settings for New Auras</h4>
             <Card>
                 <CardContent>
                     <AuraConfigEditor

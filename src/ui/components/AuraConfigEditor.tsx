@@ -46,7 +46,7 @@ export function AuraConfigEditor({
                 <SizeInput value={config.size} onChange={setSize} />
             </Stack>
             {hasColorOpacityControls && (
-                <Stack direction="row" gap={1}>
+                <Stack direction="row" gap={1} sx={{ mb: 2 }}>
                     <ColorInput
                         value={getColor(config.style)}
                         onChange={(color) =>

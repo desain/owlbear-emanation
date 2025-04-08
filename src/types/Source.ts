@@ -1,11 +1,10 @@
-import OBR, { Item } from "@owlbear-rodeo/sdk";
+import { isImage, Item } from "@owlbear-rodeo/sdk";
 
 import { METADATA_KEY } from "../constants";
-import { assertItem } from "../utils/itemUtils";
 import { CandidateSource, isCandidateSource } from "./CandidateSource";
 import { HasMetadata } from "./metadata/metadataUtils";
 import { AuraEntry, SourceMetadata } from "./metadata/SourceMetadata";
-import { Specifier } from "./Specifier";
+import { forEachSpecifier, Specifier } from "./Specifier";
 
 export type Source = CandidateSource & HasMetadata<SourceMetadata>;
 
@@ -33,17 +32,17 @@ export async function updateEntries(
     specifiers: Specifier[],
     updater: (aura: AuraEntry) => void,
 ) {
-    const sources = specifiers.map((specifier) => specifier.sourceId);
-    return await OBR.scene.items.updateItems(sources, (items) =>
-        items.forEach((source) => {
-            assertItem(source, isSource);
-            const sourceScopedId = specifiers.find(
-                (specifier) => specifier.sourceId === source.id,
-            )?.sourceScopedId!;
-            const entry = getEntry(source, sourceScopedId);
-            if (entry) {
-                updater(entry);
-            }
-        }),
-    );
+    return await forEachSpecifier(specifiers, (source, sourceScopedId) => {
+        const entry = getEntry(source, sourceScopedId);
+        if (entry) {
+            updater(entry);
+        }
+    });
+}
+
+export function getSourceName(source: Source): string {
+    if (isImage(source) && source.text.plainText) {
+        return source.text.plainText;
+    }
+    return source.name;
 }
