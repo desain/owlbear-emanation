@@ -33,6 +33,7 @@ import { removeAllAuras, removeAuras } from "../utils/removeAuras";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";
 import { PasteButton } from "./PasteButton";
+import { SceneReadyGate } from "./SceneReadyGate";
 
 /**
  * Info needed to render a source.
@@ -212,45 +213,47 @@ export function EditTab() {
             <Typography variant="h6" sx={{ mb: 2 }}>
                 {header}
             </Typography>
-            <ExtantAuras targetedItems={targetedItems} />
-            <Stack direction="row" spacing={1} justifyContent="center">
-                <Button
-                    variant="outlined"
-                    startIcon={<AddCircleIcon />}
-                    onClick={() =>
-                        createAurasWithDefaults(
-                            targetedItems.filter(isCandidateSource),
-                        )
-                    }
-                    disabled={noSelection}
-                >
-                    New
-                </Button>
-                <PasteButton
-                    onPaste={async (message) => {
-                        await OBR.broadcast.sendMessage(
-                            MESSAGE_CHANNEL,
-                            {
-                                ...message,
-                                sources: await OBR.player.getSelection(),
-                            },
-                            {
-                                destination: "LOCAL",
-                            },
-                        );
-                    }}
-                    disabled={noSelection}
-                />
-                <Button
-                    variant="outlined"
-                    startIcon={<DeleteForeverIcon />}
-                    color="error"
-                    onClick={() => removeAllAuras(targetedItems.map(getId))}
-                    disabled={noSelection}
-                >
-                    Delete All
-                </Button>
-            </Stack>
+            <SceneReadyGate>
+                <ExtantAuras targetedItems={targetedItems} />
+                <Stack direction="row" spacing={1} justifyContent="center">
+                    <Button
+                        variant="outlined"
+                        startIcon={<AddCircleIcon />}
+                        onClick={() =>
+                            createAurasWithDefaults(
+                                targetedItems.filter(isCandidateSource),
+                            )
+                        }
+                        disabled={noSelection}
+                    >
+                        New
+                    </Button>
+                    <PasteButton
+                        onPaste={async (message) => {
+                            await OBR.broadcast.sendMessage(
+                                MESSAGE_CHANNEL,
+                                {
+                                    ...message,
+                                    sources: await OBR.player.getSelection(),
+                                },
+                                {
+                                    destination: "LOCAL",
+                                },
+                            );
+                        }}
+                        disabled={noSelection}
+                    />
+                    <Button
+                        variant="outlined"
+                        startIcon={<DeleteForeverIcon />}
+                        color="error"
+                        onClick={() => removeAllAuras(targetedItems.map(getId))}
+                        disabled={noSelection}
+                    >
+                        Delete All
+                    </Button>
+                </Stack>
+            </SceneReadyGate>
         </>
     );
 }
