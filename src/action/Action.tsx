@@ -113,15 +113,13 @@ export function Action() {
                 onChange={(_, value) => setCurrentTab(value)}
                 sx={{ mb: 2 }}
             >
-                <Tab icon={<EditIcon />} iconPosition="start" label="Edit" />
+                <Tab icon={<EditIcon />} label="Edit" />
                 <Tab
                     icon={<TuneIcon />}
-                    iconPosition="start"
                     label="Defaults"
                 />
                 <Tab
                     icon={<SettingsIcon />}
-                    iconPosition="start"
                     disabled={role === "PLAYER"}
                     label="GM Settings"
                 />

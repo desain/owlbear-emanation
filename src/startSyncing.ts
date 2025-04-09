@@ -42,6 +42,12 @@ export function startSyncing(): [Promise<void>, VoidFunction] {
         store.updateItems(items),
     );
 
+    const unsubscribeSceneReady = OBR.scene.onReadyChange((ready) => {
+        if (!ready) {
+            store.setEditMenuClickedItems([]);
+        }
+    });
+
     return [
         Promise.all([
             roleInitialized,
@@ -55,6 +61,7 @@ export function startSyncing(): [Promise<void>, VoidFunction] {
             unsubscribeSceneMetadata,
             unsubscribeGrid,
             unsubscribeItems,
+            unsubscribeSceneReady,
         ),
     ];
 }

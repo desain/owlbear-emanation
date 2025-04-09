@@ -99,8 +99,11 @@ export const useOwlbearStore = create<OwlbearStore>()(
             editMenuClickedItems: string[] | undefined,
         ) => {
             editMenuClickedItems = editMenuClickedItems ?? [];
-            const items = await OBR.scene.items.getItems(editMenuClickedItems);
-            return set({ editMenuClickedItems, targetedItems: items });
+            const targetedItems =
+                editMenuClickedItems.length === 0
+                    ? []
+                    : await OBR.scene.items.getItems(editMenuClickedItems);
+            return set({ editMenuClickedItems, targetedItems });
         },
         updateItems: (items: Item[]) =>
             set((state) => {
