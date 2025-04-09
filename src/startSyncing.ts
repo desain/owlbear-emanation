@@ -42,10 +42,9 @@ export function startSyncing(): [Promise<void>, VoidFunction] {
         store.updateItems(items),
     );
 
+    const sceneReadyInitialized = OBR.scene.isReady().then(store.setSceneReady);
     const unsubscribeSceneReady = OBR.scene.onReadyChange((ready) => {
-        if (!ready) {
-            store.setEditMenuClickedItems([]);
-        }
+        store.setSceneReady(ready);
     });
 
     return [
@@ -55,6 +54,7 @@ export function startSyncing(): [Promise<void>, VoidFunction] {
             selectionInitialized,
             sceneMetadataInitialized,
             gridInitialized,
+            sceneReadyInitialized,
         ]).then(() => void 0),
         deferCallAll(
             unsubscribePlayer, // covers role and player metadata and selection

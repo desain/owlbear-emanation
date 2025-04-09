@@ -1,22 +1,14 @@
 import HourglassIcon from "@mui/icons-material/HourglassEmpty";
 import { Alert } from "@mui/material";
-import OBR from "@owlbear-rodeo/sdk";
-import { useEffect, useState } from "react";
+import { useOwlbearStore } from "../useOwlbearStore";
 
 /**
  * Gate that only renders its children when the OBR scene is ready
  */
 export function SceneReadyGate({ children }: { children: React.ReactNode }) {
-    const [sceneReady, setSceneReady] = useState<boolean | null>(null);
+    const sceneReady = useOwlbearStore((store) => store.sceneReady);
 
-    useEffect(() => {
-        void OBR.scene.isReady().then(setSceneReady);
-        return OBR.scene.onReadyChange(setSceneReady);
-    }, []);
-
-    if (sceneReady === null) {
-        return null;
-    } else if (sceneReady) {
+    if (sceneReady) {
         return <>{children}</>;
     } else {
         return (
