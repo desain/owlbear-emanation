@@ -69,7 +69,9 @@ function SourceChips({ auras }: { auras: AuraListItem[] }) {
         <Stack
             direction={"row"}
             spacing={1}
-            sx={{ mb: 1, flexWrap: "wrap", rowGap: 1 }}
+            flexWrap={"wrap"}
+            rowGap={1}
+            sx={{ mb: 1 }}
         >
             {sortedUniqueSources.map(({ name, image, sourceId }) => (
                 <Chip
@@ -215,7 +217,13 @@ export function EditTab() {
             </Typography>
             <SceneReadyGate>
                 <ExtantAuras targetedItems={targetedItems} />
-                <Stack direction="row" spacing={1} justifyContent="center">
+                <Stack
+                    direction="row"
+                    spacing={1}
+                    justifyContent="center"
+                    flexWrap={"wrap"}
+                    rowGap={1}
+                >
                     <Button
                         variant="outlined"
                         startIcon={<AddCircleIcon />}
