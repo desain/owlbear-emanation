@@ -11,6 +11,7 @@ import {
 type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
 
 export interface OwlbearStore {
+    sceneReady: boolean;
     role: Role;
     playerId: string;
     sceneMetadata: SceneMetadata;
@@ -24,6 +25,7 @@ export interface OwlbearStore {
      * Items that are either selected, or were selected when the user clicked 'edit auras'.
      */
     targetedItems: Item[];
+    setSceneReady: (sceneReady: boolean) => void;
     setRole: (role: Role) => void;
     setPlayerId: (playerId: string) => void;
     setSceneMetadata: (metadata: Metadata) => void;
@@ -38,6 +40,7 @@ export interface OwlbearStore {
 export const useOwlbearStore = create<OwlbearStore>()(
     subscribeWithSelector((set) => ({
         // dummy values
+        sceneReady: false,
         role: "PLAYER",
         playerId: "NONE",
         sceneMetadata: DEFAULT_SCENE_METADATA,
@@ -54,6 +57,12 @@ export const useOwlbearStore = create<OwlbearStore>()(
         selection: [],
         editMenuClickedItems: [],
         targetedItems: [],
+        setSceneReady: (sceneReady: boolean) =>
+            set(
+                sceneReady
+                    ? { sceneReady }
+                    : { sceneReady, editMenuClickedItems: [] },
+            ),
         setRole: (role: Role) => set({ role }),
         setPlayerId: (playerId: string) => set({ playerId }),
         setSceneMetadata: (metadata: Metadata) =>
