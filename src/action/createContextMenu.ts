@@ -90,9 +90,8 @@ export default async function createContextMenu() {
                 },
             },
         ],
-        async onClick() {
-            const selection = await OBR.player.getSelection();
-            await useOwlbearStore.getState().setEditMenuClickedItems(selection);
+        async onClick(context) {
+            await useOwlbearStore.getState().setEditMenuClickedItems(context.items);
             if (await OBR.action.isOpen()) {
                 await OBR.broadcast.sendMessage(TAB_CHANNEL, 0, {
                     destination: "LOCAL",

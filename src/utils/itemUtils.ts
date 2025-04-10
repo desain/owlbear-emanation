@@ -38,5 +38,4 @@ export function didChangeScale(oldItem: Item, newItem: Item) {
             (oldItem.width !== newItem.width ||
                 oldItem.height !== newItem.height))
     );
-    return false;
 }
