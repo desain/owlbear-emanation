@@ -76,12 +76,12 @@ export function AuraConfigEditor({
                 <Stack sx={{ mb: 2 }}>
                     <ImageSelector
                         value={config.style}
-                        onChange={(imageBuildParams) => {
+                        onChange={(imageBuildParams) =>
                             setStyle({
                                 type: "Image",
                                 ...imageBuildParams,
-                            });
-                        }}
+                            })
+                        }
                     />
                 </Stack>
             )}

@@ -9,9 +9,12 @@ import {
     Uniform,
 } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
+import { useOwlbearStore } from "../useOwlbearStore";
 import { assertItem } from "../utils/itemUtils";
 import { AuraConfig } from "./AuraConfig";
+import { CandidateSource, getAbsoluteItemSize } from "./CandidateSource";
 import { Circle, isCircle } from "./Circle";
 import { HasMetadata } from "./metadata/metadataUtils";
 
@@ -40,7 +43,11 @@ export function isAura(item: Item): item is Aura {
     );
 }
 
-export function updateDrawingParams(aura: Aura, auraEntry: AuraConfig) {
+export function updateDrawingParams(
+    source: CandidateSource,
+    aura: Aura,
+    auraEntry: AuraConfig,
+) {
     switch (auraEntry.style.type) {
         case "Bubble":
         case "Glow":
@@ -64,6 +71,15 @@ export function updateDrawingParams(aura: Aura, auraEntry: AuraConfig) {
             assertItem(aura, isImage);
             aura.image = auraEntry.style.image;
             aura.grid = auraEntry.style.grid;
+            const grid = useOwlbearStore.getState().grid;
+            const absoluteItemSize = getAbsoluteItemSize(source, grid);
+            const numUnits = auraEntry.size / grid.parsedScale.multiplier;
+            aura.scale = getImageAuraScale(
+                auraEntry.style,
+                grid,
+                numUnits,
+                absoluteItemSize,
+            );
             break;
     }
 }

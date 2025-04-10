@@ -1,11 +1,11 @@
 import { Button, FormControlProps } from "@mui/material";
-import OBR, { ImageContent, ImageGrid } from "@owlbear-rodeo/sdk";
+import OBR, { ImageContent } from "@owlbear-rodeo/sdk";
 import { ImageBuildParams } from "../types/AuraStyle";
 import { Control } from "./Control";
 
 interface ImageSelectorProps {
     onChange: (imageBuildParams: ImageBuildParams) => void;
-    value: { image: ImageContent; grid: ImageGrid };
+    value: ImageBuildParams;
 }
 
 function CurrentImageDisplay({ image }: { image: ImageContent }) {
@@ -22,6 +22,8 @@ function CurrentImageDisplay({ image }: { image: ImageContent }) {
     ) : (
         <video
             autoPlay
+            loop
+            playsInline
             style={{
                 maxWidth: "100%",
                 maxHeight: "100%",
@@ -44,7 +46,7 @@ export function ImageSelector({
             undefined,
             "PROP",
         );
-        if (images && images.length > 0) {
+        if (images.length > 0) {
             const selected = images[0];
             onChange({
                 image: selected.image,
