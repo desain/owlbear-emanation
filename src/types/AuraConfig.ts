@@ -22,8 +22,11 @@ export interface AuraConfig {
  *          fully rebuilding the aura.
  */
 export function buildParamsChanged(oldEntry: AuraConfig, newEntry: AuraConfig) {
+    // Images change size by scaling, so we can resize them without rebuilding the aura
+    const canChangeSizeWithoutRebuilding =
+        oldEntry.style.type === "Image" && newEntry.style.type === "Image";
     return (
-        oldEntry.size !== newEntry.size ||
+        (oldEntry.size !== newEntry.size && !canChangeSizeWithoutRebuilding) ||
         oldEntry.style.type !== newEntry.style.type ||
         // Not sure why, but updating the blend mode directly on effect items doesn't work,
         // so we need to rebuild the aura if the blend mode changes.
@@ -38,5 +41,8 @@ export function drawingParamsChanged(
     oldEntry: AuraConfig,
     newEntry: AuraConfig,
 ) {
-    return !isDeepEqual(oldEntry.style, newEntry.style);
+    return (
+        !isDeepEqual(oldEntry.style, newEntry.style) ||
+        oldEntry.size !== newEntry.size
+    );
 }
