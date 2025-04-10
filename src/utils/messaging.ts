@@ -1,4 +1,4 @@
-import OBR, { BlendMode } from "@owlbear-rodeo/sdk";
+import OBR, { BlendMode, ImageContent, ImageGrid } from "@owlbear-rodeo/sdk";
 import {
     AuraStyle,
     AuraStyleType,
@@ -50,6 +50,13 @@ export interface CreateAurasMessage {
      * the default SRC_OVER value will be used.
      */
     blendMode?: BlendMode;
+    /**
+     * Details for image-based auras. Must be provided if and only if the `style` parameter is "Image".
+     */
+    imageBuildParams?: {
+        image: ImageContent;
+        grid: ImageGrid;
+    };
 }
 export function isCreateAuraMessage(
     message: unknown,
@@ -79,7 +86,13 @@ export function isCreateAuraMessage(
         (!("visibleTo" in message) || typeof message.visibleTo === "string") &&
         (!("blendMode" in message) ||
             (typeof message.blendMode === "string" &&
-                isBlendMode(message.blendMode)))
+                isBlendMode(message.blendMode))) &&
+        (!("imageBuildParams" in message) ||
+            (isObject(message.imageBuildParams) &&
+                "image" in message.imageBuildParams &&
+                isObject(message.imageBuildParams.image) &&
+                "grid" in message.imageBuildParams &&
+                isObject(message.imageBuildParams.grid)))
     );
 }
 
@@ -88,7 +101,10 @@ export function getStyle(message: CreateAurasMessage): AuraStyle {
     const style: AuraStyleType = message.style ?? playerSettings.style.type;
     const color = message.color ?? getColor(playerSettings.style);
     const opacity = message.opacity ?? getOpacity(playerSettings.style);
-    return createStyle(style, color, opacity, message.blendMode);
+    return createStyle(style, color, opacity, {
+        blendMode: message.blendMode,
+        imageBuildParams: message.imageBuildParams,
+    });
 }
 
 interface RemoveAurasMessage {

@@ -1,8 +1,10 @@
 import {
     Curve,
     Effect,
+    Image,
     isCurve,
     isEffect,
+    isImage,
     Item,
     Uniform,
 } from "@owlbear-rodeo/sdk";
@@ -26,12 +28,12 @@ export function isDrawable(item: Item): item is SimpleAuraDrawable {
     return isCircle(item) || isCurve(item);
 }
 
-export type Aura = (SimpleAuraDrawable | Effect) &
+export type Aura = (SimpleAuraDrawable | Effect | Image) &
     IsAttached &
     HasMetadata<AuraMetadata>;
 export function isAura(item: Item): item is Aura {
     return (
-        (isEffect(item) || isCurve(item) || isCircle(item)) &&
+        (isEffect(item) || isCurve(item) || isCircle(item) || isImage(item)) &&
         item.attachedTo !== undefined &&
         METADATA_KEY in item.metadata &&
         typeof item.metadata[METADATA_KEY] === "object"
@@ -58,6 +60,11 @@ export function updateDrawingParams(aura: Aura, auraEntry: AuraConfig) {
             break;
         case "Spirits":
             break; // nothing to set
+        case "Image":
+            assertItem(aura, isImage);
+            aura.image = auraEntry.style.image;
+            aura.grid = auraEntry.style.grid;
+            break;
     }
 }
 

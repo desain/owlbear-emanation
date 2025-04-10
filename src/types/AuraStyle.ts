@@ -1,4 +1,10 @@
-import { BlendMode, CurveStyle, ShapeStyle } from "@owlbear-rodeo/sdk";
+import {
+    BlendMode,
+    CurveStyle,
+    ImageContent,
+    ImageGrid,
+    ShapeStyle,
+} from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { hexToRgb, isHexColor, rgbToHex } from "../utils/colorUtils";
 
@@ -34,6 +40,20 @@ function isSpiritsStyle(style: AuraStyle): style is SpiritsStyle {
     return style.type === "Spirits";
 }
 
+/**
+ * All the data needed to build an image (excluding the size, which is determined by the aura size).
+ */
+export interface ImageBuildParams {
+    image: ImageContent;
+    grid: ImageGrid;
+}
+export interface ImageStyle extends ImageBuildParams {
+    type: "Image";
+}
+export function isImageStyle(style: AuraStyle): style is ImageStyle {
+    return style.type === "Image";
+}
+
 export type EffectStyle = (ColorOpacityShaderStyle | SpiritsStyle) & {
     blendMode?: BlendMode;
 };
@@ -44,7 +64,7 @@ export function isEffectStyle(style: AuraStyle): style is EffectStyle {
     );
 }
 export type EffectStyleType = EffectStyle["type"];
-export type AuraStyle = SimpleStyle | EffectStyle;
+export type AuraStyle = SimpleStyle | EffectStyle | ImageStyle;
 export type AuraStyleType = AuraStyle["type"];
 
 export const STYLE_TYPES: AuraStyleType[] = [
@@ -53,6 +73,7 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Glow",
     "Range",
     "Spirits",
+    "Image",
 ];
 export function isAuraStyle(style: string): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
@@ -63,37 +84,51 @@ export function createStyle(
     styleType: AuraStyleType,
     color: string,
     opacity: number,
-    blendMode?: BlendMode,
+    {
+        blendMode,
+        imageBuildParams,
+    }: { blendMode?: BlendMode; imageBuildParams?: ImageBuildParams } = {},
 ): AuraStyle {
     if (!isHexColor(color)) {
         throw new Error(`Color '${color}' must be a hex color`);
     }
 
-    return styleType === "Simple"
-        ? {
-              type: styleType,
-              itemStyle: {
-                  fillColor: color,
-                  fillOpacity: opacity,
-                  strokeColor: color,
-                  strokeOpacity: 1,
-                  strokeWidth: 10,
-                  strokeDash: [],
-              },
-          }
-        : styleType === "Bubble" ||
-          styleType === "Glow" ||
-          styleType === "Range"
-        ? {
-              type: styleType,
-              color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
-              opacity: opacity,
-              blendMode,
-          }
-        : {
-              type: styleType,
-              blendMode,
-          };
+    switch (styleType) {
+        case "Simple":
+            return {
+                type: styleType,
+                itemStyle: {
+                    fillColor: color,
+                    fillOpacity: opacity,
+                    strokeColor: color,
+                    strokeOpacity: 1,
+                    strokeWidth: 10,
+                    strokeDash: [],
+                },
+            };
+        case "Bubble":
+        case "Glow":
+        case "Range":
+            return {
+                type: styleType,
+                color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
+                opacity,
+                blendMode,
+            };
+        case "Spirits":
+            return {
+                type: styleType,
+                blendMode,
+            };
+        case "Image":
+            if (!imageBuildParams) {
+                throw new Error("Image data is required for Image style");
+            }
+            return {
+                type: styleType,
+                ...imageBuildParams,
+            };
+    }
 }
 
 export function getColor(style: AuraStyle): string {
@@ -105,6 +140,7 @@ export function getColor(style: AuraStyle): string {
         case "Simple":
             return style.itemStyle.fillColor;
         case "Spirits":
+        case "Image":
             return "#FFFFFF";
     }
 }
@@ -134,6 +170,7 @@ export function getOpacity(style: AuraStyle): number {
         case "Simple":
             return style.itemStyle.fillOpacity;
         case "Spirits":
+        case "Image":
             return 1.0;
     }
 }
@@ -146,6 +183,25 @@ export function setOpacity(style: AuraStyle, opacity: number) {
     }
 }
 
+export function getImageBuildParams(style: AuraStyle): ImageBuildParams {
+    if (isImageStyle(style)) {
+        return style;
+    } else {
+        return {
+            image: {
+                url: "http://localhost:5173/missing_image.svg",
+                mime: "image/svg+xml",
+                width: 300,
+                height: 300,
+            },
+            grid: {
+                dpi: 300,
+                offset: { x: 150, y: 150 },
+            },
+        };
+    }
+}
+
 export function setStyleType(
     style: AuraStyle,
     styleType: AuraStyleType,
@@ -153,5 +209,9 @@ export function setStyleType(
     const color = getColor(style);
     const opacity = getOpacity(style);
     const blendMode = getBlendMode(style);
-    return createStyle(styleType, color, opacity, blendMode);
+    const imageBuildParams = getImageBuildParams(style);
+    return createStyle(styleType, color, opacity, {
+        blendMode,
+        imageBuildParams,
+    });
 }
