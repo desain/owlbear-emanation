@@ -1,5 +1,6 @@
 // https://thebookofshaders.com/05/
 // x from 0 to 1, a in the first quadrant unit square
+// if x > 1, can return NaN
 // output 0 to 1
 float quadraticBezier (float x, vec2 a){
   // adapted from BEZMATH.PS (1993)
