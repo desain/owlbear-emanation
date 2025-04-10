@@ -203,6 +203,10 @@ To make a production build run:
     -   Localized weather effects
 -   Split out style picker into a larger modal?
 
+## Bugs
+
+-   Some images come in at the wrong size
+
 ## License
 
 GNU GPLv3

@@ -211,7 +211,7 @@ export default class AuraFixer {
                     toUpdate.push(localItemId);
                     getOrInsert(updaters, localItemId, () => []).push(
                         (aura) => {
-                            updateDrawingParams(aura, newEntry);
+                            updateDrawingParams(newSource, aura, newEntry);
                         },
                     );
                     saveAuraId(newSource, newEntry, localItemId); // keep this aura for next state

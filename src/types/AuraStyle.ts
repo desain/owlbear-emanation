@@ -1,10 +1,4 @@
-import {
-    BlendMode,
-    CurveStyle,
-    ImageContent,
-    ImageGrid,
-    ShapeStyle,
-} from "@owlbear-rodeo/sdk";
+import { BlendMode, CurveStyle, Image, ShapeStyle } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { hexToRgb, isHexColor, rgbToHex } from "../utils/colorUtils";
 
@@ -43,10 +37,7 @@ function isSpiritsStyle(style: AuraStyle): style is SpiritsStyle {
 /**
  * All the data needed to build an image (excluding the size, which is determined by the aura size).
  */
-export interface ImageBuildParams {
-    image: ImageContent;
-    grid: ImageGrid;
-}
+export type ImageBuildParams = Pick<Image, "image" | "grid">;
 export interface ImageStyle extends ImageBuildParams {
     type: "Image";
 }
