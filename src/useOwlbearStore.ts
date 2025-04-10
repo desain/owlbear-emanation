@@ -7,6 +7,7 @@ import {
     extractSceneMetadataOrDefault,
     SceneMetadata,
 } from "./types/metadata/SceneMetadata";
+import { getId } from "./utils/itemUtils";
 
 type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
 
@@ -31,9 +32,7 @@ export interface OwlbearStore {
     setSceneMetadata: (metadata: Metadata) => void;
     setGrid: (grid: GridParams) => Promise<void>;
     setSelection: (selection: string[] | undefined) => Promise<void>;
-    setEditMenuClickedItems: (
-        editMenuClickedItems: string[] | undefined,
-    ) => Promise<void>;
+    setEditMenuClickedItems: (editMenuClickedItems: Item[]) => Promise<void>;
     updateItems: (items: Item[]) => void;
 }
 
@@ -61,7 +60,12 @@ export const useOwlbearStore = create<OwlbearStore>()(
             set(
                 sceneReady
                     ? { sceneReady }
-                    : { sceneReady, editMenuClickedItems: [] },
+                    : {
+                          sceneReady,
+                          editMenuClickedItems: [],
+                          targetedItems: [],
+                          selection: [],
+                      },
             ),
         setRole: (role: Role) => set({ role }),
         setPlayerId: (playerId: string) => set({ playerId }),
@@ -104,24 +108,21 @@ export const useOwlbearStore = create<OwlbearStore>()(
                 });
             }
         },
-        setEditMenuClickedItems: async (
-            editMenuClickedItems: string[] | undefined,
-        ) => {
-            editMenuClickedItems = editMenuClickedItems ?? [];
-            const targetedItems =
-                editMenuClickedItems.length === 0
-                    ? []
-                    : await OBR.scene.items.getItems(editMenuClickedItems);
-            return set({ editMenuClickedItems, targetedItems });
+        setEditMenuClickedItems: async (editMenuClickedItems: Item[]) => {
+            return set({
+                editMenuClickedItems: editMenuClickedItems.map(getId),
+                targetedItems: editMenuClickedItems,
+            });
         },
         updateItems: (items: Item[]) =>
             set((state) => {
-                const targetList =
+                const targetList = new Set(
                     state.selection.length !== 0
                         ? state.selection
-                        : state.editMenuClickedItems;
+                        : state.editMenuClickedItems,
+                );
                 const targetedItems = items.filter((item) =>
-                    targetList.includes(item.id),
+                    targetList.has(item.id),
                 );
                 return { targetedItems };
             }),
