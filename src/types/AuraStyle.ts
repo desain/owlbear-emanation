@@ -112,9 +112,18 @@ export function createStyle(
                 blendMode,
             };
         case "Image":
-            if (!imageBuildParams) {
-                throw new Error("Image data is required for Image style");
-            }
+            imageBuildParams = imageBuildParams ?? {
+                image: {
+                    url: "http://localhost:5173/missing_image.svg",
+                    mime: "image/svg+xml",
+                    width: 300,
+                    height: 300,
+                },
+                grid: {
+                    dpi: 300,
+                    offset: { x: 150, y: 150 },
+                },
+            };
             return {
                 type: styleType,
                 ...imageBuildParams,
@@ -174,23 +183,13 @@ export function setOpacity(style: AuraStyle, opacity: number) {
     }
 }
 
-export function getImageBuildParams(style: AuraStyle): ImageBuildParams {
+export function getImageBuildParams(
+    style: AuraStyle,
+): ImageBuildParams | undefined {
     if (isImageStyle(style)) {
         return style;
-    } else {
-        return {
-            image: {
-                url: "http://localhost:5173/missing_image.svg",
-                mime: "image/svg+xml",
-                width: 300,
-                height: 300,
-            },
-            grid: {
-                dpi: 300,
-                offset: { x: 150, y: 150 },
-            },
-        };
     }
+    return undefined;
 }
 
 export function setStyleType(

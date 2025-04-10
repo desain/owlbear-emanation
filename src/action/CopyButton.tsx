@@ -2,7 +2,12 @@ import CopyIcon from "@mui/icons-material/ContentCopy";
 import { Button } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
 import { AuraConfig } from "../types/AuraConfig";
-import { getBlendMode, getColor, getOpacity } from "../types/AuraStyle";
+import {
+    getBlendMode,
+    getColor,
+    getImageBuildParams,
+    getOpacity,
+} from "../types/AuraStyle";
 import { CreateAurasMessage } from "../utils/messaging";
 
 async function copyToClipboard(message: CreateAurasMessage) {
@@ -34,6 +39,7 @@ export function CopyButton({ config }: { config: AuraConfig }) {
                     opacity: getOpacity(config.style),
                     visibleTo: config.visibleTo,
                     blendMode: getBlendMode(config.style),
+                    imageBuildParams: getImageBuildParams(config.style),
                 };
                 copyToClipboard(message);
             }}
