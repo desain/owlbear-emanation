@@ -7,6 +7,7 @@ import { GridParsed } from "../types/GridParsed";
 import { HasMetadata } from "../types/metadata/metadataUtils";
 import { SceneMetadata } from "../types/metadata/SceneMetadata";
 import { buildEffectAura } from "./effect";
+import { buildImageAura } from "./image";
 import { buildSimpleAura } from "./simple";
 
 /**
@@ -36,6 +37,14 @@ export default function buildAura(
                   absoluteItemSize,
                   shape,
               )
+            : style.type === "Image"
+            ? buildImageAura(
+                  grid,
+                  style,
+                  item.position,
+                  numUnits,
+                  absoluteItemSize,
+              )
             : buildEffectAura(
                   grid,
                   style,
@@ -57,7 +66,6 @@ export default function buildAura(
         ...(aura.metadata[METADATA_KEY] ?? {}),
         ...metadata,
     };
-    // aura.scale.x = 1 + 2 / 3;
 
     return aura as typeof aura & IsAttached & HasMetadata<typeof metadata>; // typescript can't figure out these keys are set now;
 }

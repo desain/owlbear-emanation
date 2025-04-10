@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { PLAYER_SETTINGS_STORE_NAME } from "./constants";
 import { AuraConfig } from "./types/AuraConfig";
-import { createStyle, setColor } from "./types/AuraStyle";
+import { setColor } from "./types/AuraStyle";
 
 const ObrSceneReady = new Promise<void>((resolve) => {
     OBR.onReady(async () => {
@@ -45,7 +45,11 @@ export const usePlayerSettings = create<PlayerSettingsStore>()(
         (set) => ({
             hasSensibleValues: false,
             size: 5,
-            style: createStyle("Simple", "#FFFFFF", 0.5),
+            style: {
+                type: "Bubble",
+                color: { x: 1, y: 1, z: 1 },
+                opacity: 1,
+            },
             _markSensible() {
                 set({ hasSensibleValues: true });
             },

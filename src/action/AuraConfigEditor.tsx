@@ -7,6 +7,7 @@ import {
     getOpacity,
     isColorOpacityShaderStyle,
     isEffectStyle,
+    isImageStyle,
     isSimpleStyle,
     setColor,
     setOpacity,
@@ -14,6 +15,7 @@ import {
 } from "../types/AuraStyle";
 import { BlendModeSelector } from "./BlendModeSelector";
 import { ColorInput } from "./ColorInput";
+import { ImageSelector } from "./ImageSelector";
 import { OpacitySlider } from "./OpacitySlider";
 import { SizeInput } from "./SizeInput";
 import { StyleSelector } from "./StyleSelector";
@@ -67,6 +69,19 @@ export function AuraConfigEditor({
                                 }),
                             )
                         }
+                    />
+                </Stack>
+            )}
+            {isImageStyle(config.style) && (
+                <Stack sx={{ mb: 2 }}>
+                    <ImageSelector
+                        value={config.style}
+                        onChange={(imageBuildParams) => {
+                            setStyle({
+                                type: "Image",
+                                ...imageBuildParams,
+                            });
+                        }}
                     />
                 </Stack>
             )}

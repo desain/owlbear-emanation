@@ -196,7 +196,6 @@ To make a production build run:
 
 ## To do
 
--   Auras from images
 -   Update auras when image alignment changes
 -   Find more ways to skip rebuilds (debounce, track builder)
 -   Optimize item update handler
