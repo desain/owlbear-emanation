@@ -7,7 +7,7 @@ import glsl from "vite-plugin-glsl";
 export default defineConfig({
     plugins: [react(), glsl()],
     server: {
-        cors: true, // Enable CORS
+        cors: true,
     },
     build: {
         assetsInlineLimit: 0, // disable inlining assets since that doesn't work for OBR
