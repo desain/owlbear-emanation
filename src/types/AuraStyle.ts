@@ -112,14 +112,12 @@ export function createStyle(
                 blendMode,
             };
         case "Image":
-            const url =
-                window.location.origin +
-                import.meta.env.BASE_URL +
-                "missing_image.svg";
-            console.log(url);
             imageBuildParams = imageBuildParams ?? {
                 image: {
-                    url,
+                    url:
+                        window.location.origin +
+                        import.meta.env.BASE_URL +
+                        "missing_image.svg",
                     mime: "image/svg+xml",
                     width: 300,
                     height: 300,
