@@ -12,6 +12,7 @@ The extension can be installed from https://owlbear-emanation.pages.dev/manifest
 
 ## Features
 
+-   Create auras from shapes, shader effects, or images.
 -   Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chebyshev / Chessboard D&D 5e distance, auras will be square)
 -   Auras will automatically resize after tokens are scaled, so that their boundary is the correct distance away.
 -   Manage any number of auras with any color, opacity, or style.
@@ -30,7 +31,7 @@ The aura will be centered on the source's origin point (the center of the contro
 
 ![Edit Auras](https://github.com/user-attachments/assets/bf696d4f-e605-4792-a4de-30b78a6f9eae)
 
-When any selected character has at least one aura, you will see the edit auras menu, which lets you manage auras for those characters.
+When any selected token has at least one aura, you will see the 'Edit Auras' menu option (with the same 'E' shortcut), which lets you manage auras for those characters through the 'Aura Settings' action in the top left. You can also open the action in the 'Edit' tab and then select tokens to add or edit auras.
 
 Menu options:
 
@@ -38,9 +39,17 @@ Menu options:
 -   **Size**: Size of the aura, in the same units as the grid.
 -   **Color**: Aura color. Editable with your browser's native color picker. By default, the color will be your player color.
 -   **Opacity**: Aura opacity.
--   **Delete** (trash icon): Remove this aura from the character.
--   **New**: Add another aura to the characters. You can manage all auras in the context menu (if you don't see a new aura, try scrolling up or down in the menu). If multiple characters are selected, this button will add a new aura to all of them.
+-   **Image**: For image auras, selects which image asset to use as the aura.
+-   **Delete**: Remove this aura from the character.
+-   **Copy to Clipboard**: Copy this aura's settings to your OS clipboard.
+-   **New**: Add another aura to the characters using the aura settings from the 'Defaults' tab. If multiple characters are selected, this button will add a new aura to all of them.
+-   **Paste**: Allows you to add a previously-copied aura to a token.
 -   **Delete All**: Remove all auras from the selected characters.
+
+Options under 'Advanced Options':
+
+-   **Visibility**: Lets you control which players can see the aura.
+-   **Blend Mode**: For shader-based auras, sets the graphical [blend mode](https://en.wikipedia.org/wiki/Blend_modes) for the shader. Ideas: 'PLUS' with the 'Glow' aura is good for simulating lights, and with a pure white 'Range' aura, 'DIFFERENCE' creates an area of negative color, and 'SATURATION' creates an aura that makes the world inside it grayscale.
 
 ### Resizing tokens
 
@@ -54,13 +63,15 @@ https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
 
-### Changing defaults and global settings
+### Changing defaults
 
 ![Defaults Menu](https://github.com/user-attachments/assets/648f7dde-35d9-4f95-8d50-c74c463ae5e7)
 
-To change the default settings for newly created auras, open the Aura Settings actions menu in the top left. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser).
+To change the default settings for newly created auras, open the Aura Settings action menu in the top left and go to the 'Defaults' tab. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser data).
 
-For the GM, this menu has additional settings under 'Scene Settings':
+### Changing global settings
+
+The GM can also access scene-global settings under the Aura Settings action menu in the 'GM Settings' tab.
 
 -   **Shape to grid**: When enabled, causes auras in the current scene to try to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 -   **Override Shape**: When set, causes auras to take on the specified shape, rather than conforming to a shape that traces out the points a certain distance away from the source based on the grid's current measurement settings.
@@ -103,8 +114,6 @@ A rangefinder which steps from white to the aura color at each discrete grid uni
 
 A fancy one just for fun! Displays animated trails that circle your character while changing color.
 
-This style ignores your color and opacity settings because the spirits have their own ideas.
-
 ## Calling this extension from other extensions
 
 If you're another extension developer, you can automate managing auras with this API. Create an object `message` of one of these types:
@@ -143,6 +152,13 @@ interface CreateAurasMessage {
      * the default SRC_OVER value will be used.
      */
     blendMode?: BlendMode;
+    /**
+     * Details for image-based auras. Must be provided if and only if the `style` parameter is "Image".
+     */
+    imageBuildParams?: {
+        image: ImageContent;
+        grid: ImageGrid;
+    };
 }
 
 interface RemoveAurasMessage {
@@ -174,9 +190,7 @@ After checkout, run `pnpm install`.
 
 This project is a Typescript app.
 
-The background script `background.ts` communicates with Owlbear Rodeo to create a context menu item. When that item is clicked a popup is shown with the `contextmenu.html` site rendered.
-
-The `action.html` page is rendered as an action item, which controls global settings for auras.
+The `action.html` page is rendered in the 'renderAction.tsx' file, which calls OBR APIs to set up the context menu and installs handlers to manage auras.
 
 ## Building
 
