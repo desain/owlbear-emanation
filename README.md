@@ -2,7 +2,8 @@
 
 This extension allows you to add auras to any character in a variety of styles.
 
-![Interface](https://github.com/user-attachments/assets/1231da26-2939-4877-a023-3444ed2018b7)
+![Interface](https://github.com/user-attachments/assets/b5825f4a-1846-476f-849e-4e7d31efab78)
+
 
 ## Installing
 
@@ -54,6 +55,12 @@ Options under 'Advanced Options':
 
 -   **Visibility**: Lets you control which players can see the aura.
 -   **Blend Mode**: For shader-based auras, sets the graphical [blend mode](https://en.wikipedia.org/wiki/Blend_modes) for the shader. Ideas: 'PLUS' with the 'Glow' aura is good for simulating lights, and with a pure white 'Range' aura, 'DIFFERENCE' creates an area of negative color, and 'SATURATION' creates an aura that makes the world inside it grayscale.
+
+#### Editing multiple auras at once
+
+If you select multiple tokens which all share an aura, you can edit that aura on all the tokens at once. You will see a list of which tokens you are editing above the aura settings.
+
+![Multi edit](https://github.com/user-attachments/assets/7b25bcf7-d4a1-4912-a47a-73b3d791f66c)
 
 ### Resizing tokens
 
