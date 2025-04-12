@@ -29,9 +29,13 @@ The aura will be centered on the source's origin point (the center of the contro
 
 ### Editing aura parameters
 
-![Edit Auras](https://github.com/user-attachments/assets/bf696d4f-e605-4792-a4de-30b78a6f9eae)
+![Edit Auras](https://github.com/user-attachments/assets/109a5abd-6bf7-442d-af0c-ee431cbbaa92)
 
-When any selected token has at least one aura, you will see the 'Edit Auras' menu option (with the same 'E' shortcut), which lets you manage auras for those characters through the 'Aura Settings' action in the top left. You can also open the action in the 'Edit' tab and then select tokens to add or edit auras.
+When any selected token has at least one aura, you will see the 'Edit Auras' menu option (with the same 'E' shortcut), which lets you manage auras for those characters through the 'Aura Settings' action in the top left.
+
+![Edit Tab](https://github.com/user-attachments/assets/0f2094c7-66c3-45cf-ad74-9650a568b8e6)
+
+You can also open the action in the 'Edit' tab and then select tokens to add or edit auras.
 
 Menu options:
 
@@ -65,7 +69,7 @@ When you change the grid type or measurement type, auras will reshape to be appr
 
 ### Changing defaults
 
-![Defaults Menu](https://github.com/user-attachments/assets/648f7dde-35d9-4f95-8d50-c74c463ae5e7)
+![Defaults Menu](https://github.com/user-attachments/assets/91d102ea-3f10-4399-bb32-5b34fb41d644)
 
 To change the default settings for newly created auras, open the Aura Settings action menu in the top left and go to the 'Defaults' tab. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser data).
 
@@ -76,7 +80,7 @@ The GM can also access scene-global settings under the Aura Settings action menu
 -   **Shape to grid**: When enabled, causes auras in the current scene to try to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 -   **Override Shape**: When set, causes auras to take on the specified shape, rather than conforming to a shape that traces out the points a certain distance away from the source based on the grid's current measurement settings.
 
-https://github.com/user-attachments/assets/130b5f4f-14bb-41ed-9fa2-ecd1b1354b79
+![Settings Tab](https://github.com/user-attachments/assets/186ca429-72f3-4aa1-a45f-9a0119401441)
 
 ### Aura Styles
 
@@ -87,6 +91,12 @@ This extension supports several different aura styles. The different types are l
 ![Simple](https://github.com/user-attachments/assets/2345b74a-3129-4639-9f79-bdffa8b90a63)
 
 A filled area with a solid outline. The color control sets the color of both the fill and stroke, and the opacity controls the opacity of the fill.
+
+#### Image
+
+![Image](https://github.com/user-attachments/assets/e7e624c4-a4cf-47fa-ab88-906ddd3e8408)
+
+An image from your assets. You can find some fun effect images from https://library.jb2a.com.
 
 #### Bubble
 
