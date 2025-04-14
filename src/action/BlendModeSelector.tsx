@@ -1,7 +1,6 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
 import { BlendMode } from "@owlbear-rodeo/sdk";
-import { BLEND_MODES, isBlendMode } from "../utils/obrTypeUtils";
-import { Control } from "./Control";
+import { BLEND_MODES, Control, isBlendMode } from "owlbear-utils";
 
 interface BlendModeSelectorProps {
     value: BlendMode;

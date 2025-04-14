@@ -1,5 +1,5 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { assertItem } from "../utils/itemUtils";
+import { assertItem } from "owlbear-utils";
 import { isSource, Source } from "./Source";
 
 /**

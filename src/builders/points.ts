@@ -1,6 +1,6 @@
 import { Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import { GridParsed } from "owlbear-utils";
 import { AuraShape } from "../types/AuraShape";
-import { GridParsed } from "../types/GridParsed";
 import {
     buildAlternatingPreciseOctant,
     buildAlternatingSquareOctant,

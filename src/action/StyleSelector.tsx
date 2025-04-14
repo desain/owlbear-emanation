@@ -1,6 +1,6 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
+import { Control } from "owlbear-utils";
 import { AuraStyleType, isAuraStyle, STYLE_TYPES } from "../types/AuraStyle";
-import { Control } from "./Control";
 
 interface StyleSelectorProps {
     value: AuraStyleType;

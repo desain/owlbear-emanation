@@ -9,10 +9,10 @@ import {
     Uniform,
 } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import { assertItem } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
 import { useOwlbearStore } from "../useOwlbearStore";
-import { assertItem } from "../utils/itemUtils";
 import { AuraConfig } from "./AuraConfig";
 import { CandidateSource, getAbsoluteItemSize } from "./CandidateSource";
 import { Circle, isCircle } from "./Circle";

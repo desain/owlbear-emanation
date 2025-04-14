@@ -1,7 +1,6 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
 import { Layer } from "@owlbear-rodeo/sdk";
-import { isLayer, LAYERS } from "../utils/obrTypeUtils";
-import { Control } from "./Control";
+import { Control, isLayer, LAYERS } from "owlbear-utils";
 
 interface LayerSelectorProps {
     value: Layer;

@@ -1,9 +1,9 @@
+import { GridParsed } from "owlbear-utils";
 import { METADATA_KEY } from "../constants";
 import { Aura, AuraMetadata, IsAttached } from "../types/Aura";
 import { AuraConfig, getLayer } from "../types/AuraConfig";
 import { getAuraShape } from "../types/AuraShape";
 import { CandidateSource, getAbsoluteItemSize } from "../types/CandidateSource";
-import { GridParsed } from "../types/GridParsed";
 import { HasMetadata } from "../types/metadata/metadataUtils";
 import { SceneMetadata } from "../types/metadata/SceneMetadata";
 import { buildEffectAura } from "./effect";
