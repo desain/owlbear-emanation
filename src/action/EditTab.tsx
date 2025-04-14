@@ -196,15 +196,14 @@ export function EditTab() {
         (store) => store.hasSensibleValues,
     );
 
-    const usingEditMenuItems = useOwlbearStore(
-        (store) => store.editMenuClickedItems.length !== 0,
+    const targetedItems = useOwlbearStore(
+        (store) => store.lastNonemptySelectionItems,
     );
-    const targetedItems = useOwlbearStore((store) => store.targetedItems);
 
     const noSelection = targetedItems.length === 0;
     const header = noSelection
         ? "Select items to add or edit auras"
-        : "Edit Auras" + (usingEditMenuItems ? "*" : "");
+        : "Edit Auras";
 
     if (!playerSettingsSensible) {
         return null;

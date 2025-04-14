@@ -9,7 +9,6 @@ import {
     TAB_CHANNEL,
 } from "../constants";
 import { CandidateSource } from "../types/CandidateSource";
-import { useOwlbearStore } from "../useOwlbearStore";
 import { createAurasWithDefaults } from "../utils/createAuras";
 
 /**
@@ -90,8 +89,7 @@ export default async function createContextMenu() {
                 },
             },
         ],
-        async onClick(context) {
-            await useOwlbearStore.getState().setEditMenuClickedItems(context.items);
+        async onClick() {
             if (await OBR.action.isOpen()) {
                 await OBR.broadcast.sendMessage(TAB_CHANNEL, 0, {
                     destination: "LOCAL",
