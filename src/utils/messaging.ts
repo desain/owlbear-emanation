@@ -98,10 +98,13 @@ export function isCreateAuraMessage(
 
 export function getStyle(message: CreateAurasMessage): AuraStyle {
     const playerSettings = usePlayerSettings.getState();
-    const style: AuraStyleType = message.style ?? playerSettings.style.type;
+    const styleType: AuraStyleType = message.style ?? playerSettings.style.type;
     const color = message.color ?? getColor(playerSettings.style);
     const opacity = message.opacity ?? getOpacity(playerSettings.style);
-    return createStyle(style, color, opacity, {
+    return createStyle({
+        styleType,
+        color,
+        opacity,
         blendMode: message.blendMode,
         imageBuildParams: message.imageBuildParams,
     });
