@@ -71,15 +71,19 @@ export function isAuraStyle(style: string): style is AuraStyleType {
     return styleTypes.includes(style);
 }
 
-export function createStyle(
-    styleType: AuraStyleType,
-    color: string,
-    opacity: number,
-    {
-        blendMode,
-        imageBuildParams,
-    }: { blendMode?: BlendMode; imageBuildParams?: ImageBuildParams } = {},
-): AuraStyle {
+export function createStyle({
+    styleType,
+    color,
+    opacity,
+    blendMode,
+    imageBuildParams,
+}: {
+    styleType: AuraStyleType;
+    color: string;
+    opacity: number;
+    blendMode?: BlendMode;
+    imageBuildParams?: ImageBuildParams;
+}): AuraStyle {
     if (!isHexColor(color)) {
         throw new Error(`Color '${color}' must be a hex color`);
     }
@@ -203,7 +207,10 @@ export function setStyleType(
     const opacity = getOpacity(style);
     const blendMode = getBlendMode(style);
     const imageBuildParams = getImageBuildParams(style);
-    return createStyle(styleType, color, opacity, {
+    return createStyle({
+        styleType,
+        color,
+        opacity,
         blendMode,
         imageBuildParams,
     });
