@@ -1,5 +1,6 @@
 import { Button, FormControlProps } from "@mui/material";
 import OBR, { ImageContent } from "@owlbear-rodeo/sdk";
+import { RefObject, useEffect, useRef } from "react";
 import { ImageBuildParams } from "../types/AuraStyle";
 import { Control } from "./Control";
 
@@ -9,6 +10,17 @@ interface ImageSelectorProps {
 }
 
 function CurrentImageDisplay({ image }: { image: ImageContent }) {
+    const videoRef: RefObject<HTMLVideoElement | null> = useRef(null);
+
+    // If the video source changes, the browser won't update the currently
+    // playing video by default, so we have to manually call load() to update
+    // the video element.
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.load();
+        }
+    }, [image.url]);
+
     return image.mime.startsWith("image/") ? (
         <img
             src={image.url}
@@ -21,7 +33,9 @@ function CurrentImageDisplay({ image }: { image: ImageContent }) {
         />
     ) : (
         <video
+            ref={videoRef}
             autoPlay
+            muted
             loop
             playsInline
             style={{
@@ -31,6 +45,7 @@ function CurrentImageDisplay({ image }: { image: ImageContent }) {
             }}
         >
             <source src={image.url} type={image.mime} />
+            Cannot render video.
         </video>
     );
 }

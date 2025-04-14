@@ -1,5 +1,5 @@
 import { METADATA_KEY } from "../constants";
-import { Aura, IsAttached } from "../types/Aura";
+import { Aura, AuraMetadata, IsAttached } from "../types/Aura";
 import { getAuraShape } from "../types/AuraShape";
 import { AuraStyle } from "../types/AuraStyle";
 import { CandidateSource, getAbsoluteItemSize } from "../types/CandidateSource";
@@ -61,7 +61,7 @@ export default function buildAura(
     aura.visible = item.visible;
     aura.attachedTo = item.id;
     aura.disableAttachmentBehavior = ["ROTATION", "LOCKED", "COPY"];
-    const metadata = { isAura: true } as const;
+    const metadata = { isAura: true } satisfies AuraMetadata;
     aura.metadata[METADATA_KEY] = {
         ...(aura.metadata[METADATA_KEY] ?? {}),
         ...metadata,

@@ -33,5 +33,6 @@ export const BLEND_MODES: BlendMode[] = [
 ];
 
 export function isBlendMode(mode: string): mode is BlendMode {
-    return (BLEND_MODES as string[]).includes(mode);
+    const blendModes2: string[] = BLEND_MODES; // hack to widen type
+    return blendModes2.includes(mode);
 }

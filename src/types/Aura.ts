@@ -22,7 +22,7 @@ export interface IsAttached {
     attachedTo: string;
 }
 
-interface AuraMetadata {
+export interface AuraMetadata {
     isAura: true;
 }
 
