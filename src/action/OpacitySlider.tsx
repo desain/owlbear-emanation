@@ -41,7 +41,7 @@ export function OpacitySlider({
                     valueLabelFormat={(n) => `${n * 100}%`}
                     value={displayValue}
                     onChange={(_, opacity) => {
-                        setDisplayValue(opacity as number); // only one slider so won't be an array
+                        setDisplayValue(opacity);
                     }} // really onInput
                     onChangeCommitted={() => {
                         // don't use the new value parameter here since it has wrong values
