@@ -46,36 +46,39 @@ export function isAura(item: Item): item is Aura {
 export function updateDrawingParams(
     source: CandidateSource,
     aura: Aura,
-    auraEntry: AuraConfig,
+    config: AuraConfig,
 ) {
-    switch (auraEntry.style.type) {
+    if (config.layer) {
+        aura.layer = config.layer;
+    }
+    switch (config.style.type) {
         case "Bubble":
         case "Glow":
         case "Range":
             assertItem(aura, isEffect);
-            setColorUniform(aura, auraEntry.style.color);
-            setOpacityUniform(aura, auraEntry.style.opacity);
+            setColorUniform(aura, config.style.color);
+            setOpacityUniform(aura, config.style.opacity);
             break;
         case "Simple":
             assertItem(aura, isDrawable);
-            aura.style.fillColor = auraEntry.style.itemStyle.fillColor;
-            aura.style.fillOpacity = auraEntry.style.itemStyle.fillOpacity;
-            aura.style.strokeColor = auraEntry.style.itemStyle.strokeColor;
-            aura.style.strokeDash = auraEntry.style.itemStyle.strokeDash;
-            aura.style.strokeOpacity = auraEntry.style.itemStyle.strokeOpacity;
-            aura.style.strokeWidth = auraEntry.style.itemStyle.strokeWidth;
+            aura.style.fillColor = config.style.itemStyle.fillColor;
+            aura.style.fillOpacity = config.style.itemStyle.fillOpacity;
+            aura.style.strokeColor = config.style.itemStyle.strokeColor;
+            aura.style.strokeDash = config.style.itemStyle.strokeDash;
+            aura.style.strokeOpacity = config.style.itemStyle.strokeOpacity;
+            aura.style.strokeWidth = config.style.itemStyle.strokeWidth;
             break;
         case "Spirits":
             break; // nothing to set
         case "Image":
             assertItem(aura, isImage);
-            aura.image = auraEntry.style.image;
-            aura.grid = auraEntry.style.grid;
+            aura.image = config.style.image;
+            aura.grid = config.style.grid;
             const grid = useOwlbearStore.getState().grid;
             const absoluteItemSize = getAbsoluteItemSize(source, grid);
-            const numUnits = auraEntry.size / grid.parsedScale.multiplier;
+            const numUnits = config.size / grid.parsedScale.multiplier;
             aura.scale = getImageAuraScale(
-                auraEntry.style,
+                config.style,
                 grid,
                 numUnits,
                 absoluteItemSize,
