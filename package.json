@@ -20,7 +20,7 @@
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.19",
         "typescript": "^5.8.3",
-        "typescript-eslint": "^8.29.1",
+        "typescript-eslint": "^8.30.0",
         "vite": "^6.2.6",
         "vite-plugin-glsl": "^1.4.0"
     },
@@ -36,7 +36,7 @@
         "globals": "^16.0.0",
         "immer": "^10.1.1",
         "object-hash": "^3.0.0",
-        "owlbear-utils": "git+ssh://desain@github.com/desain/owlbear-utils.git",
+        "owlbear-utils": "git+https://github.com/desain/owlbear-utils.git",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "zustand": "^5.0.3"
