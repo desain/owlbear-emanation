@@ -70,7 +70,7 @@ export function updateDrawingParams(
             break;
         case "Spirits":
             break; // nothing to set
-        case "Image":
+        case "Image": {
             assertItem(aura, isImage);
             aura.image = config.style.image;
             aura.grid = config.style.grid;
@@ -84,6 +84,7 @@ export function updateDrawingParams(
                 absoluteItemSize,
             );
             break;
+        }
     }
 }
 

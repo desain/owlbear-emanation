@@ -19,7 +19,7 @@ export function PasteButton({ onPaste, ...props }: PasteButtonProps) {
                 );
                 if (clipboardText) {
                     try {
-                        const parsed = JSON.parse(clipboardText);
+                        const parsed: unknown = JSON.parse(clipboardText);
                         if (isCreateAuraMessage(parsed)) {
                             onPaste(parsed);
                         } else {
@@ -30,7 +30,7 @@ export function PasteButton({ onPaste, ...props }: PasteButtonProps) {
                             "Failed to parse clipboard contents",
                             error,
                         );
-                        OBR.notification.show(
+                        void OBR.notification.show(
                             "Failed to parse clipboard contents",
                             "ERROR",
                         );
