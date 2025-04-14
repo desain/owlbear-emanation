@@ -36,7 +36,7 @@
         "globals": "^16.0.0",
         "immer": "^10.1.1",
         "object-hash": "^3.0.0",
-        "owlbear-utils": "git+https://github.com/desain/owlbear-utils.git",
+        "owlbear-utils": "git+ssh://git@github.com/desain/owlbear-utils.git",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "zustand": "^5.0.3"
