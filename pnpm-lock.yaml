@@ -42,7 +42,7 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       owlbear-utils:
-        specifier: git+https://github.com/desain/owlbear-utils.git
+        specifier: github:desain/owlbear-utils
         version: git+https://github.com/desain/owlbear-utils.git#14364a88ca242561cd5a54e686d0a1923d772b87
       react:
         specifier: ^19.1.0
