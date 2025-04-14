@@ -1,4 +1,4 @@
-import { BlendMode } from "@owlbear-rodeo/sdk";
+import { BlendMode, Layer } from "@owlbear-rodeo/sdk";
 
 export const BLEND_MODES: BlendMode[] = [
     "SRC_OVER", // Default/normal
@@ -35,4 +35,27 @@ export const BLEND_MODES: BlendMode[] = [
 export function isBlendMode(mode: string): mode is BlendMode {
     const blendModes2: string[] = BLEND_MODES; // hack to widen type
     return blendModes2.includes(mode);
+}
+
+export const LAYERS: Layer[] = [
+    "MAP",
+    "GRID",
+    "DRAWING",
+    "PROP",
+    "MOUNT",
+    "CHARACTER",
+    "ATTACHMENT",
+    "NOTE",
+    "TEXT",
+    "RULER",
+    "FOG",
+    "POINTER",
+    "POST_PROCESS",
+    "CONTROL",
+    "POPOVER",
+];
+
+export function isLayer(layer: string): layer is Layer {
+    const layers2: string[] = LAYERS; // hack to widen type
+    return layers2.includes(layer);
 }

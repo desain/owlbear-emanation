@@ -1,7 +1,7 @@
 import CopyIcon from "@mui/icons-material/ContentCopy";
 import { Button } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
-import { AuraConfig } from "../types/AuraConfig";
+import { AuraConfig, getLayer } from "../types/AuraConfig";
 import {
     getBlendMode,
     getColor,
@@ -38,6 +38,7 @@ export function CopyButton({ config }: { config: AuraConfig }) {
                     color: getColor(config.style),
                     opacity: getOpacity(config.style),
                     visibleTo: config.visibleTo,
+                    layer: getLayer(config),
                     blendMode: getBlendMode(config.style),
                     imageBuildParams: getImageBuildParams(config.style),
                 };

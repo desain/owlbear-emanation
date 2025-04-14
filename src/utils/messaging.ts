@@ -1,4 +1,10 @@
-import OBR, { BlendMode, ImageContent, ImageGrid } from "@owlbear-rodeo/sdk";
+import OBR, {
+    BlendMode,
+    ImageContent,
+    ImageGrid,
+    Layer,
+} from "@owlbear-rodeo/sdk";
+import { AuraConfig } from "../types/AuraConfig";
 import {
     AuraStyle,
     AuraStyleType,
@@ -12,7 +18,7 @@ import { usePlayerSettings } from "../usePlayerSettings";
 import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
 import { isObject } from "./jsUtils";
-import { isBlendMode } from "./obrTypeUtils";
+import { isBlendMode, isLayer } from "./obrTypeUtils";
 import { removeAllAuras } from "./removeAuras";
 
 const CREATE_AURAS_TYPE = "CREATE_AURAS";
@@ -45,6 +51,11 @@ export interface CreateAurasMessage {
      * If set to null, the aura will not be visible.
      */
     visibleTo?: string | null;
+    /**
+     * Which Owlbear Rodeo layer the aura will be on. If not provided, the 'DRAWING' layer
+     * will be used.
+     */
+    layer?: Layer;
     /**
      * Blend mode for effect-based auras. Only used if the `style` parameter is an effect type. If not provided,
      * the default SRC_OVER value will be used.
@@ -84,6 +95,8 @@ export function isCreateAuraMessage(
                 message.opacity >= 0 &&
                 message.opacity <= 1)) &&
         (!("visibleTo" in message) || typeof message.visibleTo === "string") &&
+        (!("layer" in message) ||
+            (typeof message.layer === "string" && isLayer(message.layer))) &&
         (!("blendMode" in message) ||
             (typeof message.blendMode === "string" &&
                 isBlendMode(message.blendMode))) &&
@@ -94,6 +107,15 @@ export function isCreateAuraMessage(
                 "grid" in message.imageBuildParams &&
                 isObject(message.imageBuildParams.grid)))
     );
+}
+
+function toConfig(message: CreateAurasMessage): AuraConfig {
+    return {
+        size: message.size,
+        style: getStyle(message),
+        visibleTo: message.visibleTo,
+        layer: message.layer,
+    };
 }
 
 export function getStyle(message: CreateAurasMessage): AuraStyle {
@@ -135,12 +157,7 @@ export async function handleMessage(data: unknown) {
             isCandidateSource,
         );
         if (sources.length > 0) {
-            return await createAuras(
-                sources,
-                data.size,
-                getStyle(data),
-                data.visibleTo,
-            );
+            return await createAuras(sources, toConfig(data));
         } else {
             console.warn("[Auras] No images found for sources", data.sources);
         }

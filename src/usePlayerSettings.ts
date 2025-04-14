@@ -36,8 +36,15 @@ export interface PlayerSettingsStore extends AuraConfig {
     hasSensibleValues: boolean;
     _markSensible(this: void): void;
     setSize(this: void, size: PlayerSettingsStore["size"]): void;
-    setStyle(style: PlayerSettingsStore["style"]): void;
-    setVisibility(visibleTo: PlayerSettingsStore["visibleTo"]): void;
+    setStyle(this: void, style: PlayerSettingsStore["style"]): void;
+    setVisibility(
+        this: void,
+        visibleTo: PlayerSettingsStore["visibleTo"],
+    ): void;
+    setLayer(
+        this: void,
+        layer: NonNullable<PlayerSettingsStore["layer"]>,
+    ): void;
 }
 
 export const usePlayerSettings = create<PlayerSettingsStore>()(
@@ -61,6 +68,9 @@ export const usePlayerSettings = create<PlayerSettingsStore>()(
             },
             setVisibility(visibleTo: PlayerSettingsStore["visibleTo"]) {
                 set({ visibleTo });
+            },
+            setLayer(layer: NonNullable<PlayerSettingsStore["layer"]>) {
+                set({ layer });
             },
         }),
         {

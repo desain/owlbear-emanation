@@ -1,7 +1,6 @@
 import { Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
 import { AuraConfig } from "../AuraConfig";
-import { AuraStyle } from "../AuraStyle";
 import { Source } from "../Source";
 
 /**
@@ -23,25 +22,21 @@ export interface SourceMetadata {
     auras: AuraEntry[];
 }
 
-export function addEntry(
-    item: Item,
-    style: AuraStyle,
-    size: number,
-    visibleTo?: string | null,
-) {
+export function addEntry(item: Item, config: AuraConfig) {
     const metadata: SourceMetadata = (item.metadata[METADATA_KEY] as
         | SourceMetadata
         | undefined) ?? {
         auras: [],
     };
 
-    metadata.auras.push({
-        style,
-        size,
+    const entry = {
+        size: config.size,
+        style: config.style,
+        visibleTo: config.visibleTo,
+        layer: config.layer,
         sourceScopedId: crypto.randomUUID(),
-        visibleTo,
-    });
-
+    };
+    metadata.auras.push(entry);
     item.metadata[METADATA_KEY] = metadata;
 }
 

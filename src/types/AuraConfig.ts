@@ -1,3 +1,4 @@
+import { Layer } from "@owlbear-rodeo/sdk";
 import { isDeepEqual } from "../utils/jsUtils";
 import { AuraStyle, getBlendMode } from "./AuraStyle";
 
@@ -15,34 +16,49 @@ export interface AuraConfig {
      * If null, the aura is visible to no one.
      */
     visibleTo?: string | null;
+    /**
+     * Which Owlbear Rodeo layer the aura will be on. If not set, the 'DRAWING' layer
+     * will be used.
+     */
+    layer?: Layer;
+}
+
+export function getLayer(config: AuraConfig): Layer {
+    return config.layer ?? "DRAWING";
+}
+
+/**
+ * @returns Whether the aura's parameters have changed in a way that can be
+ *          updated without rebuilding the aura.
+ */
+export function drawingParamsChanged(
+    oldConfig: AuraConfig,
+    newConfig: AuraConfig,
+) {
+    return (
+        !isDeepEqual(oldConfig.style, newConfig.style) ||
+        oldConfig.size !== newConfig.size ||
+        oldConfig.layer !== newConfig.layer
+    );
 }
 
 /**
  * @returns Whether the aura's parameters have changed in a way that requires
  *          fully rebuilding the aura.
  */
-export function buildParamsChanged(oldEntry: AuraConfig, newEntry: AuraConfig) {
+export function buildParamsChanged(
+    oldConfig: AuraConfig,
+    newConfig: AuraConfig,
+) {
     // Images change size by scaling, so we can resize them without rebuilding the aura
     const canChangeSizeWithoutRebuilding =
-        oldEntry.style.type === "Image" && newEntry.style.type === "Image";
+        oldConfig.style.type === "Image" && newConfig.style.type === "Image";
     return (
-        (oldEntry.size !== newEntry.size && !canChangeSizeWithoutRebuilding) ||
-        oldEntry.style.type !== newEntry.style.type ||
+        (oldConfig.size !== newConfig.size &&
+            !canChangeSizeWithoutRebuilding) ||
+        oldConfig.style.type !== newConfig.style.type ||
         // Not sure why, but updating the blend mode directly on effect items doesn't work,
         // so we need to rebuild the aura if the blend mode changes.
-        getBlendMode(oldEntry.style) !== getBlendMode(newEntry.style)
-    );
-}
-/**
- * @returns Whether the aura's parameters have changed in a way that can be
- *          updated without rebuilding the aura.
- */
-export function drawingParamsChanged(
-    oldEntry: AuraConfig,
-    newEntry: AuraConfig,
-) {
-    return (
-        !isDeepEqual(oldEntry.style, newEntry.style) ||
-        oldEntry.size !== newEntry.size
+        getBlendMode(oldConfig.style) !== getBlendMode(newConfig.style)
     );
 }
