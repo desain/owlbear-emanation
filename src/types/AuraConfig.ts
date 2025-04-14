@@ -1,5 +1,5 @@
 import { Layer } from "@owlbear-rodeo/sdk";
-import { isDeepEqual } from "../utils/jsUtils";
+import { isDeepEqual } from "owlbear-utils";
 import { AuraStyle, getBlendMode } from "./AuraStyle";
 
 /**

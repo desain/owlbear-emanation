@@ -1,6 +1,7 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
+import { deferCallAll, getOrInsert } from "owlbear-utils";
 import buildAura from "./builders/buildAura";
 import { METADATA_KEY } from "./constants";
 import { Aura, isAura, updateDrawingParams } from "./types/Aura";
@@ -13,7 +14,6 @@ import { AuraEntry } from "./types/metadata/SourceMetadata";
 import { getEntry, isSource, Source } from "./types/Source";
 import { useOwlbearStore } from "./useOwlbearStore";
 import { assertItem, didChangeScale, hasId } from "./utils/itemUtils";
-import { deferCallAll, getOrInsert } from "./utils/jsUtils";
 
 type SourceAndAuras = {
     source: Source;

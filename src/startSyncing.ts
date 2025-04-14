@@ -1,6 +1,6 @@
 import OBR from "@owlbear-rodeo/sdk";
+import { deferCallAll } from "owlbear-utils";
 import { useOwlbearStore } from "./useOwlbearStore";
-import { deferCallAll } from "./utils/jsUtils";
 
 /**
  *
