@@ -5,9 +5,8 @@
     "type": "module",
     "license": "GPL-3.0",
     "scripts": {
-        "preinstall": "echo PREINSTALL",
         "dev": "vite",
-        "build": "tsc --build && vite build",
+        "build": "{ test \"$CF_PAGES\" '!=' 1 || test \"$SKIP_DEPENDENCY_INSTALL\" = 1; } || { echo 'SKIP_DEPENDENCY_INSTALL=1 must be set on Cloudflare Pages'; exit 1; } && tsc --build && vite build",
         "preview": "vite preview",
         "lint": "eslint ."
     },
