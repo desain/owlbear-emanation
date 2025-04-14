@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
+import { groupBy } from "owlbear-utils";
 import React, { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { AuraConfig } from "../types/AuraConfig";
@@ -28,7 +29,6 @@ import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAurasWithDefaults } from "../utils/createAuras";
 import { getId } from "../utils/itemUtils";
-import { groupBy } from "../utils/jsUtils";
 import { removeAllAuras, removeAuras } from "../utils/removeAuras";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";

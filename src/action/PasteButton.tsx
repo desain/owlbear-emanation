@@ -13,7 +13,7 @@ export function PasteButton({ onPaste, ...props }: PasteButtonProps) {
             {...props}
             variant="outlined"
             startIcon={<PasteIcon />}
-            onClick={async () => {
+            onClick={() => {
                 const clipboardText = prompt(
                     "Paste here (this extension doesn't have permission to read your clipboard directly)",
                 );
