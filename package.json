@@ -5,6 +5,7 @@
     "type": "module",
     "license": "GPL-3.0",
     "scripts": {
+        "preinstall": "echo PREINSTALL",
         "dev": "vite",
         "build": "tsc --build && vite build",
         "preview": "vite preview",
