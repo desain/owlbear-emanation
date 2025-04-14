@@ -114,6 +114,11 @@ function AuraControls({
                             entry.visibleTo = visibleTo;
                         })
                     }
+                    setLayer={(layer) =>
+                        updateEntries(auras, (entry) => {
+                            entry.layer = layer;
+                        })
+                    }
                 />
             </CardContent>
             <CardActions>

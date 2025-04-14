@@ -148,7 +148,7 @@ interface CreateAurasMessage {
     /**
      * Style of aura to create. If not provided, the current player's default style will be used.
      */
-    style?: "Simple" | "Bubble" | "Glow" | "Range" | "Spirits";
+    style?: "Simple" | "Image" | "Bubble" | "Glow" | "Range" | "Spirits";
     /**
      * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
@@ -162,6 +162,11 @@ interface CreateAurasMessage {
      * If set to null, the aura will not be visible.
      */
     visibleTo?: string | null;
+    /**
+     * Which Owlbear Rodeo layer the aura will be on. If not provided, the 'DRAWING' layer
+     * will be used.
+     */
+    layer?: Layer;
     /**
      * Blend mode for effect-based auras. Only used if the `style` parameter is an effect type. If not provided,
      * the default SRC_OVER value will be used.
@@ -225,6 +230,7 @@ To make a production build run:
 
 ## To do
 
+-   Allow creating multiple presets instead of single defaults
 -   Optimize item update handler
 -   More effects!
     -   Localized weather effects - snow, rain

@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
 import { produce } from "immer";
-import { AuraConfig } from "../types/AuraConfig";
+import { AuraConfig, getLayer } from "../types/AuraConfig";
 import {
     getBlendMode,
     getColor,
@@ -16,6 +16,7 @@ import {
 import { BlendModeSelector } from "./BlendModeSelector";
 import { ColorInput } from "./ColorInput";
 import { ImageSelector } from "./ImageSelector";
+import { LayerSelector } from "./LayerSelector";
 import { OpacitySlider } from "./OpacitySlider";
 import { SizeInput } from "./SizeInput";
 import { StyleSelector } from "./StyleSelector";
@@ -26,11 +27,13 @@ export function AuraConfigEditor({
     setStyle,
     setSize,
     setVisibility,
+    setLayer,
 }: {
     config: AuraConfig;
     setStyle: (style: AuraConfig["style"]) => void;
     setSize: (size: AuraConfig["size"]) => void;
     setVisibility: (visibleTo: AuraConfig["visibleTo"]) => void;
+    setLayer: (layer: NonNullable<AuraConfig["layer"]>) => void;
 }) {
     const hasColorOpacityControls =
         isSimpleStyle(config.style) || isColorOpacityShaderStyle(config.style);
@@ -92,6 +95,11 @@ export function AuraConfigEditor({
                         fullWidth
                         value={config.visibleTo}
                         onChange={setVisibility}
+                    />
+                    <LayerSelector
+                        fullWidth
+                        value={getLayer(config)}
+                        onChange={setLayer}
                     />
                     {isEffectStyle(config.style) && (
                         <BlendModeSelector

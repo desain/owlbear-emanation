@@ -143,8 +143,7 @@ export default class AuraFixer {
         const createAura = (source: Source, entry: AuraEntry) => {
             const aura = buildAura(
                 source,
-                entry.style,
-                entry.size,
+                entry,
                 store.sceneMetadata,
                 store.grid,
             );

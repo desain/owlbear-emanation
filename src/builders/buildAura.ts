@@ -1,7 +1,7 @@
 import { METADATA_KEY } from "../constants";
 import { Aura, AuraMetadata, IsAttached } from "../types/Aura";
+import { AuraConfig, getLayer } from "../types/AuraConfig";
 import { getAuraShape } from "../types/AuraShape";
-import { AuraStyle } from "../types/AuraStyle";
 import { CandidateSource, getAbsoluteItemSize } from "../types/CandidateSource";
 import { GridParsed } from "../types/GridParsed";
 import { HasMetadata } from "../types/metadata/metadataUtils";
@@ -18,36 +18,35 @@ import { buildSimpleAura } from "./simple";
  */
 export default function buildAura(
     item: CandidateSource,
-    style: AuraStyle,
-    size: number,
+    config: AuraConfig,
     sceneMetadata: SceneMetadata,
     grid: GridParsed,
 ): Aura {
     const shape = getAuraShape(grid, sceneMetadata);
-    const numUnits = size / grid.parsedScale.multiplier;
+    const numUnits = config.size / grid.parsedScale.multiplier;
     const absoluteItemSize = getAbsoluteItemSize(item, grid);
 
     const aura =
-        style.type === "Simple"
+        config.style.type === "Simple"
             ? buildSimpleAura(
                   grid,
-                  style,
+                  config.style,
                   item.position,
                   numUnits,
                   absoluteItemSize,
                   shape,
               )
-            : style.type === "Image"
+            : config.style.type === "Image"
             ? buildImageAura(
                   grid,
-                  style,
+                  config.style,
                   item.position,
                   numUnits,
                   absoluteItemSize,
               )
             : buildEffectAura(
                   grid,
-                  style,
+                  config.style,
                   item.position,
                   numUnits,
                   absoluteItemSize,
@@ -55,8 +54,8 @@ export default function buildAura(
               );
 
     aura.locked = true;
-    aura.name = `Aura ${item.name} ${size}`;
-    aura.layer = "DRAWING";
+    aura.name = `Aura ${item.name} ${config.size}`;
+    aura.layer = getLayer(config);
     aura.disableHit = true;
     aura.visible = item.visible;
     aura.attachedTo = item.id;

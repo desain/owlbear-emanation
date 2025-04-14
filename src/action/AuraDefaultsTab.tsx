@@ -1,5 +1,4 @@
 import { Card, CardActions, CardContent, Typography } from "@mui/material";
-import { AuraConfig } from "../types/AuraConfig";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { getStyle } from "../utils/messaging";
 import { AuraConfigEditor } from "./AuraConfigEditor";
@@ -10,18 +9,15 @@ export function AuraDefaultsTab() {
     const playerSettingsSensible = usePlayerSettings(
         (store) => store.hasSensibleValues,
     );
-    const style = usePlayerSettings((store) => store.style);
-    const size = usePlayerSettings((store) => store.size);
-    const visibleTo = usePlayerSettings((store) => store.visibleTo);
+    const config = usePlayerSettings((store) => store);
     const setStyle = usePlayerSettings((store) => store.setStyle);
     const setSize = usePlayerSettings((store) => store.setSize);
     const setVisibility = usePlayerSettings((store) => store.setVisibility);
+    const setLayer = usePlayerSettings((store) => store.setLayer);
 
     if (!playerSettingsSensible) {
         return null;
     }
-
-    const config: AuraConfig = { style, size, visibleTo };
 
     return (
         <>
@@ -35,6 +31,7 @@ export function AuraDefaultsTab() {
                         setStyle={setStyle}
                         setSize={setSize}
                         setVisibility={setVisibility}
+                        setLayer={setLayer}
                     />
                 </CardContent>
                 <CardActions>

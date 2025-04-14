@@ -41,6 +41,10 @@ export interface PlayerSettingsStore extends AuraConfig {
         this: void,
         visibleTo: PlayerSettingsStore["visibleTo"],
     ): void;
+    setLayer(
+        this: void,
+        layer: NonNullable<PlayerSettingsStore["layer"]>,
+    ): void;
 }
 
 export const usePlayerSettings = create<PlayerSettingsStore>()(
@@ -64,6 +68,9 @@ export const usePlayerSettings = create<PlayerSettingsStore>()(
             },
             setVisibility(visibleTo: PlayerSettingsStore["visibleTo"]) {
                 set({ visibleTo });
+            },
+            setLayer(layer: NonNullable<PlayerSettingsStore["layer"]>) {
+                set({ layer });
             },
         }),
         {
