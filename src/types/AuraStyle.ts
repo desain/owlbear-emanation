@@ -60,11 +60,11 @@ export type AuraStyleType = AuraStyle["type"];
 
 export const STYLE_TYPES: AuraStyleType[] = [
     "Simple",
+    "Image",
     "Bubble",
     "Glow",
     "Range",
     "Spirits",
-    "Image",
 ];
 export function isAuraStyle(style: string): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
