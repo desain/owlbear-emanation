@@ -17,7 +17,7 @@ async function copyToClipboard(message: CreateAurasMessage) {
             "Copied aura style settings to clipboard",
             "SUCCESS",
         );
-    } catch (error) {
+    } catch {
         await OBR.notification.show(
             "Failed to copy aura style settings to clipboard",
             "ERROR",
@@ -29,7 +29,7 @@ export function CopyButton({ config }: { config: AuraConfig }) {
     return (
         <Button
             startIcon={<CopyIcon />}
-            onClick={() => {
+            onClick={async () => {
                 const message: CreateAurasMessage = {
                     type: "CREATE_AURAS",
                     sources: [],
@@ -42,7 +42,7 @@ export function CopyButton({ config }: { config: AuraConfig }) {
                     blendMode: getBlendMode(config.style),
                     imageBuildParams: getImageBuildParams(config.style),
                 };
-                copyToClipboard(message);
+                await copyToClipboard(message);
             }}
         >
             Copy to Clipboard
