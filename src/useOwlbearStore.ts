@@ -7,7 +7,6 @@ import {
     extractSceneMetadataOrDefault,
     SceneMetadata,
 } from "./types/metadata/SceneMetadata";
-import { getId } from "./utils/itemUtils";
 
 type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
 
@@ -17,22 +16,14 @@ export interface OwlbearStore {
     playerId: string;
     sceneMetadata: SceneMetadata;
     grid: GridParsed;
-    selection: string[];
-    /**
-     * Items the user clicked 'edit auras' on.
-     */
-    editMenuClickedItems: string[];
-    /**
-     * Items that are either selected, or were selected when the user clicked 'edit auras'.
-     */
-    targetedItems: Item[];
+    lastNonemptySelection: string[];
+    lastNonemptySelectionItems: Item[];
     setSceneReady: (sceneReady: boolean) => void;
     setRole: (role: Role) => void;
     setPlayerId: (playerId: string) => void;
     setSceneMetadata: (metadata: Metadata) => void;
     setGrid: (grid: GridParams) => Promise<void>;
     setSelection: (selection: string[] | undefined) => Promise<void>;
-    setEditMenuClickedItems: (editMenuClickedItems: Item[]) => Promise<void>;
     updateItems: (items: Item[]) => void;
 }
 
@@ -53,18 +44,15 @@ export const useOwlbearStore = create<OwlbearStore>()(
                 multiplier: 5,
             },
         },
-        selection: [],
-        editMenuClickedItems: [],
-        targetedItems: [],
+        lastNonemptySelection: [],
+        lastNonemptySelectionItems: [],
         setSceneReady: (sceneReady: boolean) =>
             set(
                 sceneReady
                     ? { sceneReady }
                     : {
                           sceneReady,
-                          editMenuClickedItems: [],
-                          targetedItems: [],
-                          selection: [],
+                          lastNonemptySelection: [],
                       },
             ),
         setRole: (role: Role) => set({ role }),
@@ -83,48 +71,23 @@ export const useOwlbearStore = create<OwlbearStore>()(
             });
         },
         setSelection: async (selection: string[] | undefined) => {
-            selection = selection ?? [];
-
-            if (selection.length !== 0) {
-                // user actually selected something, so target those items.
-                // also the previously edit-clicked items are no longer relevant,
-                // so clear them
-                const selectedItems = await OBR.scene.items.getItems(selection);
+            if (selection && selection.length > 0) {
                 return set({
-                    selection,
-                    editMenuClickedItems: [],
-                    targetedItems: selectedItems,
-                });
-            } else {
-                return set((state) => {
-                    if (state.editMenuClickedItems.length !== 0) {
-                        // deselect was probably due to clicking off the context menu,
-                        // so leave the targeted items alone
-                        return { selection };
-                    } else {
-                        // no edit menu items, so actually detarget
-                        return { selection, targetedItems: [] };
-                    }
+                    lastNonemptySelection: selection,
+                    lastNonemptySelectionItems: await OBR.scene.items.getItems(
+                        selection,
+                    ),
                 });
             }
         },
-        setEditMenuClickedItems: async (editMenuClickedItems: Item[]) => {
-            return set({
-                editMenuClickedItems: editMenuClickedItems.map(getId),
-                targetedItems: editMenuClickedItems,
-            });
-        },
         updateItems: (items: Item[]) =>
             set((state) => {
-                const targetList = new Set(
-                    state.selection.length !== 0
-                        ? state.selection
-                        : state.editMenuClickedItems,
+                const lastNonemptySelectionItems = items.filter((item) =>
+                    state.lastNonemptySelection.includes(item.id),
                 );
-                const targetedItems = items.filter((item) =>
-                    targetList.has(item.id),
-                );
-                return { targetedItems };
+                return {
+                    lastNonemptySelectionItems,
+                };
             }),
     })),
 );
