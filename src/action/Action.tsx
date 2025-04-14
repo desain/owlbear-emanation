@@ -42,7 +42,7 @@ function useActionResizer(tabContainer: React.RefObject<HTMLElement | null>) {
             observer.disconnect();
             void OBR.action.setHeight(BASE_HEIGHT);
         };
-    }, []);
+    }, [tabContainer]);
 }
 
 /**
@@ -110,14 +110,11 @@ export function Action() {
             <Tabs
                 value={currentTab}
                 variant="fullWidth"
-                onChange={(_, value) => setCurrentTab(value)}
+                onChange={(_, value: number) => setCurrentTab(value)}
                 sx={{ mb: 2 }}
             >
                 <Tab icon={<EditIcon />} label="Edit" />
-                <Tab
-                    icon={<TuneIcon />}
-                    label="Defaults"
-                />
+                <Tab icon={<TuneIcon />} label="Defaults" />
                 <Tab
                     icon={<SettingsIcon />}
                     disabled={role === "PLAYER"}
