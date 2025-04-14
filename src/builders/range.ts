@@ -6,8 +6,8 @@ import {
     createDistanceFunction,
     createItemRadius,
 } from "../utils/skslUtils";
-import axialRound from "./shaders/axialRound.glsl";
 import range from "./shaders/range.frag";
+import axialRound from "./shaders/util/axialRound.glsl";
 
 function createRoundToCell(shape: AuraShape) {
     let expression: string;

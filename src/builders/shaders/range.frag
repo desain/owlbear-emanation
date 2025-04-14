@@ -1,5 +1,5 @@
-#include random
-#include cellCoords
+#include util/random
+#include util/cellCoords
 
 const float FUZZINESS = 0.1;
 
@@ -7,7 +7,7 @@ vec4 main(vec2 fragCoord){
     vec2 xy = cellCoords(fragCoord);
     xy += FUZZINESS * (vec2(random(xy), random(xy.yx)) - 0.5); // dither
     xy = axonometricTransform(xy);
-    xy = transformCoordinateSpace(xy); // axono transform + move to corner or pixel to hex
+    xy = transformCoordinateSpace(xy); // move to corner or pixel to hex
     xy = roundToCell(xy);
 
     float d = distance(xy);

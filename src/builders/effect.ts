@@ -7,6 +7,7 @@ import { declareUniforms, getUniforms } from "../utils/skslUtils";
 import { getBubbleSksl } from "./bubble";
 import { getRangeSksl } from "./range";
 import glow from "./shaders/glow.frag";
+import { getSnowSksl } from "./snow";
 import { getSpiritsSksl } from "./spirits";
 
 function getSksl(
@@ -28,6 +29,8 @@ function getSksl(
             return declareUniforms(style) + glow;
         case "Range":
             return declareUniforms(style) + getRangeSksl(grid, shape);
+        case "Snow":
+            return declareUniforms(style) + getSnowSksl(grid);
     }
 }
 

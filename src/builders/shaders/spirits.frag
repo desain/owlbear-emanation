@@ -1,5 +1,5 @@
-#include random
-#include cellCoords
+#include util/random
+#include util/cellCoords
 
 // const float NUM_PARTICLES = <must be preappended in typescript>
 const float RADIAL_JITTER = 0.5;

@@ -67,6 +67,7 @@ function hasColorOpacityUniforms(
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Snow":
             return true;
         case "Spirits":
             return false;
@@ -106,7 +107,7 @@ export function getUniforms(
     return uniforms;
 }
 
-export function declareUniforms(style: EffectStyle) {
+export function declareUniforms(style: EffectStyle): string {
     let uniforms = `
         uniform vec2 size;
         uniform float dpi;

@@ -1,5 +1,5 @@
-#include cellCoords
-#include quadraticBezier
+#include util/cellCoords
+#include util/quadraticBezier
 
 vec4 main(in vec2 fragCoord) {
     vec2 xy = cellCoords(fragCoord); // cell coords

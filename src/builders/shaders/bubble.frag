@@ -1,4 +1,4 @@
-#include quadraticBezier
+#include util/quadraticBezier
 
 // distance from 0 at outside to 1 at inside
 float getOpacity(float pct) { // opacity from distance

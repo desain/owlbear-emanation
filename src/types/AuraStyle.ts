@@ -11,7 +11,7 @@ export function isSimpleStyle(style: AuraStyle): style is SimpleStyle {
 }
 
 export interface ColorOpacityShaderStyle {
-    type: "Bubble" | "Glow" | "Range";
+    type: "Bubble" | "Glow" | "Range" | "Snow";
     color: Vector3;
     opacity: number;
 }
@@ -21,7 +21,8 @@ export function isColorOpacityShaderStyle(
     return (
         (style.type === "Bubble" ||
             style.type === "Glow" ||
-            style.type === "Range") &&
+            style.type === "Range" ||
+            style.type === "Snow") &&
         "opacity" in style &&
         typeof style.opacity === "number"
     );
@@ -64,6 +65,7 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Bubble",
     "Glow",
     "Range",
+    "Snow",
     "Spirits",
 ];
 export function isAuraStyle(style: string): style is AuraStyleType {
@@ -104,6 +106,7 @@ export function createStyle({
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Snow":
             return {
                 type: styleType,
                 color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
@@ -143,6 +146,7 @@ export function getColor(style: AuraStyle): string {
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Snow":
             return rgbToHex(style.color);
         case "Simple":
             return style.itemStyle.fillColor;
@@ -173,6 +177,7 @@ export function getOpacity(style: AuraStyle): number {
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Snow":
             return style.opacity;
         case "Simple":
             return style.itemStyle.fillOpacity;
