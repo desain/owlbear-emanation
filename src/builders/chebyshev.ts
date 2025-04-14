@@ -1,5 +1,5 @@
 import { Vector2 } from "@owlbear-rodeo/sdk";
-import { GridParsed } from "../types/GridParsed";
+import { GridParsed } from "owlbear-utils";
 
 /**
  * @returns Square of points in pixel space centered on origin.

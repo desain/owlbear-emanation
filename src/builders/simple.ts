@@ -1,8 +1,8 @@
 import { buildCurve, Curve, Vector2 } from "@owlbear-rodeo/sdk";
+import { GridParsed } from "owlbear-utils";
 import { SimpleAuraDrawable } from "../types/Aura";
 import { AuraShape } from "../types/AuraShape";
 import { SimpleStyle } from "../types/AuraStyle";
-import { GridParsed } from "../types/GridParsed";
 import {
     getAxonometricTransformMatrix,
     getScale,

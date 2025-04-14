@@ -4,6 +4,7 @@ import OBR, {
     ImageGrid,
     Layer,
 } from "@owlbear-rodeo/sdk";
+import { isBlendMode, isLayer, isObject } from "owlbear-utils";
 import { AuraConfig } from "../types/AuraConfig";
 import {
     AuraStyle,
@@ -17,9 +18,7 @@ import { isCandidateSource } from "../types/CandidateSource";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
-import { isBlendMode, isLayer } from "./obrTypeUtils";
 import { removeAllAuras } from "./removeAuras";
-import { isObject } from 'owlbear-utils';
 
 const CREATE_AURAS_TYPE = "CREATE_AURAS";
 const REMOVE_AURAS_TYPE = "REMOVE_AURAS";

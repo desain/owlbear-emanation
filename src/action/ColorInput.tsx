@@ -1,6 +1,6 @@
 import { FormControlProps } from "@mui/material";
 import { useEffect, useState } from "react";
-import { Control } from "./Control";
+import { Control } from "owlbear-utils";
 
 export function ColorInput({
     value,

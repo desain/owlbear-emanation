@@ -1,8 +1,8 @@
 import { FormControlProps, InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import { Control } from "owlbear-utils";
 import { useState } from "react";
 import { useOwlbearStore } from "../useOwlbearStore";
-import { Control } from "./Control";
 
 export function SizeInput({
     value,

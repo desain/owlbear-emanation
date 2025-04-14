@@ -11,8 +11,8 @@ import { startSyncing } from "../startSyncing";
 import { handleMessage } from "../utils/messaging";
 import { Action } from "./Action";
 import createContextMenu from "./createContextMenu";
-import { PluginGate } from "./PluginGate";
-import { PluginThemeProvider } from "./PluginThemeProvider";
+import { PluginGate } from "owlbear-utils";
+import { PluginThemeProvider } from "owlbear-utils";
 
 let uninstall: VoidFunction = () => {};
 let root: ReactDOM.Root | null = null;

@@ -1,7 +1,4 @@
+import { HasParameterizedMetadata } from "owlbear-utils";
 import { METADATA_KEY } from "../../constants";
 
-export interface HasMetadata<M> {
-    metadata: {
-        [METADATA_KEY]: M;
-    };
-}
+export type HasMetadata<M> = HasParameterizedMetadata<typeof METADATA_KEY, M>;

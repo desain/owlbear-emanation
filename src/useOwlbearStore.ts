@@ -1,7 +1,7 @@
 import OBR, { Item, Metadata } from "@owlbear-rodeo/sdk";
+import { GridParams, GridParsed } from "owlbear-utils";
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
-import { GridParams, GridParsed } from "./types/GridParsed";
 import {
     DEFAULT_SCENE_METADATA,
     extractSceneMetadataOrDefault,

@@ -1,6 +1,6 @@
 import { buildImage, Image, Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import { GridParsed } from "owlbear-utils";
 import { ImageBuildParams, ImageStyle } from "../types/AuraStyle";
-import { GridParsed } from "../types/GridParsed";
 import { getScale } from "../utils/axonometricUtils";
 
 export function getImageAuraScale(

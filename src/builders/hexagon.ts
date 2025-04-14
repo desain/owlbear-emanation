@@ -1,6 +1,6 @@
 import { Math2, Vector2 } from "@owlbear-rodeo/sdk";
+import { GridParsed } from "owlbear-utils";
 import { getHexGridUtils } from "../utils/HexGridUtils";
-import { GridParsed } from '../types/GridParsed';
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
     return Math2.rotate(point, { x: 0, y: 0 }, degrees);
@@ -14,7 +14,7 @@ export function buildHexagonGridPoints(
     numUnits: number,
     absoluteItemSize: number,
 ): Vector2[] {
-    const flatTop = grid.type === 'HEX_HORIZONTAL';
+    const flatTop = grid.type === "HEX_HORIZONTAL";
     const utils = getHexGridUtils(grid.dpi, flatTop);
     const radius = utils.getAuraRadius(numUnits, absoluteItemSize);
     const rightHexOffset = { x: utils.mainAxisSpacing, y: 0 };
