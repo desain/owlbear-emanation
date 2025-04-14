@@ -4,12 +4,11 @@ This extension allows you to add auras to any character in a variety of styles.
 
 ![Interface](https://github.com/user-attachments/assets/b5825f4a-1846-476f-849e-4e7d31efab78)
 
-
 ## Installing
 
 The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.
 
-(Eventually on a [store page](https://extensions.owlbear.rodeo/owlbear-emanation) too, though not yet)
+(Eventually on a [store page](https://extensions.owlbear.rodeo/owlbear-emanation) maybe, though not yet)
 
 ## Features
 
@@ -150,7 +149,6 @@ interface CreateAurasMessage {
      * Style of aura to create. If not provided, the current player's default style will be used.
      */
     style?: "Simple" | "Bubble" | "Glow" | "Range" | "Spirits";
-;
     /**
      * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
@@ -227,11 +225,9 @@ To make a production build run:
 
 ## To do
 
--   Update auras when image alignment changes
--   Find more ways to skip rebuilds (debounce, track builder)
 -   Optimize item update handler
 -   More effects!
-    -   Localized weather effects
+    -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
 
 ## License
