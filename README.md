@@ -235,6 +235,10 @@ To make a production build run:
 -   More effects!
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
+-   Update store page
+-   Allow turning off context menu
+-   Explanations of blend modes (maybe an option to hide less useful blend modes)
+-   Option to hide nonstandard layers
 
 ## License
 
