@@ -239,6 +239,7 @@ To make a production build run:
 -   Allow turning off context menu
 -   Explanations of blend modes (maybe an option to hide less useful blend modes)
 -   Option to hide nonstandard layers
+-   Combine stores
 
 ## License
 
