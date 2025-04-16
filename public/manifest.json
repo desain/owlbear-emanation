@@ -12,5 +12,9 @@
         "popover": "/action.html",
         "height": 100,
         "width": 400
-    }
+    },
+    "permissions": [
+        { "name": "clipboard-write", "reason": "Copy aura settings to the clipboard" },
+        { "name": "clipboard-read", "reason": "Paste aura settings from the clipboard" },
+    ]
 }
