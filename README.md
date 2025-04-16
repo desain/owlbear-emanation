@@ -240,6 +240,7 @@ To make a production build run:
 -   Explanations of blend modes (maybe an option to hide less useful blend modes)
 -   Option to hide nonstandard layers
 -   Combine stores
+-   Figure out what to do when identical auras combine
 
 ## License
 
