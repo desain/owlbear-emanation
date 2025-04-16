@@ -242,6 +242,7 @@ To make a production build run:
 -   Combine stores
 -   Figure out what to do when identical auras combine
 -   Check image picker on guest account
+-   Message "click new" when no auras
 
 ## License
 
