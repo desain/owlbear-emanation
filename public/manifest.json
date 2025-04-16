@@ -15,6 +15,6 @@
     },
     "permissions": [
         { "name": "clipboard-write", "reason": "Copy aura settings to the clipboard" },
-        { "name": "clipboard-read", "reason": "Paste aura settings from the clipboard" },
+        { "name": "clipboard-read", "reason": "Paste aura settings from the clipboard" }
     ]
 }
