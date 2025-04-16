@@ -13,10 +13,8 @@ export function PasteButton({ onPaste, ...props }: PasteButtonProps) {
             {...props}
             variant="outlined"
             startIcon={<PasteIcon />}
-            onClick={() => {
-                const clipboardText = prompt(
-                    "Paste here (this extension doesn't have permission to read your clipboard directly)",
-                );
+            onClick={async () => {
+                const clipboardText = await navigator.clipboard.readText();
                 if (clipboardText) {
                     try {
                         const parsed: unknown = JSON.parse(clipboardText);

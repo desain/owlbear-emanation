@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
-import { groupBy } from "owlbear-utils";
+import { getId, groupBy } from "owlbear-utils";
 import React, { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { AuraConfig } from "../types/AuraConfig";
@@ -28,7 +28,6 @@ import {
 import { useOwlbearStore } from "../useOwlbearStore";
 import { usePlayerSettings } from "../usePlayerSettings";
 import { createAurasWithDefaults } from "../utils/createAuras";
-import { getId } from "owlbear-utils";
 import { removeAllAuras, removeAuras } from "../utils/removeAuras";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";
@@ -201,6 +200,9 @@ export function EditTab() {
         (store) => store.hasSensibleValues,
     );
 
+    const lastNonemptySelection = useOwlbearStore(
+        (store) => store.lastNonemptySelection,
+    );
     const targetedItems = useOwlbearStore(
         (store) => store.lastNonemptySelectionItems,
     );
@@ -241,18 +243,18 @@ export function EditTab() {
                         New
                     </Button>
                     <PasteButton
-                        onPaste={async (message) => {
-                            await OBR.broadcast.sendMessage(
+                        onPaste={(message) =>
+                            OBR.broadcast.sendMessage(
                                 MESSAGE_CHANNEL,
                                 {
                                     ...message,
-                                    sources: await OBR.player.getSelection(),
+                                    sources: lastNonemptySelection,
                                 },
                                 {
                                     destination: "LOCAL",
                                 },
-                            );
-                        }}
+                            )
+                        }
                         disabled={noSelection}
                     />
                     <Button
