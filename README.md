@@ -241,6 +241,7 @@ To make a production build run:
 -   Option to hide nonstandard layers
 -   Combine stores
 -   Figure out what to do when identical auras combine
+-   Check image picker on guest account
 
 ## License
 
