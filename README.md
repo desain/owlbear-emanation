@@ -239,7 +239,7 @@ To make a production build run:
 -   Allow turning off context menu
 -   Explanations of blend modes (maybe an option to hide less useful blend modes)
 -   Option to hide nonstandard layers
--   Combine stores
+-   Combine stores; use symbol for sensible like codeo
 -   Figure out what to do when identical auras combine
 -   Check image picker on guest account
 -   Message "click new" when no auras
