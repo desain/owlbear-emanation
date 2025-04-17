@@ -242,7 +242,7 @@ To make a production build run:
 -   Combine stores; use symbol for sensible like codeo
 -   Figure out what to do when identical auras combine
 -   Check image picker on guest account
--   Message "click new" when no auras
+-   Replace getSourceName with utils getName
 
 ## License
 
