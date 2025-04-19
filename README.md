@@ -243,6 +243,7 @@ To make a production build run:
 -   Figure out what to do when identical auras combine
 -   Check image picker on guest account
 -   Replace getSourceName with utils getName
+-   Allow size 0 auras
 
 ## License
 
