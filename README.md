@@ -239,6 +239,7 @@ To make a production build run:
 -   Option to hide nonstandard layers
 -   Figure out what to do when identical auras combine
 -   Allow size 0 auras
+-   Custom effects with SKSL textarea
 
 ## License
 
