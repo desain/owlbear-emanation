@@ -16,6 +16,7 @@ import objectHash from "object-hash";
 import { getId, groupBy } from "owlbear-utils";
 import React, { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraConfig } from "../types/AuraConfig";
 import { isCandidateSource } from "../types/CandidateSource";
 import {
@@ -25,8 +26,6 @@ import {
     Source,
     updateEntries,
 } from "../types/Source";
-import { useOwlbearStore } from "../useOwlbearStore";
-import { usePlayerSettings } from "../usePlayerSettings";
 import { createAurasWithDefaults } from "../utils/createAuras";
 import { removeAllAuras, removeAuras } from "../utils/removeAuras";
 import { AuraConfigEditor } from "./AuraConfigEditor";
@@ -196,14 +195,14 @@ function ExtantAuras({
 }
 
 export function EditTab() {
-    const playerSettingsSensible = usePlayerSettings(
+    const playerSettingsSensible = usePlayerStorage(
         (store) => store.hasSensibleValues,
     );
 
-    const lastNonemptySelection = useOwlbearStore(
+    const lastNonemptySelection = usePlayerStorage(
         (store) => store.lastNonemptySelection,
     );
-    const targetedItems = useOwlbearStore(
+    const targetedItems = usePlayerStorage(
         (store) => store.lastNonemptySelectionItems,
     );
 

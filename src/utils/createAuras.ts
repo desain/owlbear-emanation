@@ -1,12 +1,12 @@
 import OBR from "@owlbear-rodeo/sdk";
 
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraConfig } from "../types/AuraConfig";
 import { CandidateSource } from "../types/CandidateSource";
 import { addEntry } from "../types/metadata/SourceMetadata";
-import { usePlayerSettings } from "../usePlayerSettings";
 
 export function createAurasWithDefaults(items: CandidateSource[]) {
-    const playerSettings = usePlayerSettings.getState();
+    const playerSettings = usePlayerStorage.getState();
     return createAuras(items, playerSettings);
 }
 

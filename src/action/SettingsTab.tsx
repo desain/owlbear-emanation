@@ -6,13 +6,13 @@ import {
     Switch,
     Typography,
 } from "@mui/material";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { updateSceneMetadata } from "../types/metadata/SceneMetadata";
-import { useOwlbearStore } from "../useOwlbearStore";
 import { OverrideShapeSelector } from "./OverrideShapeSelector";
 import { SceneReadyGate } from "./SceneReadyGate";
 
 export function SceneSettingsTab() {
-    const sceneMetadata = useOwlbearStore((store) => store.sceneMetadata);
+    const sceneMetadata = usePlayerStorage((store) => store.sceneMetadata);
     return (
         <>
             <Typography variant="h6" sx={{ mb: 2 }}>

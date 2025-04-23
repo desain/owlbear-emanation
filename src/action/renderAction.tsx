@@ -1,18 +1,16 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import OBR from "@owlbear-rodeo/sdk";
-import { deferCallAll } from "owlbear-utils";
+import { deferCallAll, PluginGate, PluginThemeProvider } from "owlbear-utils";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "../../assets/style.css";
 import { version } from "../../package.json";
 import AuraFixer from "../AuraFixer";
 import { MESSAGE_CHANNEL } from "../constants";
-import { startSyncing } from "../startSyncing";
+import { startSyncing } from "../state/startSyncing";
 import { handleMessage } from "../utils/messaging";
 import { Action } from "./Action";
 import createContextMenu from "./createContextMenu";
-import { PluginGate } from "owlbear-utils";
-import { PluginThemeProvider } from "owlbear-utils";
 
 let uninstall: VoidFunction = () => {};
 let root: ReactDOM.Root | null = null;

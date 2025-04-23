@@ -4,6 +4,7 @@ import AwaitLock from "await-lock";
 import { assertItem, deferCallAll, getOrInsert, hasId } from "owlbear-utils";
 import buildAura from "./builders/buildAura";
 import { METADATA_KEY } from "./constants";
+import { usePlayerStorage } from "./state/usePlayerStorage";
 import { Aura, isAura, updateDrawingParams } from "./types/Aura";
 import {
     AuraConfig,
@@ -12,7 +13,6 @@ import {
 } from "./types/AuraConfig";
 import { AuraEntry } from "./types/metadata/SourceMetadata";
 import { getEntry, isSource, Source } from "./types/Source";
-import { useOwlbearStore } from "./useOwlbearStore";
 import { didChangeScale } from "./utils/itemUtils";
 
 type SourceAndAuras = {
@@ -54,7 +54,7 @@ export default class AuraFixer {
     private currentPlayerId: string;
 
     /**
-     * Create fixer. Uses useOwlbearStore, so only works if store is syncing.
+     * Create fixer. Uses usePlayerStorage, so only works if store is syncing.
      * @returns [fixer, function to uninstall fixer]
      */
     static async install(): Promise<[AuraFixer, VoidFunction]> {
@@ -73,12 +73,12 @@ export default class AuraFixer {
             }),
         );
 
-        const unsubscribeGrid = useOwlbearStore.subscribe(
+        const unsubscribeGrid = usePlayerStorage.subscribe(
             (store) => store.grid,
             lockify(async () => fixer.fix(latestItems, true)),
         );
 
-        const unsubscribeSceneMetadata = useOwlbearStore.subscribe(
+        const unsubscribeSceneMetadata = usePlayerStorage.subscribe(
             (store) => store.sceneMetadata,
             lockify(async () => fixer.fix(latestItems, true)),
         );
@@ -122,7 +122,7 @@ export default class AuraFixer {
     }
 
     async fix(networkItems: Item[], rebuildAll: boolean = false) {
-        const store = useOwlbearStore.getState();
+        const store = usePlayerStorage.getState();
         const toAdd: Aura[] = [];
         const toDelete: string[] = [];
         const toUpdate: string[] = [];

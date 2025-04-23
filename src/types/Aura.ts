@@ -12,7 +12,7 @@ import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { assertItem } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
-import { useOwlbearStore } from "../useOwlbearStore";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraConfig } from "./AuraConfig";
 import { CandidateSource, getAbsoluteItemSize } from "./CandidateSource";
 import { Circle, isCircle } from "./Circle";
@@ -74,7 +74,7 @@ export function updateDrawingParams(
             assertItem(aura, isImage);
             aura.image = config.style.image;
             aura.grid = config.style.grid;
-            const grid = useOwlbearStore.getState().grid;
+            const grid = usePlayerStorage.getState().grid;
             const absoluteItemSize = getAbsoluteItemSize(source, grid);
             const numUnits = config.size / grid.parsedScale.multiplier;
             aura.scale = getImageAuraScale(
