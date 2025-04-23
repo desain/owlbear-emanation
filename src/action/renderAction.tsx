@@ -10,7 +10,7 @@ import { MESSAGE_CHANNEL } from "../constants";
 import { startSyncing } from "../state/startSyncing";
 import { handleMessage } from "../utils/messaging";
 import { Action } from "./Action";
-import createContextMenu from "./createContextMenu";
+import { startWatchingContextMenuEnabled } from "./createContextMenu";
 
 let uninstall: VoidFunction = () => {};
 let root: ReactDOM.Root | null = null;
@@ -34,7 +34,7 @@ function installBroadcastListener() {
 async function installExtension(): Promise<VoidFunction> {
     console.log(`Auras and Emanations version ${version}`);
 
-    await createContextMenu();
+    const stopWatchingContextMenu = await startWatchingContextMenuEnabled();
     const [storeInitialized, stopSyncing] = startSyncing();
     await storeInitialized;
     const [, uninstallFixer] = await AuraFixer.install();
@@ -43,6 +43,7 @@ async function installExtension(): Promise<VoidFunction> {
     return deferCallAll(
         () => console.log("Uninstalling Auras and Emanations"),
         stopSyncing,
+        stopWatchingContextMenu,
         uninstallFixer,
         uninstallBroadcastListener,
     );
