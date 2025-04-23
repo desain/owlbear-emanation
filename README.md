@@ -239,7 +239,6 @@ To make a production build run:
 -   Explanations of blend modes (maybe an option to hide less useful blend modes)
 -   Option to hide nonstandard layers
 -   Figure out what to do when identical auras combine
--   Check image picker on guest account
 -   Allow size 0 auras
 
 ## License
