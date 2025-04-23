@@ -1,6 +1,7 @@
 import { Item } from "@owlbear-rodeo/sdk";
+import { isObject } from "owlbear-utils";
 import { METADATA_KEY } from "../../constants";
-import { AuraConfig } from "../AuraConfig";
+import { AuraConfig, isAuraConfig } from "../AuraConfig";
 import { Source } from "../Source";
 
 /**
@@ -14,6 +15,13 @@ export interface AuraEntry extends AuraConfig {
      */
     sourceScopedId: string;
 }
+function isAuraEntry(entry: unknown): entry is AuraEntry {
+    return (
+        isAuraConfig(entry) &&
+        "sourceScopedId" in entry &&
+        typeof entry.sourceScopedId === "string"
+    );
+}
 
 /**
  * Metadata on an aura source.
@@ -21,13 +29,25 @@ export interface AuraEntry extends AuraConfig {
 export interface SourceMetadata {
     auras: AuraEntry[];
 }
+export function isSourceMetadata(
+    metadata: unknown,
+): metadata is SourceMetadata {
+    return (
+        isObject(metadata) &&
+        "auras" in metadata &&
+        Array.isArray(metadata.auras) &&
+        metadata.auras.every(isAuraEntry)
+    );
+}
 
 export function addEntry(item: Item, config: AuraConfig) {
-    const metadata: SourceMetadata = (item.metadata[METADATA_KEY] as
-        | SourceMetadata
-        | undefined) ?? {
-        auras: [],
-    };
+    const metadata: SourceMetadata = isSourceMetadata(
+        item.metadata[METADATA_KEY],
+    )
+        ? item.metadata[METADATA_KEY]
+        : {
+              auras: [],
+          };
 
     const entry = {
         size: config.size,
