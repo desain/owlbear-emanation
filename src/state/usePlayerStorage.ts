@@ -103,6 +103,15 @@ export interface OwlbearStore {
 
 export interface PlayerStorage extends PlayerSettingsStore, OwlbearStore {}
 
+const DEFAULT_CONFIG = {
+    size: 5,
+    style: {
+        type: "Bubble",
+        color: { x: 1, y: 1, z: 1 },
+        opacity: 1,
+    },
+} as const;
+
 export const usePlayerStorage = create<PlayerStorage>()(
     subscribeWithSelector(
         persist(
@@ -177,14 +186,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     {
                         name: "Default",
                         id: crypto.randomUUID(),
-                        config: {
-                            size: 5,
-                            style: {
-                                type: "Bubble",
-                                color: { x: 1, y: 1, z: 1 },
-                                opacity: 1,
-                            },
-                        },
+                        config: DEFAULT_CONFIG,
                     },
                 ],
                 enableContextMenu: true,
@@ -228,8 +230,25 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 onRehydrateStorage() {
                     // console.log("onRehydrateStorage");
                     return (state, error) => {
-                        // console.log("onRehydrateStorage callback", state, error);
+                        // console.log(
+                        //     "onRehydrateStorage callback",
+                        //     state,
+                        //     error,
+                        // );
                         if (state) {
+                            // work around missing keys in migrated preset
+                            if (!state.presets[0].config.size) {
+                                state.setPresetSize(
+                                    state.presets[0].id,
+                                    DEFAULT_CONFIG.size,
+                                );
+                            }
+                            if (!state.presets[0].config.style) {
+                                state.setPresetStyle(
+                                    state.presets[0].id,
+                                    DEFAULT_CONFIG.style,
+                                );
+                            }
                             if (!state.hasSensibleValues) {
                                 // console.log("Not sensible, fetching defaults");
                                 void fetchDefaults().then(({ color, size }) => {
@@ -264,13 +283,13 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 migrate(persistedState, version: number) {
                     // Move defaults into preset
                     if (version === 0) {
-                        const oldConfig = persistedState as AuraConfig; // lazy hack to avoid creating a bunch of type check helpers
+                        const oldConfig = persistedState as Partial<AuraConfig>; // lazy hack to avoid creating a bunch of type check helpers
                         const defaultPreset: Preset = {
                             name: "Default",
                             id: crypto.randomUUID(),
                             config: {
-                                size: oldConfig.size,
-                                style: oldConfig.style,
+                                size: oldConfig.size ?? DEFAULT_CONFIG.size,
+                                style: oldConfig.style ?? DEFAULT_CONFIG.style,
                                 layer: oldConfig.layer,
                                 visibleTo: oldConfig.visibleTo,
                             },
