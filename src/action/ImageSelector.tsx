@@ -1,8 +1,8 @@
 import { Button, FormControlProps } from "@mui/material";
 import OBR, { ImageContent } from "@owlbear-rodeo/sdk";
+import { complain, Control, isObject } from "owlbear-utils";
 import { RefObject, useEffect, useRef } from "react";
 import { ImageBuildParams } from "../types/AuraStyle";
-import { Control } from "owlbear-utils";
 
 interface ImageSelectorProps {
     onChange: (imageBuildParams: ImageBuildParams) => void;
@@ -56,17 +56,32 @@ export function ImageSelector({
     ...props
 }: ImageSelectorProps & Omit<FormControlProps, "onChange">) {
     const handleSelectImage = async () => {
-        const images = await OBR.assets.downloadImages(
-            false,
-            undefined,
-            "PROP",
-        );
-        if (images.length > 0) {
-            const selected = images[0];
-            onChange({
-                image: selected.image,
-                grid: selected.grid,
-            });
+        try {
+            const images = await OBR.assets.downloadImages(
+                false,
+                undefined,
+                "PROP",
+            );
+            if (images.length > 0) {
+                const selected = images[0];
+                onChange({
+                    image: selected.image,
+                    grid: selected.grid,
+                });
+            }
+        } catch (e) {
+            console.log(e);
+            let error = "Failed to get image";
+            if (
+                isObject(e) &&
+                "error" in e &&
+                isObject(e.error) &&
+                "message" in e.error &&
+                typeof e.error.message === "string"
+            ) {
+                error = e.error.message;
+            }
+            complain(error);
         }
     };
 
