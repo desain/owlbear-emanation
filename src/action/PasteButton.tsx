@@ -1,6 +1,6 @@
 import PasteIcon from "@mui/icons-material/ContentPaste";
 import { Button, ButtonProps } from "@mui/material";
-import OBR from "@owlbear-rodeo/sdk";
+import { complain } from "owlbear-utils";
 import { CreateAurasMessage, isCreateAuraMessage } from "../utils/messaging";
 
 type PasteButtonProps = {
@@ -24,14 +24,8 @@ export function PasteButton({ onPaste, ...props }: PasteButtonProps) {
                             throw new Error("Invalid message format");
                         }
                     } catch (error) {
-                        console.error(
-                            "Failed to parse clipboard contents",
-                            error,
-                        );
-                        void OBR.notification.show(
-                            "Failed to parse clipboard contents",
-                            "ERROR",
-                        );
+                        complain("Failed to parse clipboard contents");
+                        console.log(error);
                     }
                 }
             }}
