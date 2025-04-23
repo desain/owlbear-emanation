@@ -6,10 +6,9 @@ import OBR from "@owlbear-rodeo/sdk";
 import { useActionResizer, useUndoRedoHandler } from "owlbear-utils";
 import { useEffect, useRef, useState } from "react";
 import { TAB_CHANNEL } from "../constants";
-import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraDefaultsTab } from "./AuraDefaultsTab";
 import { EditTab } from "./EditTab";
-import { SceneSettingsTab } from "./SettingsTab";
+import { SettingsTab } from "./SettingsTab";
 
 const BASE_HEIGHT = 100;
 const MAX_HEIGHT = 700;
@@ -31,7 +30,6 @@ function TabContent({
 
 export function Action() {
     const [currentTab, setCurrentTab] = useState(0);
-    const role = usePlayerStorage((store) => store.role);
 
     useEffect(() => {
         return OBR.broadcast.onMessage(TAB_CHANNEL, ({ data }) => {
@@ -56,11 +54,7 @@ export function Action() {
             >
                 <Tab icon={<EditIcon />} label="Edit" />
                 <Tab icon={<TuneIcon />} label="Defaults" />
-                <Tab
-                    icon={<SettingsIcon />}
-                    disabled={role === "PLAYER"}
-                    label="GM Settings"
-                />
+                <Tab icon={<SettingsIcon />} label="Settings" />
             </Tabs>
 
             <Box ref={tabContainer} sx={{ pb: 2 }}>
@@ -71,7 +65,7 @@ export function Action() {
                     <AuraDefaultsTab />
                 </TabContent>
                 <TabContent currentIndex={currentTab} index={2}>
-                    <SceneSettingsTab />
+                    <SettingsTab />
                 </TabContent>
             </Box>
         </>

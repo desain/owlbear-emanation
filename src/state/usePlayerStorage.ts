@@ -54,6 +54,7 @@ export interface PlayerSettingsStore {
     hasSensibleValues: boolean;
     [SET_SENSIBLE](this: void): void;
     presets: Preset[];
+    enableContextMenu: boolean;
     setPresetSize(this: void, id: string, size: AuraConfig["size"]): void;
     setPresetStyle(this: void, id: string, style: AuraConfig["style"]): void;
     setPresetVisibility(
@@ -66,6 +67,7 @@ export interface PlayerSettingsStore {
         id: string,
         layer: NonNullable<AuraConfig["layer"]>,
     ): void;
+    setContextMenuEnabled(this: void, enableContextMenu: boolean): void;
 }
 
 /**
@@ -185,6 +187,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         },
                     },
                 ],
+                enableContextMenu: true,
                 [SET_SENSIBLE]() {
                     set({ hasSensibleValues: true });
                 },
@@ -214,6 +217,8 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         const preset = getPreset(state, id);
                         preset.config.layer = layer;
                     }),
+                setContextMenuEnabled: (enableContextMenu) =>
+                    set({ enableContextMenu }),
             })),
             {
                 name: PLAYER_SETTINGS_STORE_NAME,

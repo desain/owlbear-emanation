@@ -8,13 +8,31 @@ import {
     METADATA_KEY,
     TAB_CHANNEL,
 } from "../constants";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { CandidateSource } from "../types/CandidateSource";
 import { createAurasWithDefaults } from "../utils/createAuras";
+
+export async function startWatchingContextMenuEnabled(): Promise<VoidFunction> {
+    if (usePlayerStorage.getState().enableContextMenu) {
+        await createContextMenu();
+    }
+    return usePlayerStorage.subscribe(
+        (store) => store.enableContextMenu,
+        async (enabled) => {
+            console.log(enabled);
+            if (enabled) {
+                await createContextMenu();
+            } else {
+                await removeContextMenu();
+            }
+        },
+    );
+}
 
 /**
  * Creates context menu - but should be called from background or action.
  */
-export default async function createContextMenu() {
+async function createContextMenu() {
     const createAuraItemCreated = OBR.contextMenu.create({
         id: CONTEXTMENU_CREATE_ID,
         shortcut: "E", // Emanation
@@ -100,4 +118,11 @@ export default async function createContextMenu() {
         },
     });
     return Promise.all([createAuraItemCreated, editAuraItemCreated]);
+}
+
+async function removeContextMenu() {
+    return Promise.all([
+        OBR.contextMenu.remove(CONTEXTMENU_CREATE_ID),
+        OBR.contextMenu.remove(CONTEXTMENU_EDIT_ID),
+    ]);
 }
