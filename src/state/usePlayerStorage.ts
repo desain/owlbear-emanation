@@ -294,16 +294,14 @@ export const usePlayerStorage = create<PlayerStorage>()(
                                 visibleTo: oldConfig.visibleTo,
                             },
                         };
-                        delete (persistedState as Partial<AuraConfig>).size;
-                        delete (persistedState as Partial<AuraConfig>).style;
-                        delete (persistedState as Partial<AuraConfig>).layer;
-                        delete (persistedState as Partial<AuraConfig>)
-                            .visibleTo;
                         (persistedState as PlayerStorage).presets = [
                             defaultPreset,
                         ];
+                        delete oldConfig.size;
+                        delete oldConfig.style;
+                        delete oldConfig.layer;
+                        delete oldConfig.visibleTo;
                     }
-
                     return persistedState;
                 },
             },
