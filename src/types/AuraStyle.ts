@@ -66,7 +66,7 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Range",
     "Spirits",
 ];
-export function isAuraStyle(style: string): style is AuraStyleType {
+export function isAuraStyleType(style: string): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
     return styleTypes.includes(style);
 }

@@ -3,6 +3,7 @@ import { enableMapSet } from "immer";
 import { GridParams, GridParsed } from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
+import { immer } from "zustand/middleware/immer";
 import { PLAYER_SETTINGS_STORE_NAME } from "../constants";
 import { AuraConfig } from "../types/AuraConfig";
 import { setColor } from "../types/AuraStyle";
@@ -43,19 +44,40 @@ async function fetchDefaults(): Promise<{ color: string; size: number }> {
     };
 }
 
-export interface PlayerSettingsStore extends AuraConfig {
+export interface Preset {
+    name: string;
+    id: string;
+    config: AuraConfig;
+}
+
+export interface PlayerSettingsStore {
     hasSensibleValues: boolean;
     [SET_SENSIBLE](this: void): void;
-    setSize(this: void, size: PlayerSettingsStore["size"]): void;
-    setStyle(this: void, style: PlayerSettingsStore["style"]): void;
-    setVisibility(
+    presets: Preset[];
+    setPresetSize(this: void, id: string, size: AuraConfig["size"]): void;
+    setPresetStyle(this: void, id: string, style: AuraConfig["style"]): void;
+    setPresetVisibility(
         this: void,
-        visibleTo: PlayerSettingsStore["visibleTo"],
+        id: string,
+        visibleTo: AuraConfig["visibleTo"],
     ): void;
-    setLayer(
+    setPresetLayer(
         this: void,
-        layer: NonNullable<PlayerSettingsStore["layer"]>,
+        id: string,
+        layer: NonNullable<AuraConfig["layer"]>,
     ): void;
+}
+
+/**
+ * Get preset by ID
+ * @throws if no preset with that ID exists
+ */
+function getPreset(state: PlayerSettingsStore, id: string): Preset {
+    const preset = state.presets.find((preset) => preset.id === id);
+    if (!preset) {
+        throw new Error(`Invalid preset ID ${id}`);
+    }
+    return preset;
 }
 
 type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
@@ -82,7 +104,7 @@ export interface PlayerStorage extends PlayerSettingsStore, OwlbearStore {}
 export const usePlayerStorage = create<PlayerStorage>()(
     subscribeWithSelector(
         persist(
-            (set) => ({
+            immer((set) => ({
                 // OBR sync - dummy values
                 sceneReady: false,
                 role: "PLAYER",
@@ -149,38 +171,54 @@ export const usePlayerStorage = create<PlayerStorage>()(
 
                 // Local storage
                 hasSensibleValues: false,
-                size: 5,
-                style: {
-                    type: "Bubble",
-                    color: { x: 1, y: 1, z: 1 },
-                    opacity: 1,
-                },
+                presets: [
+                    {
+                        name: "Default",
+                        id: crypto.randomUUID(),
+                        config: {
+                            size: 5,
+                            style: {
+                                type: "Bubble",
+                                color: { x: 1, y: 1, z: 1 },
+                                opacity: 1,
+                            },
+                        },
+                    },
+                ],
                 [SET_SENSIBLE]() {
                     set({ hasSensibleValues: true });
                 },
-                setSize(size: PlayerSettingsStore["size"]) {
-                    set({ size });
-                },
-                setStyle(style: PlayerSettingsStore["style"]) {
-                    set({ style });
-                },
-                setVisibility(visibleTo: PlayerSettingsStore["visibleTo"]) {
-                    set({ visibleTo });
-                },
-                setLayer(layer: NonNullable<PlayerSettingsStore["layer"]>) {
-                    set({ layer });
-                },
-            }),
+                setPresetSize: (id: string, size: AuraConfig["size"]) =>
+                    set((state) => {
+                        const preset = getPreset(state, id);
+                        preset.config.size = size;
+                    }),
+                setPresetStyle: (id: string, style: AuraConfig["style"]) =>
+                    set((state) => {
+                        const preset = getPreset(state, id);
+                        preset.config.style = style;
+                    }),
+                setPresetVisibility: (
+                    id: string,
+                    visibleTo: AuraConfig["visibleTo"],
+                ) =>
+                    set((state) => {
+                        const preset = getPreset(state, id);
+                        preset.config.visibleTo = visibleTo;
+                    }),
+                setPresetLayer: (
+                    id: string,
+                    layer: NonNullable<AuraConfig["layer"]>,
+                ) =>
+                    set((state) => {
+                        const preset = getPreset(state, id);
+                        preset.config.layer = layer;
+                    }),
+            })),
             {
                 name: PLAYER_SETTINGS_STORE_NAME,
-                partialize({
-                    hasSensibleValues,
-                    size,
-                    style,
-                    visibleTo,
-                    layer,
-                }) {
-                    return { hasSensibleValues, size, style, visibleTo, layer };
+                partialize({ hasSensibleValues, presets }) {
+                    return { hasSensibleValues, presets };
                 },
                 onRehydrateStorage() {
                     // console.log("onRehydrateStorage");
@@ -190,12 +228,23 @@ export const usePlayerStorage = create<PlayerStorage>()(
                             if (!state.hasSensibleValues) {
                                 // console.log("Not sensible, fetching defaults");
                                 void fetchDefaults().then(({ color, size }) => {
-                                    const newStyle = { ...state.style };
-                                    setColor(newStyle, color);
-                                    state.setStyle(newStyle);
-                                    state.setSize(size);
-                                    // console.log("Fetched defaults", color, size);
-                                    state[SET_SENSIBLE]();
+                                    if (state.presets.length > 0) {
+                                        const defaultPreset = state.presets[0];
+                                        const newStyle = {
+                                            ...defaultPreset.config.style,
+                                        };
+                                        setColor(newStyle, color);
+                                        state.setPresetStyle(
+                                            defaultPreset.id,
+                                            newStyle,
+                                        );
+                                        state.setPresetSize(
+                                            defaultPreset.id,
+                                            size,
+                                        );
+                                        // console.log("Fetched defaults", color, size);
+                                        state[SET_SENSIBLE]();
+                                    }
                                 });
                             }
                         } else if (error) {
@@ -205,6 +254,33 @@ export const usePlayerStorage = create<PlayerStorage>()(
                             );
                         }
                     };
+                },
+                version: 1,
+                migrate(persistedState, version: number) {
+                    // Move defaults into preset
+                    if (version === 0) {
+                        const oldConfig = persistedState as AuraConfig; // lazy hack to avoid creating a bunch of type check helpers
+                        const defaultPreset: Preset = {
+                            name: "Default",
+                            id: crypto.randomUUID(),
+                            config: {
+                                size: oldConfig.size,
+                                style: oldConfig.style,
+                                layer: oldConfig.layer,
+                                visibleTo: oldConfig.visibleTo,
+                            },
+                        };
+                        delete (persistedState as Partial<AuraConfig>).size;
+                        delete (persistedState as Partial<AuraConfig>).style;
+                        delete (persistedState as Partial<AuraConfig>).layer;
+                        delete (persistedState as Partial<AuraConfig>)
+                            .visibleTo;
+                        (persistedState as PlayerStorage).presets = [
+                            defaultPreset,
+                        ];
+                    }
+
+                    return persistedState;
                 },
             },
         ),

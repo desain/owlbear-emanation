@@ -13,7 +13,7 @@ import {
     createStyle,
     getColor,
     getOpacity,
-    isAuraStyle,
+    isAuraStyleType,
 } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
 import { isHexColor } from "./colorUtils";
@@ -86,7 +86,7 @@ export function isCreateAuraMessage(
         message.size > 0 &&
         (!("style" in message) ||
             (typeof message.style === "string" &&
-                isAuraStyle(message.style))) &&
+                isAuraStyleType(message.style))) &&
         (!("color" in message) ||
             (typeof message.color === "string" && isHexColor(message.color))) &&
         (!("opacity" in message) ||
@@ -119,9 +119,11 @@ function toConfig(message: CreateAurasMessage): AuraConfig {
 
 export function getStyle(message: CreateAurasMessage): AuraStyle {
     const playerSettings = usePlayerStorage.getState();
-    const styleType: AuraStyleType = message.style ?? playerSettings.style.type;
-    const color = message.color ?? getColor(playerSettings.style);
-    const opacity = message.opacity ?? getOpacity(playerSettings.style);
+    const firstPresetConfig = playerSettings.presets[0].config;
+    const styleType: AuraStyleType =
+        message.style ?? firstPresetConfig.style.type;
+    const color = message.color ?? getColor(firstPresetConfig.style);
+    const opacity = message.opacity ?? getOpacity(firstPresetConfig.style);
     return createStyle({
         styleType,
         color,

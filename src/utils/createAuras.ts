@@ -7,7 +7,7 @@ import { addEntry } from "../types/metadata/SourceMetadata";
 
 export function createAurasWithDefaults(items: CandidateSource[]) {
     const playerSettings = usePlayerStorage.getState();
-    return createAuras(items, playerSettings);
+    return createAuras(items, playerSettings.presets[0].config);
 }
 
 /**
