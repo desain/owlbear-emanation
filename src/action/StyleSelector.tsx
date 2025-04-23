@@ -1,6 +1,10 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
 import { Control } from "owlbear-utils";
-import { AuraStyleType, isAuraStyle, STYLE_TYPES } from "../types/AuraStyle";
+import {
+    AuraStyleType,
+    isAuraStyleType,
+    STYLE_TYPES,
+} from "../types/AuraStyle";
 
 interface StyleSelectorProps {
     value: AuraStyleType;
@@ -19,7 +23,7 @@ export function StyleSelector({
                 value={value}
                 onChange={(e) => {
                     const value = e.target.value;
-                    if (isAuraStyle(value)) {
+                    if (isAuraStyleType(value)) {
                         onChange(value);
                     }
                 }}
