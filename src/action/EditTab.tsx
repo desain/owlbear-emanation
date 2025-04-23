@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
-import { getId, groupBy } from "owlbear-utils";
+import { getId, getName, groupBy } from "owlbear-utils";
 import React, { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
@@ -21,7 +21,6 @@ import { AuraConfig } from "../types/AuraConfig";
 import { isCandidateSource } from "../types/CandidateSource";
 import {
     getSourceImage,
-    getSourceName,
     isSource,
     Source,
     updateEntries,
@@ -145,7 +144,7 @@ function deduplicationKey({ entry: config }: { entry: AuraConfig }): string {
 
 function getAllAnnotatedAuras(source: Source) {
     return source.metadata[METADATA_KEY].auras.map((entry) => ({
-        name: getSourceName(source),
+        name: getName(source),
         image: getSourceImage(source),
         sourceId: source.id,
         entry,

@@ -40,13 +40,6 @@ export async function updateEntries(
     });
 }
 
-export function getSourceName(source: Source): string {
-    if (isImage(source) && source.text.plainText) {
-        return source.text.plainText;
-    }
-    return source.name;
-}
-
 export function getSourceImage(source: Source): string | undefined {
     if (isImage(source)) {
         return source.image.url;
