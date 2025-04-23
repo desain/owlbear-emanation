@@ -1,19 +1,19 @@
 import { Card, CardActions, CardContent, Typography } from "@mui/material";
-import { usePlayerSettings } from "../usePlayerSettings";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { getStyle } from "../utils/messaging";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";
 import { PasteButton } from "./PasteButton";
 
 export function AuraDefaultsTab() {
-    const playerSettingsSensible = usePlayerSettings(
+    const playerSettingsSensible = usePlayerStorage(
         (store) => store.hasSensibleValues,
     );
-    const config = usePlayerSettings((store) => store);
-    const setStyle = usePlayerSettings((store) => store.setStyle);
-    const setSize = usePlayerSettings((store) => store.setSize);
-    const setVisibility = usePlayerSettings((store) => store.setVisibility);
-    const setLayer = usePlayerSettings((store) => store.setLayer);
+    const config = usePlayerStorage((store) => store);
+    const setStyle = usePlayerStorage((store) => store.setStyle);
+    const setSize = usePlayerStorage((store) => store.setSize);
+    const setVisibility = usePlayerStorage((store) => store.setVisibility);
+    const setLayer = usePlayerStorage((store) => store.setLayer);
 
     if (!playerSettingsSensible) {
         return null;

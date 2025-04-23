@@ -5,6 +5,7 @@ import OBR, {
     Layer,
 } from "@owlbear-rodeo/sdk";
 import { isBlendMode, isLayer, isObject } from "owlbear-utils";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraConfig } from "../types/AuraConfig";
 import {
     AuraStyle,
@@ -15,7 +16,6 @@ import {
     isAuraStyle,
 } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
-import { usePlayerSettings } from "../usePlayerSettings";
 import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
 import { removeAllAuras } from "./removeAuras";
@@ -118,7 +118,7 @@ function toConfig(message: CreateAurasMessage): AuraConfig {
 }
 
 export function getStyle(message: CreateAurasMessage): AuraStyle {
-    const playerSettings = usePlayerSettings.getState();
+    const playerSettings = usePlayerStorage.getState();
     const styleType: AuraStyleType = message.style ?? playerSettings.style.type;
     const color = message.color ?? getColor(playerSettings.style);
     const opacity = message.opacity ?? getOpacity(playerSettings.style);

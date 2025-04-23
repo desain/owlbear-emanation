@@ -6,7 +6,7 @@ import OBR from "@owlbear-rodeo/sdk";
 import { useActionResizer, useUndoRedoHandler } from "owlbear-utils";
 import { useEffect, useRef, useState } from "react";
 import { TAB_CHANNEL } from "../constants";
-import { useOwlbearStore } from "../useOwlbearStore";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraDefaultsTab } from "./AuraDefaultsTab";
 import { EditTab } from "./EditTab";
 import { SceneSettingsTab } from "./SettingsTab";
@@ -31,7 +31,7 @@ function TabContent({
 
 export function Action() {
     const [currentTab, setCurrentTab] = useState(0);
-    const role = useOwlbearStore((store) => store.role);
+    const role = usePlayerStorage((store) => store.role);
 
     useEffect(() => {
         return OBR.broadcast.onMessage(TAB_CHANNEL, ({ data }) => {
