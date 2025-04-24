@@ -21,7 +21,19 @@ function PresetEditor({ preset: { name, id, config } }: { preset: Preset }) {
 
     return (
         <Card>
-            <CardHeader title={name} />
+            <CardHeader
+                title={name}
+                slotProps={{
+                    title: {
+                        sx: {
+                            fontSize: "1.125rem",
+                            fontWeight: "bold",
+                            lineHeight: "32px",
+                            color: "text.primary",
+                        },
+                    },
+                }}
+            />
             <CardContent>
                 <AuraConfigEditor
                     config={config}
