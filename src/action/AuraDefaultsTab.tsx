@@ -3,8 +3,10 @@ import {
     CardActions,
     CardContent,
     CardHeader,
+    TextField,
     Typography,
 } from "@mui/material";
+import { Control } from "owlbear-utils";
 import { Preset, usePlayerStorage } from "../state/usePlayerStorage";
 import { getStyle } from "../utils/messaging";
 import { AuraConfigEditor } from "./AuraConfigEditor";
@@ -12,6 +14,7 @@ import { CopyButton } from "./CopyButton";
 import { PasteButton } from "./PasteButton";
 
 function PresetEditor({ preset: { name, id, config } }: { preset: Preset }) {
+    const setPresetName = usePlayerStorage((store) => store.setPresetName);
     const setPresetStyle = usePlayerStorage((store) => store.setPresetStyle);
     const setPresetSize = usePlayerStorage((store) => store.setPresetSize);
     const setPresetVisibility = usePlayerStorage(
@@ -22,17 +25,27 @@ function PresetEditor({ preset: { name, id, config } }: { preset: Preset }) {
     return (
         <Card>
             <CardHeader
-                title={name}
-                slotProps={{
-                    title: {
-                        sx: {
-                            fontSize: "1.125rem",
-                            fontWeight: "bold",
-                            lineHeight: "32px",
-                            color: "text.primary",
-                        },
-                    },
-                }}
+                title={
+                    <Control label="Preset Name">
+                        <TextField
+                            value={name}
+                            onChange={(e) => setPresetName(id, e.target.value)}
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            slotProps={{
+                                input: {
+                                    sx: {
+                                        fontSize: "1.125rem",
+                                        fontWeight: "bold",
+                                        lineHeight: "32px",
+                                        color: "text.primary",
+                                    },
+                                },
+                            }}
+                        />
+                    </Control>
+                }
             />
             <CardContent>
                 <AuraConfigEditor
