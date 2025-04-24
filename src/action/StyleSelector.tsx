@@ -1,5 +1,6 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
 import { Control } from "owlbear-utils";
+import { FC } from "react";
 import {
     AuraStyleType,
     isAuraStyleType,
@@ -11,27 +12,25 @@ interface StyleSelectorProps {
     onChange: (styleType: AuraStyleType) => void;
 }
 
-export function StyleSelector({
-    value,
-    onChange,
-    ...props
-}: StyleSelectorProps & Omit<FormControlProps, "onChange">) {
-    return (
-        <Control {...props} label="Style">
-            <Select
-                size="small"
-                value={value}
-                onChange={(e) => {
-                    const value = e.target.value;
-                    if (isAuraStyleType(value)) {
-                        onChange(value);
-                    }
-                }}
-            >
-                {...STYLE_TYPES.map((styleType) => (
-                    <MenuItem value={styleType}>{styleType}</MenuItem>
-                ))}
-            </Select>
-        </Control>
-    );
-}
+export const StyleSelector: FC<
+    StyleSelectorProps & Omit<FormControlProps, "onChange">
+> = ({ value, onChange, ...props }) => (
+    <Control {...props} label="Style">
+        <Select
+            size="small"
+            value={value}
+            onChange={(e) => {
+                const value = e.target.value;
+                if (isAuraStyleType(value)) {
+                    onChange(value);
+                }
+            }}
+        >
+            {STYLE_TYPES.map((styleType) => (
+                <MenuItem key={styleType} value={styleType}>
+                    {styleType}
+                </MenuItem>
+            ))}
+        </Select>
+    </Control>
+);
