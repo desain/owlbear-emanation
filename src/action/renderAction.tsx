@@ -13,17 +13,6 @@ import { Action } from "./Action";
 import { startWatchingContextMenuEnabled } from "./createContextMenu";
 
 let uninstall: VoidFunction = () => {};
-let root: ReactDOM.Root | null = null;
-
-if (import.meta.hot) {
-    import.meta.hot.accept();
-    import.meta.hot.dispose(() => {
-        console.log("Disposing");
-        uninstall();
-        root?.unmount();
-        root = null;
-    });
-}
 
 function installBroadcastListener() {
     return OBR.broadcast.onMessage(MESSAGE_CHANNEL, ({ data }) => {
@@ -50,7 +39,7 @@ async function installExtension(): Promise<VoidFunction> {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    root = ReactDOM.createRoot(document.getElementById("reactApp")!);
+    const root = ReactDOM.createRoot(document.getElementById("reactApp")!);
     root.render(
         <React.StrictMode>
             <PluginGate>

@@ -165,6 +165,7 @@ function getAllAnnotatedAuras(source: Source): AnnotatedAura[] {
  * No list will have two identical auras for the same item.
  */
 function groupAuras(auras: AnnotatedAura[]): AnnotatedAura[][] {
+    console.log("oooo");
     const m: Map<string, AnnotatedAura[][]> = new Map();
     for (const aura of auras) {
         const hash = deduplicationKey(aura);
