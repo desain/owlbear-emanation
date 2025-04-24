@@ -13,12 +13,13 @@ import {
 } from "@mui/material";
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
-import { getId, getName, groupBy } from "owlbear-utils";
-import React, { useMemo } from "react";
+import { getId, getName, getOrInsert } from "owlbear-utils";
+import { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraConfig } from "../types/AuraConfig";
 import { isCandidateSource } from "../types/CandidateSource";
+import { AuraEntry } from "../types/metadata/SourceMetadata";
 import {
     getSourceImage,
     isSource,
@@ -36,9 +37,12 @@ import { SceneReadyGate } from "./SceneReadyGate";
  * Info needed to render a source.
  */
 interface SourceListItem {
+    /**
+     * Source ID
+     */
+    id: string;
     name: string;
     image?: string;
-    sourceId: string;
 }
 
 /**
@@ -53,8 +57,8 @@ function SourceChips({ auras }: { auras: AuraListItem[] }) {
         const ids = new Set();
         const sources = [];
         for (const aura of auras) {
-            if (!ids.has(aura.sourceId)) {
-                ids.add(aura.sourceId);
+            if (!ids.has(aura.id)) {
+                ids.add(aura.id);
                 sources.push(aura);
             }
         }
@@ -70,9 +74,9 @@ function SourceChips({ auras }: { auras: AuraListItem[] }) {
             rowGap={1}
             sx={{ mb: 1 }}
         >
-            {sortedUniqueSources.map(({ name, image, sourceId }) => (
+            {sortedUniqueSources.map(({ name, image, id }) => (
                 <Chip
-                    key={sourceId}
+                    key={id}
                     avatar={
                         image !== undefined ? <Avatar src={image} /> : undefined
                     }
@@ -138,47 +142,68 @@ function deduplicationKey({ entry: config }: { entry: AuraConfig }): string {
         style: config.style,
         size: config.size,
         visibleTo: config.visibleTo,
+        layer: config.layer,
     };
     return objectHash(configCopy);
 }
 
-function getAllAnnotatedAuras(source: Source) {
+interface AnnotatedAura extends Pick<Item, "name" | "id"> {
+    image?: string;
+    entry: AuraEntry;
+}
+function getAllAnnotatedAuras(source: Source): AnnotatedAura[] {
     return source.metadata[METADATA_KEY].auras.map((entry) => ({
         name: getName(source),
+        id: source.id,
         image: getSourceImage(source),
-        sourceId: source.id,
         entry,
     }));
 }
 
-function ExtantAuras({
-    targetedItems,
-}: {
-    targetedItems: Item[];
-}): React.ReactNode {
-    return useMemo(
+/**
+ * Group auras by identicality. Each returned list is of identical auras.
+ * No list will have two identical auras for the same item.
+ */
+function groupAuras(auras: AnnotatedAura[]): AnnotatedAura[][] {
+    const m: Map<string, AnnotatedAura[][]> = new Map();
+    for (const aura of auras) {
+        const hash = deduplicationKey(aura);
+        const identicalityLists = getOrInsert(m, hash, () => []);
+        // find the first list which doesn't have share an item with the current aura
+        const firstAppendableList = identicalityLists.find(
+            (list) => !list.some((otherAura) => otherAura.id === aura.id),
+        );
+        if (firstAppendableList) {
+            firstAppendableList.push(aura);
+        } else {
+            identicalityLists.push([aura]);
+        }
+    }
+    return [...m.values()].flat();
+}
+
+const ExtantAuras = ({ targetedItems }: { targetedItems: Item[] }) =>
+    useMemo(
         () =>
-            Object.values(
-                groupBy(
-                    targetedItems
-                        .filter(isSource)
-                        .flatMap(getAllAnnotatedAuras),
-                    deduplicationKey,
-                ),
+            groupAuras(
+                targetedItems.filter(isSource).flatMap(getAllAnnotatedAuras),
             )
                 .sort((aurasA, aurasB) => aurasB.length - aurasA.length)
                 .map((identicalAuras) => {
                     const config: AuraConfig = identicalAuras[0].entry;
                     const auras = identicalAuras.map(
-                        ({ name, image, sourceId, entry }) => ({
+                        ({ name, id, image, entry }) => ({
                             name,
                             image,
-                            sourceId,
+                            id,
                             sourceScopedId: entry.sourceScopedId,
                         }),
                     );
                     const reactKey = auras
-                        .map(({ sourceScopedId }) => sourceScopedId)
+                        .map(
+                            ({ id, sourceScopedId }) =>
+                                id + "/" + sourceScopedId,
+                        )
                         .sort()
                         .join("|");
                     return (
@@ -191,7 +216,6 @@ function ExtantAuras({
                 }),
         [targetedItems],
     );
-}
 
 export function EditTab() {
     const playerSettingsSensible = usePlayerStorage(

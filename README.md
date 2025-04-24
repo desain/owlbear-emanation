@@ -237,7 +237,6 @@ To make a production build run:
 -   Split out style picker into a larger modal?
 -   Explanations of blend modes (maybe an option to hide less useful blend modes)
 -   Option to hide nonstandard layers
--   Figure out what to do when identical auras combine
 -   Allow size 0 auras
 -   Custom effects with SKSL textarea
 
