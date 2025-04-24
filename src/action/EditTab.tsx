@@ -1,4 +1,3 @@
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import {
@@ -18,7 +17,6 @@ import { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraConfig } from "../types/AuraConfig";
-import { isCandidateSource } from "../types/CandidateSource";
 import { AuraEntry } from "../types/metadata/SourceMetadata";
 import {
     getSourceImage,
@@ -26,10 +24,10 @@ import {
     Source,
     updateEntries,
 } from "../types/Source";
-import { createAurasWithDefaults } from "../utils/createAuras";
 import { removeAllAuras, removeAuras } from "../utils/removeAuras";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";
+import { NewAuraButton } from "./NewAuraButton";
 import { PasteButton } from "./PasteButton";
 import { SceneReadyGate } from "./SceneReadyGate";
 
@@ -165,7 +163,6 @@ function getAllAnnotatedAuras(source: Source): AnnotatedAura[] {
  * No list will have two identical auras for the same item.
  */
 function groupAuras(auras: AnnotatedAura[]): AnnotatedAura[][] {
-    console.log("oooo");
     const m: Map<string, AnnotatedAura[][]> = new Map();
     for (const aura of auras) {
         const hash = deduplicationKey(aura);
@@ -253,18 +250,10 @@ export function EditTab() {
                     flexWrap={"wrap"}
                     rowGap={1}
                 >
-                    <Button
-                        variant="outlined"
-                        startIcon={<AddCircleIcon />}
-                        onClick={() =>
-                            createAurasWithDefaults(
-                                targetedItems.filter(isCandidateSource),
-                            )
-                        }
+                    <NewAuraButton
                         disabled={noSelection}
-                    >
-                        New
-                    </Button>
+                        targetedItems={targetedItems}
+                    />
                     <PasteButton
                         onPaste={(message) =>
                             OBR.broadcast.sendMessage(
