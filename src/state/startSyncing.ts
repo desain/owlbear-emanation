@@ -3,8 +3,6 @@ import { deferCallAll } from "owlbear-utils";
 import { usePlayerStorage } from "./usePlayerStorage";
 
 /**
- *
- * @param syncParams
  * @returns [Promise that resolves once store has initialized, function to stop syncing]
  */
 export function startSyncing(): [Promise<void>, VoidFunction] {

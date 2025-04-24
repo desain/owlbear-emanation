@@ -1,5 +1,5 @@
 import { buildCurve, Curve, Vector2 } from "@owlbear-rodeo/sdk";
-import { GridParsed } from "owlbear-utils";
+import { GridParsed, matrixMultiply } from "owlbear-utils";
 import { SimpleAuraDrawable } from "../types/Aura";
 import { AuraShape } from "../types/AuraShape";
 import { SimpleStyle } from "../types/AuraStyle";
@@ -7,7 +7,6 @@ import {
     getAxonometricTransformMatrix,
     getScale,
 } from "../utils/axonometricUtils";
-import { matrixMultiply } from "../utils/mathUtils";
 import { buildEuclideanAura } from "./euclidean";
 import { getPoints } from "./points";
 

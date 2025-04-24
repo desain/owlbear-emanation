@@ -1,6 +1,5 @@
-import { GridParsed } from "owlbear-utils";
+import { GridParsed, PI_6, SQRT_3 } from "owlbear-utils";
 import { AuraShape } from "../types/AuraShape";
-import { PI_6, SQRT_3 } from "../utils/mathUtils";
 import {
     createAxonometricTransform,
     createDistanceFunction,
