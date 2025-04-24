@@ -237,8 +237,8 @@ export const usePlayerStorage = create<PlayerStorage>()(
             })),
             {
                 name: PLAYER_SETTINGS_STORE_NAME,
-                partialize({ hasSensibleValues, presets }) {
-                    return { hasSensibleValues, presets };
+                partialize({ hasSensibleValues, presets, enableContextMenu }) {
+                    return { hasSensibleValues, presets, enableContextMenu };
                 },
                 onRehydrateStorage() {
                     // console.log("onRehydrateStorage");
