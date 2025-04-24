@@ -1,19 +1,30 @@
+import { Delete as DeleteIcon } from "@mui/icons-material";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import {
+    Button,
     Card,
     CardActions,
     CardContent,
     CardHeader,
+    Stack,
     TextField,
     Typography,
 } from "@mui/material";
 import { Control } from "owlbear-utils";
 import { Preset, usePlayerStorage } from "../state/usePlayerStorage";
-import { getStyle } from "../utils/messaging";
+import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
+import { toConfig } from "../utils/messaging";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";
 import { PasteButton } from "./PasteButton";
 
-function PresetEditor({ preset: { name, id, config } }: { preset: Preset }) {
+function PresetEditor({
+    preset: { name, id, config },
+    disableDelete,
+}: {
+    preset: Preset;
+    disableDelete: boolean;
+}) {
     const setPresetName = usePlayerStorage((store) => store.setPresetName);
     const setPresetStyle = usePlayerStorage((store) => store.setPresetStyle);
     const setPresetSize = usePlayerStorage((store) => store.setPresetSize);
@@ -21,9 +32,10 @@ function PresetEditor({ preset: { name, id, config } }: { preset: Preset }) {
         (store) => store.setPresetVisibility,
     );
     const setPresetLayer = usePlayerStorage((store) => store.setPresetLayer);
+    const deletePreset = usePlayerStorage((store) => store.deletePreset);
 
     return (
-        <Card>
+        <Card sx={{ mb: 1 }}>
             <CardHeader
                 title={
                     <Control label="Preset Name">
@@ -59,17 +71,14 @@ function PresetEditor({ preset: { name, id, config } }: { preset: Preset }) {
                 />
             </CardContent>
             <CardActions>
+                <Button
+                    onClick={() => deletePreset(id)}
+                    startIcon={<DeleteIcon />}
+                    disabled={disableDelete}
+                >
+                    Delete
+                </Button>
                 <CopyButton config={config} />
-                <PasteButton
-                    onPaste={(message) => {
-                        setPresetSize(id, message.size);
-                        setPresetVisibility(id, message.visibleTo);
-                        setPresetStyle(id, getStyle(message));
-                        if (message.layer) {
-                            setPresetLayer(id, message.layer);
-                        }
-                    }}
-                />
             </CardActions>
         </Card>
     );
@@ -80,6 +89,7 @@ export function AuraDefaultsTab() {
         (store) => store.hasSensibleValues,
     );
     const presets = usePlayerStorage((store) => store.presets);
+    const createPreset = usePlayerStorage((store) => store.createPreset);
 
     if (!playerSettingsSensible) {
         return null;
@@ -91,8 +101,34 @@ export function AuraDefaultsTab() {
                 Default Settings for New Auras
             </Typography>
             {presets.map((preset) => (
-                <PresetEditor key={preset.id} preset={preset} />
+                <PresetEditor
+                    key={preset.id}
+                    preset={preset}
+                    disableDelete={presets.length === 1}
+                />
             ))}
+            <Stack
+                direction="row"
+                spacing={1}
+                justifyContent="center"
+                flexWrap={"wrap"}
+                rowGap={1}
+            >
+                <Button
+                    startIcon={<AddCircleIcon />}
+                    variant="outlined"
+                    onClick={() =>
+                        createPreset("New Preset", DEFAULT_AURA_CONFIG)
+                    }
+                >
+                    New
+                </Button>
+                <PasteButton
+                    onPaste={(message) => {
+                        createPreset("New Preset", toConfig(message));
+                    }}
+                />
+            </Stack>
         </>
     );
 }

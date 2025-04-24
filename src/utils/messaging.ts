@@ -6,7 +6,7 @@ import OBR, {
 } from "@owlbear-rodeo/sdk";
 import { isBlendMode, isLayer, isObject } from "owlbear-utils";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import { AuraConfig } from "../types/AuraConfig";
+import { AuraConfig, DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import {
     AuraStyle,
     AuraStyleType,
@@ -108,7 +108,7 @@ export function isCreateAuraMessage(
     );
 }
 
-function toConfig(message: CreateAurasMessage): AuraConfig {
+export function toConfig(message: CreateAurasMessage): AuraConfig {
     return {
         size: message.size,
         style: getStyle(message),
@@ -117,13 +117,15 @@ function toConfig(message: CreateAurasMessage): AuraConfig {
     };
 }
 
-export function getStyle(message: CreateAurasMessage): AuraStyle {
+function getStyle(message: CreateAurasMessage): AuraStyle {
     const playerSettings = usePlayerStorage.getState();
-    const firstPresetConfig = playerSettings.presets[0].config;
-    const styleType: AuraStyleType =
-        message.style ?? firstPresetConfig.style.type;
-    const color = message.color ?? getColor(firstPresetConfig.style);
-    const opacity = message.opacity ?? getOpacity(firstPresetConfig.style);
+    const defaultConfig =
+        playerSettings.presets.length === 0
+            ? DEFAULT_AURA_CONFIG
+            : playerSettings.presets[0].config;
+    const styleType: AuraStyleType = message.style ?? defaultConfig.style.type;
+    const color = message.color ?? getColor(defaultConfig.style);
+    const opacity = message.opacity ?? getOpacity(defaultConfig.style);
     return createStyle({
         styleType,
         color,

@@ -122,7 +122,6 @@ function AuraControls({
             </CardContent>
             <CardActions>
                 <Button
-                    aria-label="remove"
                     startIcon={<DeleteIcon />}
                     onClick={() => removeAuras(auras)}
                 >
