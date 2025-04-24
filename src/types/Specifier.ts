@@ -7,9 +7,9 @@ import { isSource, Source } from "./Source";
  */
 export interface Specifier {
     /**
-     * Which items has the aura.
+     * ID of item that has the aura.
      */
-    sourceId: string;
+    id: string;
     /**
      * Which item in the source's list of auras.
      */
@@ -20,12 +20,12 @@ export async function forEachSpecifier(
     specifiers: Specifier[],
     handler: (source: Source, sourceScopedId: string) => void,
 ) {
-    const sources = specifiers.map((specifier) => specifier.sourceId);
+    const sources = specifiers.map((specifier) => specifier.id);
     return await OBR.scene.items.updateItems(sources, (items) =>
         items.forEach((source) => {
             assertItem(source, isSource);
             for (const specifier of specifiers) {
-                if (specifier.sourceId === source.id) {
+                if (specifier.id === source.id) {
                     handler(source, specifier.sourceScopedId);
                 }
             }
