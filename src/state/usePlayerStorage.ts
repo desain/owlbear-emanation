@@ -55,6 +55,7 @@ export interface PlayerSettingsStore {
     [SET_SENSIBLE](this: void): void;
     presets: Preset[];
     enableContextMenu: boolean;
+    setPresetName(this: void, id: string, name: string): void;
     setPresetSize(this: void, id: string, size: AuraConfig["size"]): void;
     setPresetStyle(this: void, id: string, style: AuraConfig["style"]): void;
     setPresetVisibility(
@@ -193,6 +194,11 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 [SET_SENSIBLE]() {
                     set({ hasSensibleValues: true });
                 },
+                setPresetName: (id: string, name: string) =>
+                    set((state) => {
+                        const preset = getPreset(state, id);
+                        preset.name = name;
+                    }),
                 setPresetSize: (id: string, size: AuraConfig["size"]) =>
                     set((state) => {
                         const preset = getPreset(state, id);
