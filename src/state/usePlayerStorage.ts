@@ -5,7 +5,7 @@ import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { PLAYER_SETTINGS_STORE_NAME } from "../constants";
-import { AuraConfig } from "../types/AuraConfig";
+import { AuraConfig, DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import { setColor } from "../types/AuraStyle";
 import {
     DEFAULT_SCENE_METADATA,
@@ -68,6 +68,8 @@ export interface PlayerSettingsStore {
         id: string,
         layer: NonNullable<AuraConfig["layer"]>,
     ): void;
+    createPreset(this: void, name: string, config: AuraConfig): void;
+    deletePreset(this: void, id: string): void;
     setContextMenuEnabled(this: void, enableContextMenu: boolean): void;
 }
 
@@ -103,15 +105,6 @@ export interface OwlbearStore {
 }
 
 export interface PlayerStorage extends PlayerSettingsStore, OwlbearStore {}
-
-const DEFAULT_CONFIG = {
-    size: 5,
-    style: {
-        type: "Bubble",
-        color: { x: 1, y: 1, z: 1 },
-        opacity: 1,
-    },
-} as const;
 
 export const usePlayerStorage = create<PlayerStorage>()(
     subscribeWithSelector(
@@ -187,7 +180,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     {
                         name: "Default",
                         id: crypto.randomUUID(),
-                        config: DEFAULT_CONFIG,
+                        config: DEFAULT_AURA_CONFIG,
                     },
                 ],
                 enableContextMenu: true,
@@ -225,6 +218,20 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         const preset = getPreset(state, id);
                         preset.config.layer = layer;
                     }),
+                createPreset: (name: string, config: AuraConfig) =>
+                    set((state) => {
+                        state.presets.push({
+                            name,
+                            id: crypto.randomUUID(),
+                            config,
+                        });
+                    }),
+                deletePreset: (id: string) =>
+                    set((state) => {
+                        state.presets = state.presets.filter(
+                            (preset) => preset.id !== id,
+                        );
+                    }),
                 setContextMenuEnabled: (enableContextMenu) =>
                     set({ enableContextMenu }),
             })),
@@ -243,16 +250,22 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         // );
                         if (state) {
                             // work around missing keys in migrated preset
-                            if (!state.presets[0].config.size) {
+                            if (
+                                state.presets.length > 0 &&
+                                !state.presets[0].config.size
+                            ) {
                                 state.setPresetSize(
                                     state.presets[0].id,
-                                    DEFAULT_CONFIG.size,
+                                    DEFAULT_AURA_CONFIG.size,
                                 );
                             }
-                            if (!state.presets[0].config.style) {
+                            if (
+                                state.presets.length > 0 &&
+                                !state.presets[0].config.style
+                            ) {
                                 state.setPresetStyle(
                                     state.presets[0].id,
-                                    DEFAULT_CONFIG.style,
+                                    DEFAULT_AURA_CONFIG.style,
                                 );
                             }
                             if (!state.hasSensibleValues) {
@@ -294,8 +307,11 @@ export const usePlayerStorage = create<PlayerStorage>()(
                             name: "Default",
                             id: crypto.randomUUID(),
                             config: {
-                                size: oldConfig.size ?? DEFAULT_CONFIG.size,
-                                style: oldConfig.style ?? DEFAULT_CONFIG.style,
+                                size:
+                                    oldConfig.size ?? DEFAULT_AURA_CONFIG.size,
+                                style:
+                                    oldConfig.style ??
+                                    DEFAULT_AURA_CONFIG.style,
                                 layer: oldConfig.layer,
                                 visibleTo: oldConfig.visibleTo,
                             },

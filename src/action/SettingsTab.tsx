@@ -25,7 +25,7 @@ export function SettingsTab() {
             <Typography variant="h6" sx={{ mb: 2 }}>
                 My Settings
             </Typography>
-            <FormGroup>
+            <FormGroup sx={{ mb: 2 }}>
                 <FormControlLabel
                     control={
                         <Switch

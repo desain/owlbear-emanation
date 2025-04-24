@@ -37,6 +37,15 @@ export function isAuraConfig(config: unknown): config is AuraConfig {
     );
 }
 
+export const DEFAULT_AURA_CONFIG: AuraConfig = {
+    size: 5,
+    style: {
+        type: "Bubble",
+        color: { x: 1, y: 1, z: 1 },
+        opacity: 1,
+    },
+};
+
 export function getLayer(config: AuraConfig): Layer {
     return config.layer ?? "DRAWING";
 }

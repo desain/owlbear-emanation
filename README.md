@@ -16,6 +16,7 @@ The extension can be installed from https://owlbear-emanation.pages.dev/manifest
 -   Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chebyshev / Chessboard D&D 5e distance, auras will be square)
 -   Auras will automatically resize after tokens are scaled, so that their boundary is the correct distance away.
 -   Manage any number of auras with any color, opacity, or style.
+-   Create aura presets for commonly used effects.
 
 ## How to use
 
@@ -46,7 +47,8 @@ Menu options:
 -   **Image**: For image auras, selects which image asset to use as the aura.
 -   **Delete**: Remove this aura from the character.
 -   **Copy to Clipboard**: Copy this aura's settings to your OS clipboard.
--   **New**: Add another aura to the characters using the aura settings from the 'Defaults' tab. If multiple characters are selected, this button will add a new aura to all of them.
+-   **New**: Add another aura to the characters using the top preset from the 'Defaults' tab. If multiple characters are selected, this button will add a new aura to all of them.
+-   **New (arrow)**: Add another aura to the characters using the selected preset from the menu.
 -   **Paste**: Allows you to add a previously-copied aura to a token.
 -   **Delete All**: Remove all auras from the selected characters.
 
@@ -73,11 +75,18 @@ https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
 
-### Changing defaults
+### Managing Presets
 
 ![Defaults Menu](https://github.com/user-attachments/assets/91d102ea-3f10-4399-bb32-5b34fb41d644)
 
-To change the default settings for newly created auras, open the Aura Settings action menu in the top left and go to the 'Defaults' tab. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser data).
+To create presets for new auras, open the Aura Settings action menu in the top left and go to the 'Defaults' tab. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser data).
+
+Controls:
+
+-   **Preset Name**: Give your preset an informative name. These names show up under the 'New' button dropdown in the Edit tab.
+-   **New**: Create a new preset.
+-   **Delete**: Delete a preset. You must always have at least one preset, so you can't delete the last one.
+-   **Paste**: Paste a previously copied set of aura settings as a preset.
 
 ### Changing global settings
 
@@ -230,7 +239,6 @@ To make a production build run:
 
 ## To do
 
--   Allow creating multiple presets instead of single defaults
 -   Optimize item update handler
 -   More effects!
     -   Localized weather effects - snow, rain
