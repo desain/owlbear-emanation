@@ -1,20 +1,26 @@
 {
-    "name": "Auras and Emanations",
-    "description": "Add and manage measurement-aware auras in several styles with any character.",
-    "version": "1.4.0",
-    "manifest_version": 1,
-    "author": "desain",
+  "name": "Auras and Emanations",
+  "description": "Add and manage measurement-aware auras in several styles with any character.",
+  "version": "1.4.1",
+  "manifest_version": 1,
+  "author": "desain",
+  "icon": "/logo.png",
+  "homepage_url": "https://github.com/desain/owlbear-emanation",
+  "action": {
+    "title": "Aura Settings",
     "icon": "/logo.png",
-    "homepage_url": "https://github.com/desain/owlbear-emanation",
-    "action": {
-        "title": "Aura Settings",
-        "icon": "/logo.png",
-        "popover": "/action.html",
-        "height": 100,
-        "width": 400
+    "popover": "/action.html",
+    "height": 100,
+    "width": 400
+  },
+  "permissions": [
+    {
+      "name": "clipboard-write",
+      "reason": "Copy aura settings to the clipboard"
     },
-    "permissions": [
-        { "name": "clipboard-write", "reason": "Copy aura settings to the clipboard" },
-        { "name": "clipboard-read", "reason": "Paste aura settings from the clipboard" }
-    ]
+    {
+      "name": "clipboard-read",
+      "reason": "Paste aura settings from the clipboard"
+    }
+  ]
 }
