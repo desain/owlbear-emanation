@@ -55,10 +55,11 @@ export function SettingsTab() {
                             }
                         />
                     }
-                    label="Show Advanced Options"
+                    label="Show advanced options"
                 />
                 <FormHelperText>
-                    Enable advanced options in UI, such as extra layers.
+                    Enable advanced options in UI: extra layers, blend modes,
+                    and aura types.
                 </FormHelperText>
             </FormGroup>
             {role === "GM" && (

@@ -69,6 +69,7 @@ function hasColorOpacityUniforms(
         case "Range":
             return true;
         case "Spirits":
+        case "Custom":
             return false;
     }
 }

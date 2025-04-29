@@ -28,6 +28,8 @@ function getSksl(
             return declareUniforms(style) + glow;
         case "Range":
             return declareUniforms(style) + getRangeSksl(grid, shape);
+        case "Custom":
+            return style.sksl;
     }
 }
 
