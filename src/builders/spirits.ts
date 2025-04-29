@@ -1,4 +1,4 @@
-import { GridParsed } from "../types/GridParsed";
+import { GridParsed } from "owlbear-utils";
 import { createAxonometricTransform } from "../utils/skslUtils";
 import spirits from "./shaders/spirits.frag";
 

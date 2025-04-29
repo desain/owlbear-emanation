@@ -1,13 +1,26 @@
 import { BlendMode, CurveStyle, Image, ShapeStyle } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import {
+    isCurveStyle,
+    isObject,
+    isShapeStyle,
+    isVector2,
+    isVector3,
+} from "owlbear-utils";
 import { hexToRgb, isHexColor, rgbToHex } from "../utils/colorUtils";
 
 export interface SimpleStyle {
     type: "Simple";
     itemStyle: ShapeStyle | CurveStyle;
 }
-export function isSimpleStyle(style: AuraStyle): style is SimpleStyle {
-    return style.type === "Simple";
+export function isSimpleStyle(style: unknown): style is SimpleStyle {
+    return (
+        isObject(style) &&
+        "type" in style &&
+        style.type === "Simple" &&
+        "itemStyle" in style &&
+        (isShapeStyle(style.itemStyle) || isCurveStyle(style.itemStyle))
+    );
 }
 
 export interface ColorOpacityShaderStyle {
@@ -16,47 +29,100 @@ export interface ColorOpacityShaderStyle {
     opacity: number;
 }
 export function isColorOpacityShaderStyle(
-    style: AuraStyle,
+    style: unknown,
 ): style is ColorOpacityShaderStyle {
     return (
+        isObject(style) &&
+        "type" in style &&
         (style.type === "Bubble" ||
             style.type === "Glow" ||
             style.type === "Range" ||
             style.type === "Snow") &&
         "opacity" in style &&
-        typeof style.opacity === "number"
+        typeof style.opacity === "number" &&
+        "color" in style &&
+        isVector3(style.color)
     );
 }
 
-export interface SpiritsStyle {
+interface SpiritsStyle {
     type: "Spirits";
 }
-function isSpiritsStyle(style: AuraStyle): style is SpiritsStyle {
-    return style.type === "Spirits";
+function isSpiritsStyle(style: unknown): style is SpiritsStyle {
+    return isObject(style) && "type" in style && style.type === "Spirits";
+}
+
+export interface CustomEffectStyle {
+    type: "Custom";
+    sksl: string;
+}
+export function isCustomEffectStyle(
+    style: unknown,
+): style is CustomEffectStyle {
+    return (
+        isObject(style) &&
+        "type" in style &&
+        style.type === "Custom" &&
+        "sksl" in style &&
+        typeof style.sksl === "string"
+    );
 }
 
 /**
  * All the data needed to build an image (excluding the size, which is determined by the aura size).
  */
 export type ImageBuildParams = Pick<Image, "image" | "grid">;
+function isImageBuildParams(params: unknown): params is ImageBuildParams {
+    return (
+        isObject(params) &&
+        "image" in params &&
+        isObject(params.image) &&
+        "url" in params.image &&
+        typeof params.image.url === "string" &&
+        "mime" in params.image &&
+        typeof params.image.mime === "string" &&
+        "width" in params.image &&
+        typeof params.image.width === "number" &&
+        "height" in params.image &&
+        typeof params.image.height === "number" &&
+        "grid" in params &&
+        isObject(params.grid) &&
+        "dpi" in params.grid &&
+        typeof params.grid.dpi === "number" &&
+        "offset" in params.grid &&
+        isVector2(params.grid.offset)
+    );
+}
+
 export interface ImageStyle extends ImageBuildParams {
     type: "Image";
 }
-export function isImageStyle(style: AuraStyle): style is ImageStyle {
-    return style.type === "Image";
+export function isImageStyle(style: unknown): style is ImageStyle {
+    return (
+        isImageBuildParams(style) && "type" in style && style.type === "Image"
+    );
 }
 
-export type EffectStyle = (ColorOpacityShaderStyle | SpiritsStyle) & {
+export type EffectStyle = (
+    | ColorOpacityShaderStyle
+    | SpiritsStyle
+    | CustomEffectStyle
+) & {
     blendMode?: BlendMode;
 };
-export function isEffectStyle(style: AuraStyle): style is EffectStyle {
+export function isEffectStyle(style: unknown): style is EffectStyle {
     return (
-        (isColorOpacityShaderStyle(style) || isSpiritsStyle(style)) &&
+        (isColorOpacityShaderStyle(style) ||
+            isSpiritsStyle(style) ||
+            isCustomEffectStyle(style)) &&
         (!("blendMode" in style) || typeof style.blendMode === "string")
     );
 }
 export type EffectStyleType = EffectStyle["type"];
 export type AuraStyle = SimpleStyle | EffectStyle | ImageStyle;
+export function isAuraStyle(style: unknown): style is AuraStyle {
+    return isSimpleStyle(style) || isEffectStyle(style) || isImageStyle(style);
+}
 export type AuraStyleType = AuraStyle["type"];
 
 export const STYLE_TYPES: AuraStyleType[] = [
@@ -67,8 +133,9 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Range",
     "Snow",
     "Spirits",
+    "Custom",
 ];
-export function isAuraStyle(style: string): style is AuraStyleType {
+export function isAuraStyleType(style: string): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
     return styleTypes.includes(style);
 }
@@ -79,12 +146,14 @@ export function createStyle({
     opacity,
     blendMode,
     imageBuildParams,
+    sksl,
 }: {
     styleType: AuraStyleType;
     color: string;
     opacity: number;
     blendMode?: BlendMode;
     imageBuildParams?: ImageBuildParams;
+    sksl?: string;
 }): AuraStyle {
     if (!isHexColor(color)) {
         throw new Error(`Color '${color}' must be a hex color`);
@@ -138,6 +207,13 @@ export function createStyle({
                 type: styleType,
                 ...imageBuildParams,
             };
+        case "Custom":
+            return {
+                type: styleType,
+                sksl:
+                    sksl ??
+                    "half4 main(vec2 coord) {\n    return vec4(1.0);\n}",
+            };
     }
 }
 
@@ -152,6 +228,7 @@ export function getColor(style: AuraStyle): string {
             return style.itemStyle.fillColor;
         case "Spirits":
         case "Image":
+        case "Custom":
             return "#FFFFFF";
     }
 }
@@ -183,6 +260,7 @@ export function getOpacity(style: AuraStyle): number {
             return style.itemStyle.fillOpacity;
         case "Spirits":
         case "Image":
+        case "Custom":
             return 1.0;
     }
 }

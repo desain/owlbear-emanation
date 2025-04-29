@@ -3,7 +3,11 @@ import { isImage, Item } from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import { CandidateSource, isCandidateSource } from "./CandidateSource";
 import { HasMetadata } from "./metadata/metadataUtils";
-import { AuraEntry, SourceMetadata } from "./metadata/SourceMetadata";
+import {
+    AuraEntry,
+    isSourceMetadata,
+    SourceMetadata,
+} from "./metadata/SourceMetadata";
 import { forEachSpecifier, Specifier } from "./Specifier";
 
 export type Source = CandidateSource & HasMetadata<SourceMetadata>;
@@ -12,7 +16,7 @@ export function isSource(item: Item): item is Source {
     return (
         isCandidateSource(item) &&
         METADATA_KEY in item.metadata &&
-        typeof item.metadata[METADATA_KEY] === "object"
+        isSourceMetadata(item.metadata[METADATA_KEY])
     );
 }
 
@@ -38,13 +42,6 @@ export async function updateEntries(
             updater(entry);
         }
     });
-}
-
-export function getSourceName(source: Source): string {
-    if (isImage(source) && source.text.plainText) {
-        return source.text.plainText;
-    }
-    return source.name;
 }
 
 export function getSourceImage(source: Source): string | undefined {

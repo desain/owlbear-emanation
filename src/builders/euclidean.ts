@@ -1,6 +1,6 @@
 import { buildShape, Vector2 } from "@owlbear-rodeo/sdk";
+import { GridParsed } from "owlbear-utils";
 import { Circle } from "../types/Circle";
-import { GridParsed } from "../types/GridParsed";
 
 /**
  * Build basic shape.

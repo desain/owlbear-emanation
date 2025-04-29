@@ -9,10 +9,10 @@ import {
     Uniform,
 } from "@owlbear-rodeo/sdk";
 import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import { assertItem } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
-import { useOwlbearStore } from "../useOwlbearStore";
-import { assertItem } from "../utils/itemUtils";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { AuraConfig } from "./AuraConfig";
 import { CandidateSource, getAbsoluteItemSize } from "./CandidateSource";
 import { Circle, isCircle } from "./Circle";
@@ -70,11 +70,11 @@ export function updateDrawingParams(
             break;
         case "Spirits":
             break; // nothing to set
-        case "Image":
+        case "Image": {
             assertItem(aura, isImage);
             aura.image = config.style.image;
             aura.grid = config.style.grid;
-            const grid = useOwlbearStore.getState().grid;
+            const grid = usePlayerStorage.getState().grid;
             const absoluteItemSize = getAbsoluteItemSize(source, grid);
             const numUnits = config.size / grid.parsedScale.multiplier;
             aura.scale = getImageAuraScale(
@@ -83,6 +83,11 @@ export function updateDrawingParams(
                 numUnits,
                 absoluteItemSize,
             );
+            break;
+        }
+        case "Custom":
+            assertItem(aura, isEffect);
+            aura.sksl = config.style.sksl;
             break;
     }
 }

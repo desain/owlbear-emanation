@@ -1,8 +1,8 @@
 import { FormControlProps, InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
+import { Control } from "owlbear-utils";
 import { useState } from "react";
-import { useOwlbearStore } from "../useOwlbearStore";
-import { Control } from "./Control";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 
 export function SizeInput({
     value,
@@ -12,7 +12,7 @@ export function SizeInput({
     value: number;
     onChange: (size: number) => void;
 } & Omit<FormControlProps, "onChange">) {
-    const grid = useOwlbearStore((state) => state.grid);
+    const grid = usePlayerStorage((state) => state.grid);
     const [oldValue, setOldValue] = useState(value);
     const [displayValue, setDisplayValue] = useState(value.toString()); // value that's not necessarily valid
 

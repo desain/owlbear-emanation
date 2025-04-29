@@ -2,8 +2,8 @@ import OpacityIcon from "@mui/icons-material/Opacity";
 import Box from "@mui/material/Box";
 import { FormControlProps } from "@mui/material/FormControl";
 import Slider from "@mui/material/Slider";
+import { Control } from "owlbear-utils";
 import { useState } from "react";
-import { Control } from "./Control";
 
 export function OpacitySlider({
     value,

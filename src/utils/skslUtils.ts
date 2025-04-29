@@ -1,8 +1,8 @@
 import { GridType, Matrix, Uniform, Vector2 } from "@owlbear-rodeo/sdk";
+import { GridParsed } from "owlbear-utils";
 import { getPoints } from "../builders/points";
 import { AuraShape } from "../types/AuraShape";
 import { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
-import { GridParsed } from "../types/GridParsed";
 import {
     INVERSE_TRANSFORM_DIMETRIC,
     INVERSE_TRANSFORM_ISOMETRIC,
@@ -70,6 +70,7 @@ function hasColorOpacityUniforms(
         case "Snow":
             return true;
         case "Spirits":
+        case "Custom":
             return false;
     }
 }

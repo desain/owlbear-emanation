@@ -1,6 +1,8 @@
 import { FormControlProps } from "@mui/material";
+import { Control } from "owlbear-utils";
 import { useEffect, useState } from "react";
-import { Control } from "./Control";
+
+const UPDATE_DELAY_MS = 100;
 
 export function ColorInput({
     value,
@@ -28,7 +30,7 @@ export function ColorInput({
             if (displayValue !== value) {
                 onChange(displayValue);
             }
-        }, 100);
+        }, UPDATE_DELAY_MS);
 
         return () => clearTimeout(handler); // Clear timeout if color changes within the delay
     }, [value, displayValue, onChange]);

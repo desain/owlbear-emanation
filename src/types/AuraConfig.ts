@@ -1,6 +1,6 @@
 import { Layer } from "@owlbear-rodeo/sdk";
-import { isDeepEqual } from "owlbear-utils";
-import { AuraStyle, getBlendMode } from "./AuraStyle";
+import { isDeepEqual, isLayer, isObject } from "owlbear-utils";
+import { AuraStyle, getBlendMode, isAuraStyle } from "./AuraStyle";
 
 /**
  * Data that defines how an aura should be displayed.
@@ -22,6 +22,29 @@ export interface AuraConfig {
      */
     layer?: Layer;
 }
+export function isAuraConfig(config: unknown): config is AuraConfig {
+    return (
+        isObject(config) &&
+        "style" in config &&
+        isAuraStyle(config.style) &&
+        "size" in config &&
+        typeof config.size === "number" &&
+        (!("visibleTo" in config) ||
+            typeof config.visibleTo === "string" ||
+            config.visibleTo === null) &&
+        (!("layer" in config) ||
+            (typeof config.layer === "string" && isLayer(config.layer)))
+    );
+}
+
+export const DEFAULT_AURA_CONFIG: AuraConfig = {
+    size: 5,
+    style: {
+        type: "Bubble",
+        color: { x: 1, y: 1, z: 1 },
+        opacity: 1,
+    },
+};
 
 export function getLayer(config: AuraConfig): Layer {
     return config.layer ?? "DRAWING";

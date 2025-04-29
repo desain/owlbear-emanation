@@ -1,18 +1,29 @@
 import { FormControlProps, MenuItem, Select } from "@mui/material";
 import { Layer } from "@owlbear-rodeo/sdk";
-import { isLayer, LAYERS } from "../utils/obrTypeUtils";
-import { Control } from "./Control";
+import { Control, isLayer, LAYERS } from "owlbear-utils";
+import { FC } from "react";
+import { usePlayerStorage } from "../state/usePlayerStorage";
+import { LAYER_ICONS } from "./layerIcons";
 
 interface LayerSelectorProps {
     value: Layer;
     onChange: (layer: Layer) => void;
 }
 
-export function LayerSelector({
-    value,
-    onChange,
-    ...props
-}: LayerSelectorProps & Omit<FormControlProps, "onChange">) {
+const LAYER_NAMES = LAYERS.map((layer) =>
+    layer
+        .toLowerCase()
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" "),
+);
+
+export const LayerSelector: FC<
+    LayerSelectorProps & Omit<FormControlProps, "onChange">
+> = ({ value, onChange, ...props }) => {
+    const showAdvancedOptions = usePlayerStorage(
+        (store) => store.showAdvancedOptions,
+    );
     return (
         <Control {...props} label="Layer">
             <Select
@@ -25,12 +36,28 @@ export function LayerSelector({
                     }
                 }}
             >
-                {LAYERS.map((layer) => (
-                    <MenuItem key={layer} value={layer}>
-                        {layer}
-                    </MenuItem>
-                ))}
+                {LAYERS.map((layer, i) => {
+                    const { icon: Icon, isAdvanced } = LAYER_ICONS[layer];
+
+                    // Don't show advanced layers unless they're selected
+                    if (isAdvanced && !showAdvancedOptions && value !== layer) {
+                        return null;
+                    }
+
+                    return (
+                        <MenuItem key={layer} value={layer}>
+                            <Icon
+                                style={{
+                                    marginRight: 8,
+                                    verticalAlign: "middle",
+                                }}
+                            />
+
+                            {LAYER_NAMES[i]}
+                        </MenuItem>
+                    );
+                })}
             </Select>
         </Control>
     );
-}
+};

@@ -4,22 +4,21 @@ import OBR, {
     ImageGrid,
     Layer,
 } from "@owlbear-rodeo/sdk";
-import { AuraConfig } from "../types/AuraConfig";
+import { isBlendMode, isLayer, isObject } from "owlbear-utils";
+import { usePlayerStorage } from "../state/usePlayerStorage";
+import { AuraConfig, DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import {
     AuraStyle,
     AuraStyleType,
     createStyle,
     getColor,
     getOpacity,
-    isAuraStyle,
+    isAuraStyleType,
 } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
-import { usePlayerSettings } from "../usePlayerSettings";
 import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
-import { isBlendMode, isLayer } from "./obrTypeUtils";
 import { removeAllAuras } from "./removeAuras";
-import { isObject } from 'owlbear-utils';
 
 const CREATE_AURAS_TYPE = "CREATE_AURAS";
 const REMOVE_AURAS_TYPE = "REMOVE_AURAS";
@@ -52,22 +51,26 @@ export interface CreateAurasMessage {
      */
     visibleTo?: string | null;
     /**
-     * Which Owlbear Rodeo layer the aura will be on. If not provided, the 'DRAWING' layer
+     * Which Owlbear Rodeo layer the aura will be on. If not provided, the `"DRAWING"` layer
      * will be used.
      */
     layer?: Layer;
     /**
      * Blend mode for effect-based auras. Only used if the `style` parameter is an effect type. If not provided,
-     * the default SRC_OVER value will be used.
+     * the default `"SRC_OVER"` value will be used.
      */
     blendMode?: BlendMode;
     /**
-     * Details for image-based auras. Must be provided if and only if the `style` parameter is "Image".
+     * Details for image-based auras. Must be provided if and only if the `style` parameter is `"Image"`.
      */
     imageBuildParams?: {
         image: ImageContent;
         grid: ImageGrid;
     };
+    /**
+     * Shader code for custom auras. Must be provided if and only if the `style` parameter is `"Custom"`.
+     */
+    sksl?: string;
 }
 export function isCreateAuraMessage(
     message: unknown,
@@ -87,7 +90,7 @@ export function isCreateAuraMessage(
         message.size > 0 &&
         (!("style" in message) ||
             (typeof message.style === "string" &&
-                isAuraStyle(message.style))) &&
+                isAuraStyleType(message.style))) &&
         (!("color" in message) ||
             (typeof message.color === "string" && isHexColor(message.color))) &&
         (!("opacity" in message) ||
@@ -105,11 +108,12 @@ export function isCreateAuraMessage(
                 "image" in message.imageBuildParams &&
                 isObject(message.imageBuildParams.image) &&
                 "grid" in message.imageBuildParams &&
-                isObject(message.imageBuildParams.grid)))
+                isObject(message.imageBuildParams.grid))) &&
+        (!("sksl" in message) || typeof message.sksl === "string")
     );
 }
 
-function toConfig(message: CreateAurasMessage): AuraConfig {
+export function toConfig(message: CreateAurasMessage): AuraConfig {
     return {
         size: message.size,
         style: getStyle(message),
@@ -118,17 +122,23 @@ function toConfig(message: CreateAurasMessage): AuraConfig {
     };
 }
 
-export function getStyle(message: CreateAurasMessage): AuraStyle {
-    const playerSettings = usePlayerSettings.getState();
-    const styleType: AuraStyleType = message.style ?? playerSettings.style.type;
-    const color = message.color ?? getColor(playerSettings.style);
-    const opacity = message.opacity ?? getOpacity(playerSettings.style);
+function getStyle(message: CreateAurasMessage): AuraStyle {
+    const playerSettings = usePlayerStorage.getState();
+    const defaultConfig =
+        playerSettings.presets.length === 0
+            ? DEFAULT_AURA_CONFIG
+            : playerSettings.presets[0].config;
+    const styleType: AuraStyleType = message.style ?? defaultConfig.style.type;
+    const color = message.color ?? getColor(defaultConfig.style);
+    const opacity = message.opacity ?? getOpacity(defaultConfig.style);
+    const sksl = message.sksl;
     return createStyle({
         styleType,
         color,
         opacity,
         blendMode: message.blendMode,
         imageBuildParams: message.imageBuildParams,
+        sksl,
     });
 }
 

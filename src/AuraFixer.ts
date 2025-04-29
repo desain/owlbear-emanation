@@ -1,9 +1,10 @@
 import OBR, { Item } from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { deferCallAll, getOrInsert } from "owlbear-utils";
+import { assertItem, deferCallAll, getOrInsert, hasId } from "owlbear-utils";
 import buildAura from "./builders/buildAura";
 import { METADATA_KEY } from "./constants";
+import { usePlayerStorage } from "./state/usePlayerStorage";
 import { Aura, isAura, updateDrawingParams } from "./types/Aura";
 import {
     AuraConfig,
@@ -12,8 +13,7 @@ import {
 } from "./types/AuraConfig";
 import { AuraEntry } from "./types/metadata/SourceMetadata";
 import { getEntry, isSource, Source } from "./types/Source";
-import { useOwlbearStore } from "./useOwlbearStore";
-import { assertItem, didChangeScale, hasId } from "./utils/itemUtils";
+import { didChangeScale } from "./utils/itemUtils";
 
 type SourceAndAuras = {
     source: Source;
@@ -54,7 +54,7 @@ export default class AuraFixer {
     private currentPlayerId: string;
 
     /**
-     * Create fixer. Uses useOwlbearStore, so only works if store is syncing.
+     * Create fixer. Uses usePlayerStorage, so only works if store is syncing.
      * @returns [fixer, function to uninstall fixer]
      */
     static async install(): Promise<[AuraFixer, VoidFunction]> {
@@ -73,12 +73,12 @@ export default class AuraFixer {
             }),
         );
 
-        const unsubscribeGrid = useOwlbearStore.subscribe(
+        const unsubscribeGrid = usePlayerStorage.subscribe(
             (store) => store.grid,
             lockify(async () => fixer.fix(latestItems, true)),
         );
 
-        const unsubscribeSceneMetadata = useOwlbearStore.subscribe(
+        const unsubscribeSceneMetadata = usePlayerStorage.subscribe(
             (store) => store.sceneMetadata,
             lockify(async () => fixer.fix(latestItems, true)),
         );
@@ -122,7 +122,7 @@ export default class AuraFixer {
     }
 
     async fix(networkItems: Item[], rebuildAll: boolean = false) {
-        const store = useOwlbearStore.getState();
+        const store = usePlayerStorage.getState();
         const toAdd: Aura[] = [];
         const toDelete: string[] = [];
         const toUpdate: string[] = [];

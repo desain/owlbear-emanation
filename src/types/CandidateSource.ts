@@ -1,6 +1,6 @@
 import { Image, Item, isImage } from "@owlbear-rodeo/sdk";
+import { GridParsed } from "owlbear-utils";
 import { Circle, isCircle } from "./Circle";
-import { GridParsed } from "./GridParsed";
 
 export type CandidateSource = Image | Circle;
 export function isCandidateSource(item: Item): item is CandidateSource {

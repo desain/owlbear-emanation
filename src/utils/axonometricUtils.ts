@@ -1,5 +1,5 @@
 import { GridType, MathM, Matrix, Vector2 } from "@owlbear-rodeo/sdk";
-import { degToRad, PI_6 } from "./mathUtils";
+import { degToRad, PI_6 } from "owlbear-utils";
 
 const ANGLE_DIMETRIC = 26.5;
 export const SCALE_ISOMETRIC: Vector2 = {
@@ -22,7 +22,9 @@ export const TRANSFORM_DIMETRIC = MathM.multiply(
 export const INVERSE_TRANSFORM_ISOMETRIC = MathM.inverse(TRANSFORM_ISOMETRIC);
 export const INVERSE_TRANSFORM_DIMETRIC = MathM.inverse(TRANSFORM_DIMETRIC);
 
-export function getAxonometricTransformMatrix(gridType: GridType): Matrix | null {
+export function getAxonometricTransformMatrix(
+    gridType: GridType,
+): Matrix | null {
     if (gridType === "ISOMETRIC") {
         return TRANSFORM_ISOMETRIC;
     } else if (gridType === "DIMETRIC") {
