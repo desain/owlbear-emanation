@@ -244,6 +244,8 @@ To make a production build run:
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
 -   Allow size 0 auras
+-   Add lints from template
+-   Use role from utils
 
 ## License
 
