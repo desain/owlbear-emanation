@@ -9,6 +9,7 @@ import {
     getColor,
     getImageBuildParams,
     getOpacity,
+    isCustomEffectStyle,
 } from "../types/AuraStyle";
 import { CreateAurasMessage } from "../utils/messaging";
 
@@ -39,6 +40,9 @@ export const CopyButton: FC<{ config: AuraConfig }> = ({ config }) => (
                 layer: getLayer(config),
                 blendMode: getBlendMode(config.style),
                 imageBuildParams: getImageBuildParams(config.style),
+                sksl: isCustomEffectStyle(config.style)
+                    ? config.style.sksl
+                    : undefined,
             };
             await copyToClipboard(message);
         }}

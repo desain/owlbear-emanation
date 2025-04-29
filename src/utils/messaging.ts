@@ -51,22 +51,26 @@ export interface CreateAurasMessage {
      */
     visibleTo?: string | null;
     /**
-     * Which Owlbear Rodeo layer the aura will be on. If not provided, the 'DRAWING' layer
+     * Which Owlbear Rodeo layer the aura will be on. If not provided, the `"DRAWING"` layer
      * will be used.
      */
     layer?: Layer;
     /**
      * Blend mode for effect-based auras. Only used if the `style` parameter is an effect type. If not provided,
-     * the default SRC_OVER value will be used.
+     * the default `"SRC_OVER"` value will be used.
      */
     blendMode?: BlendMode;
     /**
-     * Details for image-based auras. Must be provided if and only if the `style` parameter is "Image".
+     * Details for image-based auras. Must be provided if and only if the `style` parameter is `"Image"`.
      */
     imageBuildParams?: {
         image: ImageContent;
         grid: ImageGrid;
     };
+    /**
+     * Shader code for custom auras. Must be provided if and only if the `style` parameter is `"Custom"`.
+     */
+    sksl?: string;
 }
 export function isCreateAuraMessage(
     message: unknown,
@@ -104,7 +108,8 @@ export function isCreateAuraMessage(
                 "image" in message.imageBuildParams &&
                 isObject(message.imageBuildParams.image) &&
                 "grid" in message.imageBuildParams &&
-                isObject(message.imageBuildParams.grid)))
+                isObject(message.imageBuildParams.grid))) &&
+        (!("sksl" in message) || typeof message.sksl === "string")
     );
 }
 
@@ -126,12 +131,14 @@ function getStyle(message: CreateAurasMessage): AuraStyle {
     const styleType: AuraStyleType = message.style ?? defaultConfig.style.type;
     const color = message.color ?? getColor(defaultConfig.style);
     const opacity = message.opacity ?? getOpacity(defaultConfig.style);
+    const sksl = message.sksl;
     return createStyle({
         styleType,
         color,
         opacity,
         blendMode: message.blendMode,
         imageBuildParams: message.imageBuildParams,
+        sksl,
     });
 }
 

@@ -85,6 +85,10 @@ export function updateDrawingParams(
             );
             break;
         }
+        case "Custom":
+            assertItem(aura, isEffect);
+            aura.sksl = config.style.sksl;
+            break;
     }
 }
 

@@ -44,11 +44,27 @@ export function isColorOpacityShaderStyle(
     );
 }
 
-export interface SpiritsStyle {
+interface SpiritsStyle {
     type: "Spirits";
 }
 function isSpiritsStyle(style: unknown): style is SpiritsStyle {
     return isObject(style) && "type" in style && style.type === "Spirits";
+}
+
+export interface CustomEffectStyle {
+    type: "Custom";
+    sksl: string;
+}
+export function isCustomEffectStyle(
+    style: unknown,
+): style is CustomEffectStyle {
+    return (
+        isObject(style) &&
+        "type" in style &&
+        style.type === "Custom" &&
+        "sksl" in style &&
+        typeof style.sksl === "string"
+    );
 }
 
 /**
@@ -86,12 +102,18 @@ export function isImageStyle(style: unknown): style is ImageStyle {
     );
 }
 
-export type EffectStyle = (ColorOpacityShaderStyle | SpiritsStyle) & {
+export type EffectStyle = (
+    | ColorOpacityShaderStyle
+    | SpiritsStyle
+    | CustomEffectStyle
+) & {
     blendMode?: BlendMode;
 };
 export function isEffectStyle(style: unknown): style is EffectStyle {
     return (
-        (isColorOpacityShaderStyle(style) || isSpiritsStyle(style)) &&
+        (isColorOpacityShaderStyle(style) ||
+            isSpiritsStyle(style) ||
+            isCustomEffectStyle(style)) &&
         (!("blendMode" in style) || typeof style.blendMode === "string")
     );
 }
@@ -109,6 +131,7 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Glow",
     "Range",
     "Spirits",
+    "Custom",
 ];
 export function isAuraStyleType(style: string): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
@@ -121,12 +144,14 @@ export function createStyle({
     opacity,
     blendMode,
     imageBuildParams,
+    sksl,
 }: {
     styleType: AuraStyleType;
     color: string;
     opacity: number;
     blendMode?: BlendMode;
     imageBuildParams?: ImageBuildParams;
+    sksl?: string;
 }): AuraStyle {
     if (!isHexColor(color)) {
         throw new Error(`Color '${color}' must be a hex color`);
@@ -179,6 +204,13 @@ export function createStyle({
                 type: styleType,
                 ...imageBuildParams,
             };
+        case "Custom":
+            return {
+                type: styleType,
+                sksl:
+                    sksl ??
+                    "half4 main(vec2 coord) {\n    return vec4(1.0);\n}",
+            };
     }
 }
 
@@ -192,6 +224,7 @@ export function getColor(style: AuraStyle): string {
             return style.itemStyle.fillColor;
         case "Spirits":
         case "Image":
+        case "Custom":
             return "#FFFFFF";
     }
 }
@@ -222,6 +255,7 @@ export function getOpacity(style: AuraStyle): number {
             return style.itemStyle.fillOpacity;
         case "Spirits":
         case "Image":
+        case "Custom":
             return 1.0;
     }
 }

@@ -14,19 +14,28 @@ export const PasteButton: FC<PasteButtonProps> = ({ onPaste, ...props }) => (
         variant="outlined"
         startIcon={<PasteIcon />}
         onClick={async () => {
-            const clipboardText = await navigator.clipboard.readText();
-            if (clipboardText) {
-                try {
-                    const parsed: unknown = JSON.parse(clipboardText);
-                    if (isCreateAuraMessage(parsed)) {
-                        onPaste(parsed);
-                    } else {
-                        throw new Error("Invalid message format");
-                    }
-                } catch (error) {
-                    complain("Failed to parse clipboard contents");
-                    console.log(error);
+            let clipboardText: string = "";
+            try {
+                clipboardText = await navigator.clipboard.readText();
+                if (!clipboardText) {
+                    throw new Error("Clipboard text empty");
                 }
+            } catch (e) {
+                complain("Failed to read clipboard text");
+                console.log(e);
+                return;
+            }
+
+            try {
+                const parsed: unknown = JSON.parse(clipboardText);
+                if (isCreateAuraMessage(parsed)) {
+                    onPaste(parsed);
+                } else {
+                    throw new Error("Invalid message format");
+                }
+            } catch (e) {
+                complain("Failed to parse clipboard contents");
+                console.log(e);
             }
         }}
     >

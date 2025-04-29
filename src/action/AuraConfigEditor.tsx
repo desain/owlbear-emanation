@@ -6,6 +6,7 @@ import {
     getColor,
     getOpacity,
     isColorOpacityShaderStyle,
+    isCustomEffectStyle,
     isEffectStyle,
     isImageStyle,
     isSimpleStyle,
@@ -15,6 +16,7 @@ import {
 } from "../types/AuraStyle";
 import { BlendModeSelector } from "./BlendModeSelector";
 import { ColorInput } from "./ColorInput";
+import { CustomShaderInput } from "./CustomShaderInput";
 import { ImageSelector } from "./ImageSelector";
 import { LayerSelector } from "./LayerSelector";
 import { OpacitySlider } from "./OpacitySlider";
@@ -87,6 +89,20 @@ export function AuraConfigEditor({
                         }
                     />
                 </Stack>
+            )}
+            {isCustomEffectStyle(config.style) && (
+                <CustomShaderInput
+                    value={config.style.sksl}
+                    onChange={(sksl) =>
+                        setStyle(
+                            produce(config.style, (style) => {
+                                if (style.type === "Custom") {
+                                    style.sksl = sksl;
+                                }
+                            }),
+                        )
+                    }
+                />
             )}
             <details>
                 <summary>Advanced Options</summary>
