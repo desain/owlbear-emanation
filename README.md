@@ -243,10 +243,7 @@ To make a production build run:
 -   More effects!
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
--   Explanations of blend modes (maybe an option to hide less useful blend modes)
--   Option to hide nonstandard layers
 -   Allow size 0 auras
--   Custom effects with SKSL textarea
 
 ## License
 
