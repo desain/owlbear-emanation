@@ -20,6 +20,12 @@ export function SettingsTab() {
         (store) => store.setContextMenuEnabled,
     );
     const role = usePlayerStorage((store) => store.role);
+    const showAdvancedOptions = usePlayerStorage(
+        (store) => store.showAdvancedOptions,
+    );
+    const setShowAdvancedOptions = usePlayerStorage(
+        (store) => store.setShowAdvancedOptions,
+    );
     return (
         <>
             <Typography variant="h6" sx={{ mb: 2 }}>
@@ -39,6 +45,20 @@ export function SettingsTab() {
                 />
                 <FormHelperText>
                     Enable context menu items to add or edit auras on tokens.
+                </FormHelperText>
+                <FormControlLabel
+                    control={
+                        <Switch
+                            checked={showAdvancedOptions}
+                            onChange={(_, enabled) =>
+                                setShowAdvancedOptions(enabled)
+                            }
+                        />
+                    }
+                    label="Show Advanced Options"
+                />
+                <FormHelperText>
+                    Enable advanced options in UI, such as extra layers.
                 </FormHelperText>
             </FormGroup>
             {role === "GM" && (

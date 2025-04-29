@@ -1,6 +1,6 @@
 import OBR, { Item, Metadata } from "@owlbear-rodeo/sdk";
 import { enableMapSet } from "immer";
-import { GridParams, GridParsed } from "owlbear-utils";
+import { ExtractNonFunctions, GridParams, GridParsed } from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -50,11 +50,12 @@ export interface Preset {
     config: AuraConfig;
 }
 
-export interface PlayerSettingsStore {
+interface LocalStorage {
     hasSensibleValues: boolean;
     [SET_SENSIBLE](this: void): void;
     presets: Preset[];
     enableContextMenu: boolean;
+    showAdvancedOptions: boolean;
     setPresetName(this: void, id: string, name: string): void;
     setPresetSize(this: void, id: string, size: AuraConfig["size"]): void;
     setPresetStyle(this: void, id: string, style: AuraConfig["style"]): void;
@@ -71,13 +72,27 @@ export interface PlayerSettingsStore {
     createPreset(this: void, name: string, config: AuraConfig): void;
     deletePreset(this: void, id: string): void;
     setContextMenuEnabled(this: void, enableContextMenu: boolean): void;
+    setShowAdvancedOptions(this: void, show: boolean): void;
+}
+function partializeLocalStorage({
+    hasSensibleValues,
+    presets,
+    enableContextMenu,
+    showAdvancedOptions,
+}: LocalStorage): ExtractNonFunctions<LocalStorage> {
+    return {
+        hasSensibleValues,
+        presets,
+        enableContextMenu,
+        showAdvancedOptions,
+    };
 }
 
 /**
  * Get preset by ID
  * @throws if no preset with that ID exists
  */
-function getPreset(state: PlayerSettingsStore, id: string): Preset {
+function getPreset(state: LocalStorage, id: string): Preset {
     const preset = state.presets.find((preset) => preset.id === id);
     if (!preset) {
         throw new Error(`Invalid preset ID ${id}`);
@@ -87,7 +102,7 @@ function getPreset(state: PlayerSettingsStore, id: string): Preset {
 
 type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
 
-export interface OwlbearStore {
+interface OwlbearStore {
     sceneReady: boolean;
     role: Role;
     playerId: string;
@@ -104,7 +119,7 @@ export interface OwlbearStore {
     updateItems: (items: Item[]) => void;
 }
 
-export interface PlayerStorage extends PlayerSettingsStore, OwlbearStore {}
+export interface PlayerStorage extends LocalStorage, OwlbearStore {}
 
 export const usePlayerStorage = create<PlayerStorage>()(
     subscribeWithSelector(
@@ -184,6 +199,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     },
                 ],
                 enableContextMenu: true,
+                showAdvancedOptions: false,
                 [SET_SENSIBLE]() {
                     set({ hasSensibleValues: true });
                 },
@@ -234,12 +250,12 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     }),
                 setContextMenuEnabled: (enableContextMenu) =>
                     set({ enableContextMenu }),
+                setShowAdvancedOptions: (showAdvancedOptions) =>
+                    set({ showAdvancedOptions }),
             })),
             {
                 name: PLAYER_SETTINGS_STORE_NAME,
-                partialize({ hasSensibleValues, presets, enableContextMenu }) {
-                    return { hasSensibleValues, presets, enableContextMenu };
-                },
+                partialize: partializeLocalStorage,
                 onRehydrateStorage() {
                     // console.log("onRehydrateStorage");
                     return (state, error) => {
