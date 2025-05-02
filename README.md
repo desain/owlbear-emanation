@@ -246,6 +246,7 @@ To make a production build run:
 -   Allow size 0 auras
 -   Add lints from template
 -   Use role, hexgridtype, dimetric from utils
+-   `            "@typescript-eslint/consistent-type-imports": "error",`
 
 ## License
 
