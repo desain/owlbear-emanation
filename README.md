@@ -247,6 +247,7 @@ To make a production build run:
 -   Add lints from template
 -   Use role, hexgridtype, dimetric from utils
 -   `            "@typescript-eslint/consistent-type-imports": "error",`
+-   `            ...tseslint.configs.stylisticTypeChecked,`
 
 ## License
 
