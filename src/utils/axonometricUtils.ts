@@ -1,14 +1,13 @@
 import type { GridType, Matrix, Vector2 } from "@owlbear-rodeo/sdk";
 import { MathM } from "@owlbear-rodeo/sdk";
-import { degToRad, PI_6 } from "owlbear-utils";
+import { ANGLE_DIMETRIC_RADIANS, PI_6 } from "owlbear-utils";
 
-const ANGLE_DIMETRIC = 26.5;
 export const SCALE_ISOMETRIC: Vector2 = {
     x: Math.SQRT1_2 / Math.tan(PI_6),
     y: Math.SQRT1_2,
 };
 export const SCALE_DIMETRIC: Vector2 = {
-    x: Math.SQRT1_2 / Math.tan(degToRad(ANGLE_DIMETRIC)),
+    x: Math.SQRT1_2 / Math.tan(ANGLE_DIMETRIC_RADIANS),
     y: Math.SQRT1_2,
 };
 const ROTATE45 = MathM.fromRotation(45);

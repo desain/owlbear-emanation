@@ -244,7 +244,6 @@ To make a production build run:
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
 -   Allow size 0 auras
--   Use role, hexgridtype, dimetric from utils
 
 ## License
 

@@ -1,19 +1,23 @@
 import type { Item, Metadata } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
 import { enableMapSet } from "immer";
-import type { ExtractNonFunctions, GridParams, GridParsed } from "owlbear-utils";
+import type {
+    ExtractNonFunctions,
+    GridParams,
+    GridParsed,
+    Role,
+} from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { PLAYER_SETTINGS_STORE_NAME } from "../constants";
-import type { AuraConfig} from "../types/AuraConfig";
+import type { AuraConfig } from "../types/AuraConfig";
 import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import { setColor } from "../types/AuraStyle";
-import type {
-    SceneMetadata} from "../types/metadata/SceneMetadata";
+import type { SceneMetadata } from "../types/metadata/SceneMetadata";
 import {
     DEFAULT_SCENE_METADATA,
-    extractSceneMetadataOrDefault
+    extractSceneMetadataOrDefault,
 } from "../types/metadata/SceneMetadata";
 
 const SET_SENSIBLE = Symbol("SetSensible");
@@ -102,8 +106,6 @@ function getPreset(state: LocalStorage, id: string): Preset {
     }
     return preset;
 }
-
-type Role = Awaited<ReturnType<typeof OBR.player.getRole>>;
 
 interface OwlbearStore {
     sceneReady: boolean;
@@ -203,7 +205,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 ],
                 enableContextMenu: true,
                 showAdvancedOptions: false,
-                SET_SENSIBLE: () => {
+                [SET_SENSIBLE]: () => {
                     set({ hasSensibleValues: true });
                 },
                 setPresetName: (id: string, name: string) =>
@@ -260,60 +262,57 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 name: PLAYER_SETTINGS_STORE_NAME,
                 partialize: partializeLocalStorage,
                 onRehydrateStorage: () => (state, error) => {
-                        // console.log(
-                        //     "onRehydrateStorage callback",
-                        //     state,
-                        //     error,
-                        // );
-                        if (state) {
-                            // work around missing keys in migrated preset
-                            if (
-                                state.presets.length > 0 &&
-                                !state.presets[0].config.size
-                            ) {
-                                state.setPresetSize(
-                                    state.presets[0].id,
-                                    DEFAULT_AURA_CONFIG.size,
-                                );
-                            }
-                            if (
-                                state.presets.length > 0 &&
-                                !state.presets[0].config.style
-                            ) {
-                                state.setPresetStyle(
-                                    state.presets[0].id,
-                                    DEFAULT_AURA_CONFIG.style,
-                                );
-                            }
-                            if (!state.hasSensibleValues) {
-                                // console.log("Not sensible, fetching defaults");
-                                void fetchDefaults().then(({ color, size }) => {
-                                    if (state.presets.length > 0) {
-                                        const defaultPreset = state.presets[0];
-                                        const newStyle = {
-                                            ...defaultPreset.config.style,
-                                        };
-                                        setColor(newStyle, color);
-                                        state.setPresetStyle(
-                                            defaultPreset.id,
-                                            newStyle,
-                                        );
-                                        state.setPresetSize(
-                                            defaultPreset.id,
-                                            size,
-                                        );
-                                        // console.log("Fetched defaults", color, size);
-                                        state[SET_SENSIBLE]();
-                                    }
-                                });
-                            }
-                        } else if (error) {
-                            console.error(
-                                "Error hydrating player settings store",
-                                error,
+                    // console.log(
+                    //     "onRehydrateStorage callback",
+                    //     state,
+                    //     error,
+                    // );
+                    if (state) {
+                        // work around missing keys in migrated preset
+                        if (
+                            state.presets.length > 0 &&
+                            !state.presets[0].config.size
+                        ) {
+                            state.setPresetSize(
+                                state.presets[0].id,
+                                DEFAULT_AURA_CONFIG.size,
                             );
                         }
-                    },
+                        if (
+                            state.presets.length > 0 &&
+                            !state.presets[0].config.style
+                        ) {
+                            state.setPresetStyle(
+                                state.presets[0].id,
+                                DEFAULT_AURA_CONFIG.style,
+                            );
+                        }
+                        if (!state.hasSensibleValues) {
+                            // console.log("Not sensible, fetching defaults");
+                            void fetchDefaults().then(({ color, size }) => {
+                                if (state.presets.length > 0) {
+                                    const defaultPreset = state.presets[0];
+                                    const newStyle = {
+                                        ...defaultPreset.config.style,
+                                    };
+                                    setColor(newStyle, color);
+                                    state.setPresetStyle(
+                                        defaultPreset.id,
+                                        newStyle,
+                                    );
+                                    state.setPresetSize(defaultPreset.id, size);
+                                    // console.log("Fetched defaults", color, size);
+                                    state[SET_SENSIBLE]();
+                                }
+                            });
+                        }
+                    } else if (error) {
+                        console.error(
+                            "Error hydrating player settings store",
+                            error,
+                        );
+                    }
+                },
                 version: 1,
                 migrate: (persistedState, version: number) => {
                     // Move defaults into preset
