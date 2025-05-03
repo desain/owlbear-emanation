@@ -19,13 +19,8 @@ import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import type { AuraConfig } from "../types/AuraConfig";
 import type { AuraEntry } from "../types/metadata/SourceMetadata";
-import type {
-    Source} from "../types/Source";
-import {
-    getSourceImage,
-    isSource,
-    updateEntries,
-} from "../types/Source";
+import type { Source } from "../types/Source";
+import { getSourceImage, isSource, updateEntries } from "../types/Source";
 import { removeAllAuras, removeAuras } from "../utils/removeAuras";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";
@@ -182,39 +177,47 @@ function groupAuras(auras: AnnotatedAura[]): AnnotatedAura[][] {
 }
 
 const ExtantAuras = ({ targetedItems }: { targetedItems: Item[] }) =>
-    useMemo(
-        () =>
-            groupAuras(
-                targetedItems.filter(isSource).flatMap(getAllAnnotatedAuras),
-            )
-                .sort((aurasA, aurasB) => aurasB.length - aurasA.length)
-                .map((identicalAuras) => {
-                    const config: AuraConfig = identicalAuras[0].entry;
-                    const auras = identicalAuras.map(
-                        ({ name, id, image, entry }) => ({
-                            name,
-                            image,
-                            id,
-                            sourceScopedId: entry.sourceScopedId,
-                        }),
-                    );
-                    const reactKey = auras
-                        .map(
-                            ({ id, sourceScopedId }) =>
-                                id + "/" + sourceScopedId,
-                        )
-                        .sort()
-                        .join("|");
-                    return (
-                        <AuraControls
-                            key={reactKey}
-                            config={config}
-                            auras={auras}
-                        />
-                    );
-                }),
-        [targetedItems],
-    );
+    useMemo(() => {
+        const editors = groupAuras(
+            targetedItems.filter(isSource).flatMap(getAllAnnotatedAuras),
+        )
+            .sort((aurasA, aurasB) => aurasB.length - aurasA.length)
+            .map((identicalAuras) => {
+                const config: AuraConfig = identicalAuras[0].entry;
+                const auras = identicalAuras.map(
+                    ({ name, id, image, entry }) => ({
+                        name,
+                        image,
+                        id,
+                        sourceScopedId: entry.sourceScopedId,
+                    }),
+                );
+                const reactKey = auras
+                    .map(({ id, sourceScopedId }) => id + "/" + sourceScopedId)
+                    .sort()
+                    .join("|");
+                return (
+                    <AuraControls
+                        key={reactKey}
+                        config={config}
+                        auras={auras}
+                    />
+                );
+            });
+        if (editors.length > 0) {
+            return editors;
+        } else {
+            return (
+                <Typography
+                    sx={{ mb: 1 }}
+                    color="textSecondary"
+                    variant="subtitle2"
+                >
+                    No auras; click 'New' to add an aura.
+                </Typography>
+            );
+        }
+    }, [targetedItems]);
 
 export function EditTab() {
     const playerSettingsSensible = usePlayerStorage(
