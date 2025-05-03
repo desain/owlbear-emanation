@@ -1,5 +1,5 @@
-import { GridParsed } from "owlbear-utils";
-import { AuraShape } from "../types/AuraShape";
+import type { GridParsed } from "owlbear-utils";
+import type { AuraShape } from "../types/AuraShape";
 import {
     createAxonometricTransform,
     createSignedDistanceFunction,

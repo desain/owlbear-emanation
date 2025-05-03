@@ -10,7 +10,7 @@ import {
     Paper,
     Popper,
 } from "@mui/material";
-import { Item } from "@owlbear-rodeo/sdk";
+import type { Item } from "@owlbear-rodeo/sdk";
 import { useRef, useState } from "react";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import { isCandidateSource } from "../types/CandidateSource";
@@ -27,10 +27,7 @@ export function NewAuraButton({ disabled, targetedItems }: NewAuraButtonProps) {
     const presets = usePlayerStorage((store) => store.presets);
 
     const handleClose = (event: Event) => {
-        if (
-            anchorRef.current &&
-            anchorRef.current.contains(event.target as HTMLElement)
-        ) {
+        if (anchorRef.current?.contains(event.target as HTMLElement)) {
             return;
         }
 

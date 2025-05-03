@@ -1,4 +1,5 @@
-import { FormControlProps, InputAdornment } from "@mui/material";
+import type { FormControlProps} from "@mui/material";
+import { InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
 import { Control } from "owlbear-utils";
 import { useState } from "react";

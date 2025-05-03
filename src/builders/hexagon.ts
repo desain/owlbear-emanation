@@ -1,5 +1,6 @@
-import { Math2, Vector2 } from "@owlbear-rodeo/sdk";
-import { GridParsed } from "owlbear-utils";
+import type { Vector2 } from "@owlbear-rodeo/sdk";
+import { Math2 } from "@owlbear-rodeo/sdk";
+import type { GridParsed } from "owlbear-utils";
 import { getHexGridUtils } from "../utils/HexGridUtils";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {

@@ -1,4 +1,4 @@
-import { GridType } from "@owlbear-rodeo/sdk";
+import type { GridType } from "@owlbear-rodeo/sdk";
 
 export type HexGridType = "HEX_HORIZONTAL" | "HEX_VERTICAL";
 

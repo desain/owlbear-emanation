@@ -1,6 +1,6 @@
 // This file maps layer names to their icon components. Icons are adapted from the outliner repo.
-import SvgIcon from "@mui/material/SvgIcon";
-import { Layer } from "@owlbear-rodeo/sdk";
+import type SvgIcon from "@mui/material/SvgIcon";
+import type { Layer } from "@owlbear-rodeo/sdk";
 import AttachmentIcon from "./layerIcons/AttachmentIcon";
 import CharacterIcon from "./layerIcons/CharacterIcon";
 import ControlIcon from "./layerIcons/ControlIcon";

@@ -1,5 +1,5 @@
-import { Vector2 } from "@owlbear-rodeo/sdk";
-import { GridParsed } from "owlbear-utils";
+import type { Vector2 } from "@owlbear-rodeo/sdk";
+import type { GridParsed } from "owlbear-utils";
 
 /**
  * Build aura shape for manhattan aura in non-square mode.

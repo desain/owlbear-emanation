@@ -1,6 +1,7 @@
 import { Stack } from "@mui/material";
 import { produce } from "immer";
-import { AuraConfig, getLayer } from "../types/AuraConfig";
+import type { AuraConfig} from "../types/AuraConfig";
+import { getLayer } from "../types/AuraConfig";
 import {
     getBlendMode,
     getColor,

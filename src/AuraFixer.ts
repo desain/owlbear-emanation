@@ -1,27 +1,27 @@
-import OBR, { Item } from "@owlbear-rodeo/sdk";
+import type { Item } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
 import { assertItem, deferCallAll, getOrInsert, hasId } from "owlbear-utils";
 import buildAura from "./builders/buildAura";
 import { METADATA_KEY } from "./constants";
 import { usePlayerStorage } from "./state/usePlayerStorage";
-import { Aura, isAura, updateDrawingParams } from "./types/Aura";
-import {
-    AuraConfig,
-    buildParamsChanged,
-    drawingParamsChanged,
-} from "./types/AuraConfig";
-import { AuraEntry } from "./types/metadata/SourceMetadata";
-import { getEntry, isSource, Source } from "./types/Source";
+import type { Aura } from "./types/Aura";
+import { isAura, updateDrawingParams } from "./types/Aura";
+import type { AuraConfig } from "./types/AuraConfig";
+import { buildParamsChanged, drawingParamsChanged } from "./types/AuraConfig";
+import type { AuraEntry } from "./types/metadata/SourceMetadata";
+import type { Source } from "./types/Source";
+import { getEntry, isSource } from "./types/Source";
 import { didChangeScale } from "./utils/itemUtils";
 
-type SourceAndAuras = {
+interface SourceAndAuras {
     source: Source;
     /**
      * Map of scoped ID to local aura item ID.
      */
     auras: Map<string, string>;
-};
+}
 
 type AsyncConsumer<T> = (t: T) => Promise<void>;
 type Sources = Map<string, SourceAndAuras>;
@@ -50,14 +50,16 @@ function createLock() {
  * TODO: Use the Reconciler/Reactor/Actor/Patcher design pattern from official OBR plugins?
  */
 export default class AuraFixer {
-    private sources: Sources = new Map();
-    private currentPlayerId: string;
+    readonly #currentPlayerId: string;
+    #sources: Sources = new Map();
 
     /**
      * Create fixer. Uses usePlayerStorage, so only works if store is syncing.
      * @returns [fixer, function to uninstall fixer]
      */
-    static async install(): Promise<[AuraFixer, VoidFunction]> {
+    static install = async (): Promise<
+        [fixer: AuraFixer, unsubscribe: VoidFunction]
+    > => {
         const [playerId, currentLatestItems] = await Promise.all([
             OBR.player.getId(),
             OBR.scene.items.getItems(),
@@ -94,41 +96,41 @@ export default class AuraFixer {
                 () => fixer.destroy(),
             ),
         ];
-    }
+    };
 
     private constructor(currentPlayerId: string) {
-        this.currentPlayerId = currentPlayerId;
+        this.#currentPlayerId = currentPlayerId;
     }
 
-    private isAuraVisibleToCurrentPlayer(entry: AuraConfig): boolean {
+    #isAuraVisibleToCurrentPlayer(entry: AuraConfig): boolean {
         return (
             entry.visibleTo === undefined ||
-            entry.visibleTo === this.currentPlayerId
+            entry.visibleTo === this.#currentPlayerId
         );
     }
 
-    private getNewAuras(source: Source): AuraEntry[] {
-        const oldEntry = this.sources.get(source.id);
+    #getNewAuras(source: Source): AuraEntry[] {
+        const oldEntry = this.#sources.get(source.id);
         if (oldEntry === undefined) {
             return source.metadata[METADATA_KEY].auras.filter((entry) =>
-                this.isAuraVisibleToCurrentPlayer(entry),
+                this.#isAuraVisibleToCurrentPlayer(entry),
             );
         }
         return source.metadata[METADATA_KEY].auras.filter(
             (aura) =>
                 !oldEntry.auras.has(aura.sourceScopedId) &&
-                this.isAuraVisibleToCurrentPlayer(aura),
+                this.#isAuraVisibleToCurrentPlayer(aura),
         );
     }
 
-    async fix(networkItems: Item[], rebuildAll: boolean = false) {
+    async fix(networkItems: Item[], rebuildAll = false) {
         const store = usePlayerStorage.getState();
         const toAdd: Aura[] = [];
         const toDelete: string[] = [];
         const toUpdate: string[] = [];
-        const updaters: Map<string, ((aura: Aura) => void)[]> = new Map();
+        const updaters = new Map<string, ((aura: Aura) => void)[]>();
 
-        const newSources: typeof this.sources = new Map();
+        const newSources: Sources = new Map();
         const saveAuraId = (
             source: Source,
             entry: AuraEntry,
@@ -154,7 +156,7 @@ export default class AuraFixer {
         // Create auras that don't exist yet
         for (const source of networkItems) {
             if (isSource(source)) {
-                for (const newAuraEntry of this.getNewAuras(source)) {
+                for (const newAuraEntry of this.#getNewAuras(source)) {
                     createAura(source, newAuraEntry);
                 }
             }
@@ -164,7 +166,7 @@ export default class AuraFixer {
         for (const {
             source: oldSource,
             auras: oldAuras,
-        } of this.sources.values()) {
+        } of this.#sources.values()) {
             // check for deleted sources
             // TODO: hashmap lookup rather than linear search
             const newSource = networkItems.find(hasId(oldSource.id));
@@ -194,7 +196,7 @@ export default class AuraFixer {
                 const newEntry = getEntry(newSource, scopedId);
                 if (
                     newEntry === undefined ||
-                    !this.isAuraVisibleToCurrentPlayer(newEntry)
+                    !this.#isAuraVisibleToCurrentPlayer(newEntry)
                 ) {
                     // aura was deleted or made invisible
                     toDelete.push(localItemId);
@@ -220,7 +222,7 @@ export default class AuraFixer {
             }
         }
 
-        this.sources = newSources;
+        this.#sources = newSources;
 
         if (toDelete.length > 0) {
             await OBR.scene.local.deleteItems(toDelete);
@@ -245,11 +247,11 @@ export default class AuraFixer {
         console.log("Destroying local items");
         if (await OBR.scene.isReady()) {
             await OBR.scene.local.deleteItems(
-                Array.from(this.sources.values()).flatMap((sourceAndAuras) =>
+                Array.from(this.#sources.values()).flatMap((sourceAndAuras) =>
                     Array.from(sourceAndAuras.auras.values()),
                 ),
             );
         }
-        this.sources = new Map();
+        this.#sources = new Map();
     }
 }

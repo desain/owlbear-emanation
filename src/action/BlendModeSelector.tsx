@@ -1,13 +1,14 @@
+import type {
+    FormControlProps} from "@mui/material";
 import {
-    FormControlProps,
     ListItemText,
     MenuItem,
     Select,
     Typography,
 } from "@mui/material";
-import { BlendMode } from "@owlbear-rodeo/sdk";
+import type { BlendMode } from "@owlbear-rodeo/sdk";
 import { BLEND_MODES, Control, isBlendMode } from "owlbear-utils";
-import { FC } from "react";
+import type { FC } from "react";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 
 const BLEND_MODE_DESCRIPTIONS: Record<

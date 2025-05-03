@@ -1,4 +1,4 @@
-import { FormControlProps } from "@mui/material";
+import type { FormControlProps } from "@mui/material";
 import { Control } from "owlbear-utils";
 import { useEffect, useState } from "react";
 

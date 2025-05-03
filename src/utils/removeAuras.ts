@@ -1,7 +1,9 @@
-import OBR, { Item } from "@owlbear-rodeo/sdk";
+import type { Item } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../constants";
 import { removeEntry } from "../types/metadata/SourceMetadata";
-import { forEachSpecifier, Specifier } from "../types/Specifier";
+import type { Specifier } from "../types/Specifier";
+import { forEachSpecifier } from "../types/Specifier";
 
 export async function removeAuras(specifiers: Specifier[]) {
     return await forEachSpecifier(specifiers, (source, sourceScopedId) => {

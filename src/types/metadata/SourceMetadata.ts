@@ -1,8 +1,9 @@
-import { Item } from "@owlbear-rodeo/sdk";
+import type { Item } from "@owlbear-rodeo/sdk";
 import { isObject } from "owlbear-utils";
 import { METADATA_KEY } from "../../constants";
-import { AuraConfig, isAuraConfig } from "../AuraConfig";
-import { Source } from "../Source";
+import type { AuraConfig} from "../AuraConfig";
+import { isAuraConfig } from "../AuraConfig";
+import type { Source } from "../Source";
 
 /**
  * Metadata for each aura.

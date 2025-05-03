@@ -1,8 +1,10 @@
 import PasteIcon from "@mui/icons-material/ContentPaste";
-import { Button, ButtonProps } from "@mui/material";
+import type { ButtonProps } from "@mui/material";
+import { Button } from "@mui/material";
 import { complain } from "owlbear-utils";
-import { FC } from "react";
-import { CreateAurasMessage, isCreateAuraMessage } from "../utils/messaging";
+import type { FC } from "react";
+import type { CreateAurasMessage} from "../utils/messaging";
+import { isCreateAuraMessage } from "../utils/messaging";
 
 type PasteButtonProps = {
     onPaste: (message: CreateAurasMessage) => void;
@@ -14,7 +16,7 @@ export const PasteButton: FC<PasteButtonProps> = ({ onPaste, ...props }) => (
         variant="outlined"
         startIcon={<PasteIcon />}
         onClick={async () => {
-            let clipboardText: string = "";
+            let clipboardText = "";
             try {
                 clipboardText = await navigator.clipboard.readText();
                 if (!clipboardText) {

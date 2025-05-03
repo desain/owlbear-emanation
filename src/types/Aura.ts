@@ -1,22 +1,25 @@
-import {
+import type {
     Curve,
     Effect,
     Image,
+    Item,
+    Uniform} from "@owlbear-rodeo/sdk";
+import {
     isCurve,
     isEffect,
-    isImage,
-    Item,
-    Uniform,
+    isImage
 } from "@owlbear-rodeo/sdk";
-import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { assertItem } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import { AuraConfig } from "./AuraConfig";
-import { CandidateSource, getAbsoluteItemSize } from "./CandidateSource";
-import { Circle, isCircle } from "./Circle";
-import { HasMetadata } from "./metadata/metadataUtils";
+import type { AuraConfig } from "./AuraConfig";
+import type { CandidateSource} from "./CandidateSource";
+import { getAbsoluteItemSize } from "./CandidateSource";
+import type { Circle} from "./Circle";
+import { isCircle } from "./Circle";
+import type { HasMetadata } from "./metadata/metadataUtils";
 
 export interface IsAttached {
     attachedTo: string;

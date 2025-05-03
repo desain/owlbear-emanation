@@ -1,4 +1,4 @@
-import { Vector2 } from "@owlbear-rodeo/sdk";
+import type { Vector2 } from "@owlbear-rodeo/sdk";
 
 /**
  * Build first octant of alternating aura in square mode.

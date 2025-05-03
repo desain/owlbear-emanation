@@ -1,5 +1,5 @@
-import { BlendMode, CurveStyle, Image, ShapeStyle } from "@owlbear-rodeo/sdk";
-import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import type { BlendMode, CurveStyle, Image, ShapeStyle } from "@owlbear-rodeo/sdk";
+import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import {
     isCurveStyle,
     isObject,

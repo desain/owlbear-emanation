@@ -1,4 +1,5 @@
-import { FormControlProps, MenuItem, Select } from "@mui/material";
+import type { FormControlProps } from "@mui/material";
+import { MenuItem, Select } from "@mui/material";
 import { Control } from "owlbear-utils";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 
@@ -16,8 +17,7 @@ export function VisibilitySelector({
     ...props
 }: VisibilitySelectorProps & Omit<FormControlProps, "onChange">) {
     const playerId = usePlayerStorage((store) => store.playerId);
-    const textValue =
-        value === undefined ? EVERYONE : value === null ? NOBODY : value;
+    const textValue = value ?? value === undefined ? EVERYONE : NOBODY;
     const currentlyVisibleToOther = value && value !== playerId;
     return (
         <Control {...props} label="Visibility">

@@ -1,6 +1,7 @@
 import { SaveOutlined } from "@mui/icons-material";
 import { Button, FormControl, FormLabel, TextField } from "@mui/material";
-import { FC, useState } from "react";
+import type { FC} from "react";
+import { useState } from "react";
 
 interface CustomShaderInputProps {
     value: string;

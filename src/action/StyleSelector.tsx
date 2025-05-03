@@ -1,9 +1,11 @@
-import { FormControlProps, MenuItem, Select } from "@mui/material";
+import type { FormControlProps} from "@mui/material";
+import { MenuItem, Select } from "@mui/material";
 import { Control } from "owlbear-utils";
-import { FC } from "react";
+import type { FC } from "react";
 import { usePlayerStorage } from "../state/usePlayerStorage";
+import type {
+    AuraStyleType} from "../types/AuraStyle";
 import {
-    AuraStyleType,
     isAuraStyleType,
     STYLE_TYPES,
 } from "../types/AuraStyle";

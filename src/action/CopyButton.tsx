@@ -2,8 +2,9 @@ import CopyIcon from "@mui/icons-material/ContentCopy";
 import { Button } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
 import { complain } from "owlbear-utils";
-import { FC } from "react";
-import { AuraConfig, getLayer } from "../types/AuraConfig";
+import type { FC } from "react";
+import type { AuraConfig} from "../types/AuraConfig";
+import { getLayer } from "../types/AuraConfig";
 import {
     getBlendMode,
     getColor,
@@ -11,7 +12,7 @@ import {
     getOpacity,
     isCustomEffectStyle,
 } from "../types/AuraStyle";
-import { CreateAurasMessage } from "../utils/messaging";
+import type { CreateAurasMessage } from "../utils/messaging";
 
 async function copyToClipboard(message: CreateAurasMessage) {
     try {

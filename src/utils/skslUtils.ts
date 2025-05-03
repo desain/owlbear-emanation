@@ -1,8 +1,8 @@
-import { GridType, Matrix, Uniform, Vector2 } from "@owlbear-rodeo/sdk";
-import { GridParsed } from "owlbear-utils";
+import type { GridType, Matrix, Uniform, Vector2 } from "@owlbear-rodeo/sdk";
+import type { GridParsed } from "owlbear-utils";
 import { getPoints } from "../builders/points";
-import { AuraShape } from "../types/AuraShape";
-import { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
+import type { AuraShape } from "../types/AuraShape";
+import type { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
 import {
     INVERSE_TRANSFORM_DIMETRIC,
     INVERSE_TRANSFORM_ISOMETRIC,
