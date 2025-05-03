@@ -10,18 +10,20 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import OBR, { Item } from "@owlbear-rodeo/sdk";
+import type { Item } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
 import { getId, getName, getOrInsert } from "owlbear-utils";
 import { useMemo } from "react";
 import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import { AuraConfig } from "../types/AuraConfig";
-import { AuraEntry } from "../types/metadata/SourceMetadata";
+import type { AuraConfig } from "../types/AuraConfig";
+import type { AuraEntry } from "../types/metadata/SourceMetadata";
+import type {
+    Source} from "../types/Source";
 import {
     getSourceImage,
     isSource,
-    Source,
     updateEntries,
 } from "../types/Source";
 import { removeAllAuras, removeAuras } from "../utils/removeAuras";
@@ -162,7 +164,7 @@ function getAllAnnotatedAuras(source: Source): AnnotatedAura[] {
  * No list will have two identical auras for the same item.
  */
 function groupAuras(auras: AnnotatedAura[]): AnnotatedAura[][] {
-    const m: Map<string, AnnotatedAura[][]> = new Map();
+    const m = new Map<string, AnnotatedAura[][]>();
     for (const aura of auras) {
         const hash = deduplicationKey(aura);
         const identicalityLists = getOrInsert(m, hash, () => []);

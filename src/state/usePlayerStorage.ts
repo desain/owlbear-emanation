@@ -1,16 +1,19 @@
-import OBR, { Item, Metadata } from "@owlbear-rodeo/sdk";
+import type { Item, Metadata } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { enableMapSet } from "immer";
-import { ExtractNonFunctions, GridParams, GridParsed } from "owlbear-utils";
+import type { ExtractNonFunctions, GridParams, GridParsed } from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { PLAYER_SETTINGS_STORE_NAME } from "../constants";
-import { AuraConfig, DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
+import type { AuraConfig} from "../types/AuraConfig";
+import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import { setColor } from "../types/AuraStyle";
+import type {
+    SceneMetadata} from "../types/metadata/SceneMetadata";
 import {
     DEFAULT_SCENE_METADATA,
-    extractSceneMetadataOrDefault,
-    SceneMetadata,
+    extractSceneMetadataOrDefault
 } from "../types/metadata/SceneMetadata";
 
 const SET_SENSIBLE = Symbol("SetSensible");
@@ -200,7 +203,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 ],
                 enableContextMenu: true,
                 showAdvancedOptions: false,
-                [SET_SENSIBLE]() {
+                SET_SENSIBLE: () => {
                     set({ hasSensibleValues: true });
                 },
                 setPresetName: (id: string, name: string) =>
@@ -256,9 +259,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
             {
                 name: PLAYER_SETTINGS_STORE_NAME,
                 partialize: partializeLocalStorage,
-                onRehydrateStorage() {
-                    // console.log("onRehydrateStorage");
-                    return (state, error) => {
+                onRehydrateStorage: () => (state, error) => {
                         // console.log(
                         //     "onRehydrateStorage callback",
                         //     state,
@@ -312,10 +313,9 @@ export const usePlayerStorage = create<PlayerStorage>()(
                                 error,
                             );
                         }
-                    };
-                },
+                    },
                 version: 1,
-                migrate(persistedState, version: number) {
+                migrate: (persistedState, version: number) => {
                     // Move defaults into preset
                     if (version === 0) {
                         const oldConfig = persistedState as Partial<AuraConfig>; // lazy hack to avoid creating a bunch of type check helpers

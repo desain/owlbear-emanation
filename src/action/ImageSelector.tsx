@@ -1,8 +1,11 @@
-import { Button, FormControlProps } from "@mui/material";
-import OBR, { ImageContent } from "@owlbear-rodeo/sdk";
+import type { FormControlProps } from "@mui/material";
+import { Button } from "@mui/material";
+import type { ImageContent } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { complain, Control, isObject } from "owlbear-utils";
-import { RefObject, useEffect, useRef } from "react";
-import { ImageBuildParams } from "../types/AuraStyle";
+import type { RefObject} from "react";
+import { useEffect, useRef } from "react";
+import type { ImageBuildParams } from "../types/AuraStyle";
 
 interface ImageSelectorProps {
     onChange: (imageBuildParams: ImageBuildParams) => void;

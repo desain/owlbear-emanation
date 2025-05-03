@@ -31,13 +31,11 @@ function TabContent({
 export function Action() {
     const [currentTab, setCurrentTab] = useState(0);
 
-    useEffect(() => {
-        return OBR.broadcast.onMessage(TAB_CHANNEL, ({ data }) => {
+    useEffect(() => OBR.broadcast.onMessage(TAB_CHANNEL, ({ data }) => {
             if (typeof data === "number") {
                 setCurrentTab(data);
             }
-        });
-    });
+        }));
 
     const tabContainer: React.RefObject<HTMLElement | null> = useRef(null);
     useActionResizer(BASE_HEIGHT, MAX_HEIGHT, tabContainer);

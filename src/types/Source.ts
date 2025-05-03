@@ -1,14 +1,18 @@
-import { isImage, Item } from "@owlbear-rodeo/sdk";
+import type { Item } from "@owlbear-rodeo/sdk";
+import { isImage } from "@owlbear-rodeo/sdk";
 
 import { METADATA_KEY } from "../constants";
-import { CandidateSource, isCandidateSource } from "./CandidateSource";
-import { HasMetadata } from "./metadata/metadataUtils";
-import {
+import type { CandidateSource} from "./CandidateSource";
+import { isCandidateSource } from "./CandidateSource";
+import type { HasMetadata } from "./metadata/metadataUtils";
+import type {
     AuraEntry,
-    isSourceMetadata,
-    SourceMetadata,
+    SourceMetadata} from "./metadata/SourceMetadata";
+import {
+    isSourceMetadata
 } from "./metadata/SourceMetadata";
-import { forEachSpecifier, Specifier } from "./Specifier";
+import type { Specifier } from "./Specifier";
+import { forEachSpecifier } from "./Specifier";
 
 export type Source = CandidateSource & HasMetadata<SourceMetadata>;
 

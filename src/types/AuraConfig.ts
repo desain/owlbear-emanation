@@ -1,6 +1,7 @@
-import { Layer } from "@owlbear-rodeo/sdk";
+import type { Layer } from "@owlbear-rodeo/sdk";
 import { isDeepEqual, isLayer, isObject } from "owlbear-utils";
-import { AuraStyle, getBlendMode, isAuraStyle } from "./AuraStyle";
+import type { AuraStyle} from "./AuraStyle";
+import { getBlendMode, isAuraStyle } from "./AuraStyle";
 
 /**
  * Data that defines how an aura should be displayed.

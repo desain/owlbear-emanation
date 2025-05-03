@@ -1,4 +1,5 @@
-import { GridType, MathM, Matrix, Vector2 } from "@owlbear-rodeo/sdk";
+import type { GridType, Matrix, Vector2 } from "@owlbear-rodeo/sdk";
+import { MathM } from "@owlbear-rodeo/sdk";
 import { degToRad, PI_6 } from "owlbear-utils";
 
 const ANGLE_DIMETRIC = 26.5;

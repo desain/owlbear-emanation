@@ -1,15 +1,18 @@
-import OBR, {
+import type {
     BlendMode,
     ImageContent,
     ImageGrid,
     Layer,
 } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { isBlendMode, isLayer, isObject } from "owlbear-utils";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import { AuraConfig, DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
-import {
+import type { AuraConfig} from "../types/AuraConfig";
+import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
+import type {
     AuraStyle,
-    AuraStyleType,
+    AuraStyleType} from "../types/AuraStyle";
+import {
     createStyle,
     getColor,
     getOpacity,

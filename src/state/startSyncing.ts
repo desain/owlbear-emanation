@@ -5,7 +5,10 @@ import { usePlayerStorage } from "./usePlayerStorage";
 /**
  * @returns [Promise that resolves once store has initialized, function to stop syncing]
  */
-export function startSyncing(): [Promise<void>, VoidFunction] {
+export function startSyncing(): [
+    initialized: Promise<void>,
+    unsubscribe: VoidFunction,
+] {
     // console.log("startSyncing");
     const store = usePlayerStorage.getState();
 

@@ -1,4 +1,4 @@
-import { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
+import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 
 function parseColor(color: string) {
     return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);

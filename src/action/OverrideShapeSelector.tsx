@@ -1,7 +1,9 @@
-import { FormControlProps, MenuItem, Select } from "@mui/material";
+import type { FormControlProps} from "@mui/material";
+import { MenuItem, Select } from "@mui/material";
 import { Control } from "owlbear-utils";
-import { FC } from "react";
-import { AuraShape, isAuraShape } from "../types/AuraShape";
+import type { FC } from "react";
+import type { AuraShape} from "../types/AuraShape";
+import { isAuraShape } from "../types/AuraShape";
 
 interface OverrideShapeSelectorProps {
     value: string | undefined;

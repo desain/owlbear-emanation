@@ -11,7 +11,8 @@ import {
     Typography,
 } from "@mui/material";
 import { Control } from "owlbear-utils";
-import { Preset, usePlayerStorage } from "../state/usePlayerStorage";
+import type { Preset} from "../state/usePlayerStorage";
+import { usePlayerStorage } from "../state/usePlayerStorage";
 import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import { toConfig } from "../utils/messaging";
 import { AuraConfigEditor } from "./AuraConfigEditor";

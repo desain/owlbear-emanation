@@ -9,7 +9,7 @@ import {
     TAB_CHANNEL,
 } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import { CandidateSource } from "../types/CandidateSource";
+import type { CandidateSource } from "../types/CandidateSource";
 import { createAurasWithDefaults } from "../utils/createAuras";
 
 export async function startWatchingContextMenuEnabled(): Promise<VoidFunction> {
@@ -62,9 +62,7 @@ async function createContextMenu() {
                 },
             },
         ],
-        async onClick(context) {
-            return createAurasWithDefaults(context.items as CandidateSource[]); // Typecast OK because filter checks type
-        },
+        onClick: async (context) => createAurasWithDefaults(context.items as CandidateSource[]),
     });
     const editAuraItemCreated = OBR.contextMenu.create({
         id: CONTEXTMENU_EDIT_ID,
@@ -107,7 +105,7 @@ async function createContextMenu() {
                 },
             },
         ],
-        async onClick() {
+        onClick: async () => {
             if (await OBR.action.isOpen()) {
                 await OBR.broadcast.sendMessage(TAB_CHANNEL, 0, {
                     destination: "LOCAL",

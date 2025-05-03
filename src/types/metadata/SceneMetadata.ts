@@ -1,6 +1,7 @@
-import OBR, { Metadata } from "@owlbear-rodeo/sdk";
+import type { Metadata } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { METADATA_KEY } from "../../constants";
-import { AuraShape } from "../AuraShape";
+import type { AuraShape } from "../AuraShape";
 
 export interface SceneMetadata {
     gridMode: boolean;

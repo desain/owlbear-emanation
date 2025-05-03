@@ -1,7 +1,9 @@
-import { Effect, Vector2, buildEffect } from "@owlbear-rodeo/sdk";
-import { GridParsed } from "owlbear-utils";
-import { AuraShape } from "../types/AuraShape";
-import { EffectStyle, getBlendMode } from "../types/AuraStyle";
+import type { Effect, Vector2} from "@owlbear-rodeo/sdk";
+import { buildEffect } from "@owlbear-rodeo/sdk";
+import type { GridParsed } from "owlbear-utils";
+import type { AuraShape } from "../types/AuraShape";
+import type { EffectStyle} from "../types/AuraStyle";
+import { getBlendMode } from "../types/AuraStyle";
 import { getScale } from "../utils/axonometricUtils";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
 import { getBubbleSksl } from "./bubble";

@@ -1,6 +1,7 @@
 import OBR from "@owlbear-rodeo/sdk";
 import { assertItem } from "owlbear-utils";
-import { isSource, Source } from "./Source";
+import type { Source } from "./Source";
+import { isSource } from "./Source";
 
 /**
  * Way of specifying a specific aura.

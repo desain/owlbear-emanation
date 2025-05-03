@@ -12,12 +12,14 @@ import { handleMessage } from "../utils/messaging";
 import { Action } from "./Action";
 import { startWatchingContextMenuEnabled } from "./createContextMenu";
 
-let uninstall: VoidFunction = () => {};
+let uninstall: VoidFunction = () => {
+    // nothing to uninstall yet
+};
 
 function installBroadcastListener() {
-    return OBR.broadcast.onMessage(MESSAGE_CHANNEL, ({ data }) => {
-        return handleMessage(data);
-    });
+    return OBR.broadcast.onMessage(MESSAGE_CHANNEL, ({ data }) =>
+        handleMessage(data),
+    );
 }
 
 async function installExtension(): Promise<VoidFunction> {
@@ -66,7 +68,9 @@ OBR.onReady(async () => {
             uninstall = await installExtension();
         } else {
             uninstall();
-            uninstall = () => {};
+            uninstall = () => {
+                // nothing to uninstall anymore
+            };
         }
     });
 });

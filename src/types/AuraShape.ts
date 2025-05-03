@@ -1,7 +1,8 @@
-import OBR, { GridType } from "@owlbear-rodeo/sdk";
+import type { GridType } from "@owlbear-rodeo/sdk";
+import OBR from "@owlbear-rodeo/sdk";
 import { isHexGrid } from "../utils/HexGridUtils";
-import { GridParsed } from "owlbear-utils";
-import { SceneMetadata } from "./metadata/SceneMetadata";
+import type { GridParsed } from "owlbear-utils";
+import type { SceneMetadata } from "./metadata/SceneMetadata";
 
 export type AuraShape =
     | "circle"

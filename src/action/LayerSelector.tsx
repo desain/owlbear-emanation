@@ -1,7 +1,8 @@
-import { FormControlProps, MenuItem, Select } from "@mui/material";
-import { Layer } from "@owlbear-rodeo/sdk";
+import type { FormControlProps} from "@mui/material";
+import { MenuItem, Select } from "@mui/material";
+import type { Layer } from "@owlbear-rodeo/sdk";
 import { Control, isLayer, LAYERS } from "owlbear-utils";
-import { FC } from "react";
+import type { FC } from "react";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import { LAYER_ICONS } from "./layerIcons";
 

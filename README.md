@@ -244,10 +244,7 @@ To make a production build run:
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
 -   Allow size 0 auras
--   Add lints from template
 -   Use role, hexgridtype, dimetric from utils
--   `            "@typescript-eslint/consistent-type-imports": "error",`
--   `            ...tseslint.configs.stylisticTypeChecked,`
 
 ## License
 
