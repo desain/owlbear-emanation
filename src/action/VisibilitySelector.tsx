@@ -18,7 +18,6 @@ export function VisibilitySelector({
 }: VisibilitySelectorProps & Omit<FormControlProps, "onChange">) {
     const playerId = usePlayerStorage((store) => store.playerId);
     const textValue = value ?? (value === undefined ? EVERYONE : NOBODY);
-    console.log(textValue);
     const currentlyVisibleToOther = value && value !== playerId;
     return (
         <Control {...props} label="Visibility">
