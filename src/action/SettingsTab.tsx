@@ -6,6 +6,7 @@ import {
     Switch,
     Typography,
 } from "@mui/material";
+import { version } from "../../package.json";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import { updateSceneMetadata } from "../types/metadata/SceneMetadata";
 import { OverrideShapeSelector } from "./OverrideShapeSelector";
@@ -95,6 +96,13 @@ export function SettingsTab() {
                     </SceneReadyGate>
                 </>
             )}
+            <Typography
+                sx={{ mt: 1 }}
+                color="textSecondary"
+                variant="subtitle2"
+            >
+                Auras & Emanations version {version}
+            </Typography>
         </>
     );
 }
