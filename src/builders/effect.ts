@@ -1,14 +1,15 @@
-import type { Effect, Vector2} from "@owlbear-rodeo/sdk";
+import type { Effect, Vector2 } from "@owlbear-rodeo/sdk";
 import { buildEffect } from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
 import type { AuraShape } from "../types/AuraShape";
-import type { EffectStyle} from "../types/AuraStyle";
+import type { EffectStyle } from "../types/AuraStyle";
 import { getBlendMode } from "../types/AuraStyle";
 import { getScale } from "../utils/axonometricUtils";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
 import { getBubbleSksl } from "./bubble";
 import { getRangeSksl } from "./range";
 import glow from "./shaders/glow.frag";
+import { getSolidSksl } from "./solid";
 import { getSpiritsSksl } from "./spirits";
 
 function getSksl(
@@ -30,6 +31,8 @@ function getSksl(
             return declareUniforms(style) + glow;
         case "Range":
             return declareUniforms(style) + getRangeSksl(grid, shape);
+        case "Solid":
+            return declareUniforms(style) + getSolidSksl(grid, shape);
         case "Custom":
             return style.sksl;
     }

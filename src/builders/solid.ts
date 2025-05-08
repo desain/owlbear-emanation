@@ -8,9 +8,9 @@ import {
     createTransformCoordinateSpace,
 } from "../utils/skslUtils";
 import axialRound from "./shaders/axialRound.glsl";
-import range from "./shaders/range.frag";
+import solid from "./shaders/solid.frag";
 
-export function getRangeSksl(grid: GridParsed, shape: AuraShape): string {
+export function getSolidSksl(grid: GridParsed, shape: AuraShape): string {
     return [
         axialRound,
         createRoundToCell(shape),
@@ -18,6 +18,6 @@ export function getRangeSksl(grid: GridParsed, shape: AuraShape): string {
         createAxonometricTransform(grid.type),
         createTransformCoordinateSpace(grid, shape),
         createItemRadius(shape),
-        range,
+        solid,
     ].join("\n");
 }

@@ -1,23 +1,14 @@
-import type {
-    Curve,
-    Effect,
-    Image,
-    Item,
-    Uniform} from "@owlbear-rodeo/sdk";
-import {
-    isCurve,
-    isEffect,
-    isImage
-} from "@owlbear-rodeo/sdk";
+import type { Curve, Effect, Image, Item, Uniform } from "@owlbear-rodeo/sdk";
+import { isCurve, isEffect, isImage } from "@owlbear-rodeo/sdk";
 import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { assertItem } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import type { AuraConfig } from "./AuraConfig";
-import type { CandidateSource} from "./CandidateSource";
+import type { CandidateSource } from "./CandidateSource";
 import { getAbsoluteItemSize } from "./CandidateSource";
-import type { Circle} from "./Circle";
+import type { Circle } from "./Circle";
 import { isCircle } from "./Circle";
 import type { HasMetadata } from "./metadata/metadataUtils";
 
@@ -58,6 +49,7 @@ export function updateDrawingParams(
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Solid":
             assertItem(aura, isEffect);
             setColorUniform(aura, config.style.color);
             setOpacityUniform(aura, config.style.opacity);
