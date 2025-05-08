@@ -64,6 +64,7 @@ export function updateDrawingParams(
             aura.style.strokeWidth = config.style.itemStyle.strokeWidth;
             break;
         case "Spirits":
+        case "Distort":
             break; // nothing to set
         case "Image": {
             assertItem(aura, isImage);

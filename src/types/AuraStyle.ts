@@ -46,6 +46,7 @@ function isColorOpacityShaderStyleType(
         case "Image":
         case "Simple":
         case "Spirits":
+        case "Distort":
             return false;
     }
 }
@@ -69,6 +70,13 @@ interface SpiritsStyle {
 }
 function isSpiritsStyle(style: unknown): style is SpiritsStyle {
     return isObject(style) && "type" in style && style.type === "Spirits";
+}
+
+interface DistortStyle {
+    type: "Distort";
+}
+function isDistortStyle(style: unknown): style is DistortStyle {
+    return isObject(style) && "type" in style && style.type === "Distort";
 }
 
 export interface CustomEffectStyle {
@@ -125,6 +133,7 @@ export function isImageStyle(style: unknown): style is ImageStyle {
 export type EffectStyle = (
     | ColorOpacityShaderStyle
     | SpiritsStyle
+    | DistortStyle
     | CustomEffectStyle
 ) & {
     blendMode?: BlendMode;
@@ -133,6 +142,7 @@ export function isEffectStyle(style: unknown): style is EffectStyle {
     return (
         (isColorOpacityShaderStyle(style) ||
             isSpiritsStyle(style) ||
+            isDistortStyle(style) ||
             isCustomEffectStyle(style)) &&
         (!("blendMode" in style) || typeof style.blendMode === "string")
     );
@@ -151,12 +161,13 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Glow",
     "Range",
     "Spirits",
+    "Distort",
     "Solid",
     "Custom",
 ];
 export function isAuraStyleType(style: unknown): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
-    return typeof style === 'string' && styleTypes.includes(style);
+    return typeof style === "string" && styleTypes.includes(style);
 }
 
 export function createStyle({
@@ -202,6 +213,7 @@ export function createStyle({
                 blendMode,
             };
         case "Spirits":
+        case "Distort":
             return {
                 type: styleType,
                 blendMode,
@@ -248,6 +260,7 @@ export function getColor(style: AuraStyle): string {
         case "Spirits":
         case "Image":
         case "Custom":
+        case "Distort":
             return "#FFFFFF";
     }
 }
@@ -280,6 +293,7 @@ export function getOpacity(style: AuraStyle): number {
         case "Spirits":
         case "Image":
         case "Custom":
+        case "Distort":
             return 1.0;
     }
 }
@@ -316,4 +330,20 @@ export function setStyleType(
         blendMode,
         imageBuildParams,
     });
+}
+
+export function isPostProcessStyle(styleType: AuraStyleType): boolean {
+    switch (styleType) {
+        case "Distort":
+            return true;
+        case "Simple":
+        case "Bubble":
+        case "Glow":
+        case "Range":
+        case "Solid":
+        case "Spirits":
+        case "Custom":
+        case "Image":
+            return false;
+    }
 }

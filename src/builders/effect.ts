@@ -8,6 +8,7 @@ import { getScale } from "../utils/axonometricUtils";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
 import { getBubbleSksl } from "./bubble";
 import { getRangeSksl } from "./range";
+import distort from "./shaders/distort.frag";
 import glow from "./shaders/glow.frag";
 import { getSolidSksl } from "./solid";
 import { getSpiritsSksl } from "./spirits";
@@ -33,6 +34,8 @@ function getSksl(
             return declareUniforms(style) + getRangeSksl(grid, shape);
         case "Solid":
             return declareUniforms(style) + getSolidSksl(grid, shape);
+        case "Distort":
+            return declareUniforms(style) + distort;
         case "Custom":
             return style.sksl;
     }

@@ -70,6 +70,7 @@ function hasColorOpacityUniforms(
         case "Solid":
             return true;
         case "Spirits":
+        case "Distort":
         case "Custom":
             return false;
     }
@@ -111,10 +112,13 @@ export function getUniforms(
 export function declareUniforms(style: EffectStyle) {
     let uniforms = `
         uniform vec2 size;
+        uniform mat3 view;
+        uniform float time;
+        uniform mat3 modelView;
+
         uniform float dpi;
         uniform float numUnits;
         uniform float itemRadiusUnits;
-        uniform float time;
     `;
     if (hasColorOpacityUniforms(style)) {
         uniforms += `
