@@ -1,5 +1,5 @@
 import type { GridType } from "@owlbear-rodeo/sdk";
-import { HexGridType } from "owlbear-utils";
+import type { HexGridType } from "owlbear-utils";
 
 export function isHexGrid(gridType: GridType): gridType is HexGridType {
     return gridType === "HEX_HORIZONTAL" || gridType === "HEX_VERTICAL";
