@@ -1,4 +1,9 @@
-import type { BlendMode, CurveStyle, Image, ShapeStyle } from "@owlbear-rodeo/sdk";
+import type {
+    BlendMode,
+    CurveStyle,
+    Image,
+    ShapeStyle,
+} from "@owlbear-rodeo/sdk";
 import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import {
     isCurveStyle,
@@ -24,9 +29,25 @@ export function isSimpleStyle(style: unknown): style is SimpleStyle {
 }
 
 export interface ColorOpacityShaderStyle {
-    type: "Bubble" | "Glow" | "Range";
+    type: "Bubble" | "Glow" | "Range" | "Solid";
     color: Vector3;
     opacity: number;
+}
+function isColorOpacityShaderStyleType(
+    type: AuraStyleType,
+): type is ColorOpacityShaderStyle["type"] {
+    switch (type) {
+        case "Bubble":
+        case "Glow":
+        case "Range":
+        case "Solid":
+            return true;
+        case "Custom":
+        case "Image":
+        case "Simple":
+        case "Spirits":
+            return false;
+    }
 }
 export function isColorOpacityShaderStyle(
     style: unknown,
@@ -34,9 +55,8 @@ export function isColorOpacityShaderStyle(
     return (
         isObject(style) &&
         "type" in style &&
-        (style.type === "Bubble" ||
-            style.type === "Glow" ||
-            style.type === "Range") &&
+        isAuraStyleType(style.type) &&
+        isColorOpacityShaderStyleType(style.type) &&
         "opacity" in style &&
         typeof style.opacity === "number" &&
         "color" in style &&
@@ -131,11 +151,12 @@ export const STYLE_TYPES: AuraStyleType[] = [
     "Glow",
     "Range",
     "Spirits",
+    "Solid",
     "Custom",
 ];
-export function isAuraStyleType(style: string): style is AuraStyleType {
+export function isAuraStyleType(style: unknown): style is AuraStyleType {
     const styleTypes: string[] = STYLE_TYPES;
-    return styleTypes.includes(style);
+    return typeof style === 'string' && styleTypes.includes(style);
 }
 
 export function createStyle({
@@ -173,6 +194,7 @@ export function createStyle({
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Solid":
             return {
                 type: styleType,
                 color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
@@ -219,6 +241,7 @@ export function getColor(style: AuraStyle): string {
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Solid":
             return rgbToHex(style.color);
         case "Simple":
             return style.itemStyle.fillColor;
@@ -250,6 +273,7 @@ export function getOpacity(style: AuraStyle): number {
         case "Bubble":
         case "Glow":
         case "Range":
+        case "Solid":
             return style.opacity;
         case "Simple":
             return style.itemStyle.fillOpacity;
