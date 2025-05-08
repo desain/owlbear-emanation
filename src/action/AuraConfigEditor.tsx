@@ -1,6 +1,6 @@
 import { Stack } from "@mui/material";
 import { produce } from "immer";
-import type { AuraConfig} from "../types/AuraConfig";
+import type { AuraConfig } from "../types/AuraConfig";
 import { getLayer } from "../types/AuraConfig";
 import {
     getBlendMode,
@@ -10,6 +10,7 @@ import {
     isCustomEffectStyle,
     isEffectStyle,
     isImageStyle,
+    isPostProcessStyle,
     isSimpleStyle,
     setColor,
     setOpacity,
@@ -117,6 +118,7 @@ export function AuraConfigEditor({
                         fullWidth
                         value={getLayer(config)}
                         onChange={setLayer}
+                        disabled={isPostProcessStyle(config.style.type)}
                     />
                     {isEffectStyle(config.style) && (
                         <BlendModeSelector

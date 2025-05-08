@@ -1,7 +1,7 @@
 import type { Layer } from "@owlbear-rodeo/sdk";
 import { isDeepEqual, isLayer, isObject } from "owlbear-utils";
-import type { AuraStyle} from "./AuraStyle";
-import { getBlendMode, isAuraStyle } from "./AuraStyle";
+import type { AuraStyle } from "./AuraStyle";
+import { getBlendMode, isAuraStyle, isPostProcessStyle } from "./AuraStyle";
 
 /**
  * Data that defines how an aura should be displayed.
@@ -48,7 +48,9 @@ export const DEFAULT_AURA_CONFIG: AuraConfig = {
 };
 
 export function getLayer(config: AuraConfig): Layer {
-    return config.layer ?? "DRAWING";
+    return isPostProcessStyle(config.style.type)
+        ? "POST_PROCESS"
+        : config.layer ?? "DRAWING";
 }
 
 /**

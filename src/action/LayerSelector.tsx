@@ -1,4 +1,4 @@
-import type { FormControlProps} from "@mui/material";
+import type { FormControlProps } from "@mui/material";
 import { MenuItem, Select } from "@mui/material";
 import type { Layer } from "@owlbear-rodeo/sdk";
 import { Control, isLayer, LAYERS } from "owlbear-utils";
@@ -8,6 +8,7 @@ import { LAYER_ICONS } from "./layerIcons";
 
 interface LayerSelectorProps {
     value: Layer;
+    disabled: boolean;
     onChange: (layer: Layer) => void;
 }
 
@@ -21,7 +22,7 @@ const LAYER_NAMES = LAYERS.map((layer) =>
 
 export const LayerSelector: FC<
     LayerSelectorProps & Omit<FormControlProps, "onChange">
-> = ({ value, onChange, ...props }) => {
+> = ({ value, onChange, disabled, ...props }) => {
     const showAdvancedOptions = usePlayerStorage(
         (store) => store.showAdvancedOptions,
     );
@@ -30,6 +31,7 @@ export const LayerSelector: FC<
             <Select
                 size="small"
                 value={value}
+                disabled={disabled}
                 onChange={(e) => {
                     const value = e.target.value;
                     if (isLayer(value)) {
