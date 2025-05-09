@@ -17,7 +17,7 @@ import { getId, getName, getOrInsert } from "owlbear-utils";
 import { useMemo } from "react";
 import { CHANNEL_MESSAGE, METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import type { AuraConfig } from "../types/AuraConfig";
+import { DEFAULT_AURA_CONFIG, type AuraConfig } from "../types/AuraConfig";
 import type { AuraEntry } from "../types/metadata/SourceMetadata";
 import type { Source } from "../types/Source";
 import { getSourceImage, isSource, updateEntries } from "../types/Source";
@@ -183,7 +183,7 @@ const ExtantAuras = ({ targetedItems }: { targetedItems: Item[] }) =>
         )
             .sort((aurasA, aurasB) => aurasB.length - aurasA.length)
             .map((identicalAuras) => {
-                const config: AuraConfig = identicalAuras[0].entry;
+                const config = identicalAuras[0]?.entry ?? DEFAULT_AURA_CONFIG;
                 const auras = identicalAuras.map(
                     ({ name, id, image, entry }) => ({
                         name,

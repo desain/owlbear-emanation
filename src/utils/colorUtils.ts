@@ -20,7 +20,7 @@ export function assumeHexColor(color: string): HexColor {
 
 export function hexToRgb(hex: string): RgbColor | null {
     const result = parseColor(hex);
-    return result
+    return result?.[1] && result[2] && result[3]
         ? ({
               x: parseInt(result[1], 16) / 255,
               y: parseInt(result[2], 16) / 255,
@@ -41,3 +41,4 @@ export function rgbToHex({ x, y, z }: RgbColor): HexColor {
 export const WHITE_HEX: HexColor = assumeHexColor("#FFFFFF");
 
 export const PINK_RGB: RgbColor = { x: 1, y: 0, z: 1 } as RgbColor;
+export const WHITE_RGB: RgbColor = { x: 1, y: 1, z: 1 } as RgbColor;

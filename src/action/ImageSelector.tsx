@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 import type { ImageContent } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
 import { complain, Control, isObject } from "owlbear-utils";
-import type { RefObject} from "react";
+import type { RefObject } from "react";
 import { useEffect, useRef } from "react";
 import type { ImageBuildParams } from "../types/AuraStyle";
 
@@ -65,8 +65,8 @@ export function ImageSelector({
                 undefined,
                 "PROP",
             );
-            if (images.length > 0) {
-                const selected = images[0];
+            const selected = images[0];
+            if (selected) {
                 onChange({
                     image: selected.image,
                     grid: selected.grid,

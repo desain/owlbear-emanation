@@ -128,9 +128,7 @@ export function toConfig(message: CreateAurasMessage): AuraConfig {
 function getStyle(message: CreateAurasMessage): AuraStyle {
     const playerSettings = usePlayerStorage.getState();
     const defaultConfig =
-        playerSettings.presets.length === 0
-            ? DEFAULT_AURA_CONFIG
-            : playerSettings.presets[0].config;
+        playerSettings.presets[0]?.config ?? DEFAULT_AURA_CONFIG;
     const styleType: AuraStyleType = message.style ?? defaultConfig.style.type;
     const color = message.color ?? getColor(defaultConfig.style);
     const opacity = message.opacity ?? getOpacity(defaultConfig.style);
