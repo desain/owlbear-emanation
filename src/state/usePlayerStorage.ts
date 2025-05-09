@@ -7,6 +7,7 @@ import type {
     GridParsed,
     Role,
 } from "owlbear-utils";
+import { units, type Units } from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -39,7 +40,7 @@ const ObrSceneReady = new Promise<void>((resolve) => {
     });
 });
 
-async function fetchDefaults(): Promise<{ color: string; size: number }> {
+async function fetchDefaults(): Promise<{ color: string; size: Units }> {
     await ObrSceneReady;
     const [color, scale] = await Promise.all([
         OBR.player.getColor(),
@@ -47,7 +48,7 @@ async function fetchDefaults(): Promise<{ color: string; size: number }> {
     ]);
     return {
         color,
-        size: scale.parsed.multiplier,
+        size: units(scale.parsed.multiplier),
     };
 }
 

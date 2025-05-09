@@ -243,7 +243,8 @@ To make a production build run:
 -   More effects!
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
--   Allow size 0 auras
+-   Does simple work in axonometric? Setting width and height manually rather than with scale.
+-   Newtype for color
 
 ## License
 

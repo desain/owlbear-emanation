@@ -1,6 +1,6 @@
 import type { Curve, Vector2 } from "@owlbear-rodeo/sdk";
 import { buildCurve } from "@owlbear-rodeo/sdk";
-import type { GridParsed} from "owlbear-utils";
+import type { Cells, GridParsed, Pixels } from "owlbear-utils";
 import { matrixMultiply } from "owlbear-utils";
 import type { SimpleAuraDrawable } from "../types/Aura";
 import type { AuraShape } from "../types/AuraShape";
@@ -25,8 +25,8 @@ export function buildSimpleAura(
     grid: GridParsed,
     style: SimpleStyle,
     position: Vector2,
-    numUnits: number,
-    absoluteItemSize: number,
+    numUnits: Cells,
+    absoluteItemSize: Pixels,
     shape: AuraShape,
 ): SimpleAuraDrawable {
     let drawable: SimpleAuraDrawable;

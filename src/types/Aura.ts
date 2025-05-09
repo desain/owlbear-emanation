@@ -1,13 +1,13 @@
 import type { Curve, Effect, Image, Item, Uniform } from "@owlbear-rodeo/sdk";
 import { isCurve, isEffect, isImage } from "@owlbear-rodeo/sdk";
 import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
-import { assertItem } from "owlbear-utils";
+import { assertItem, unitsToCells } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import type { AuraConfig } from "./AuraConfig";
 import type { CandidateSource } from "./CandidateSource";
-import { getAbsoluteItemSize } from "./CandidateSource";
+import { getSourceSizePx } from "./CandidateSource";
 import type { Circle } from "./Circle";
 import { isCircle } from "./Circle";
 import type { HasMetadata } from "./metadata/metadataUtils";
@@ -71,12 +71,12 @@ export function updateDrawingParams(
             aura.image = config.style.image;
             aura.grid = config.style.grid;
             const grid = usePlayerStorage.getState().grid;
-            const absoluteItemSize = getAbsoluteItemSize(source, grid);
-            const numUnits = config.size / grid.parsedScale.multiplier;
+            const absoluteItemSize = getSourceSizePx(source, grid);
+            const radius = unitsToCells(config.size, grid);
             aura.scale = getImageAuraScale(
                 config.style,
                 grid,
-                numUnits,
+                radius,
                 absoluteItemSize,
             );
             break;

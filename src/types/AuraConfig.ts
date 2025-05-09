@@ -1,5 +1,6 @@
 import type { Layer } from "@owlbear-rodeo/sdk";
-import { isDeepEqual, isLayer, isObject } from "owlbear-utils";
+import type { Units } from "owlbear-utils";
+import { isDeepEqual, isLayer, isObject, units } from "owlbear-utils";
 import type { AuraStyle } from "./AuraStyle";
 import { getBlendMode, isAuraStyle, isPostProcessStyle } from "./AuraStyle";
 
@@ -11,7 +12,7 @@ export interface AuraConfig {
     /**
      * Radius in current grid units. Eg if a grid space is 5ft, a value of 5 is an aura of one grid space radius.
      */
-    size: number;
+    size: Units;
     /**
      * Player IDs that can see this aura. If not set, the aura is visible to all players.
      * If null, the aura is visible to no one.
@@ -39,7 +40,7 @@ export function isAuraConfig(config: unknown): config is AuraConfig {
 }
 
 export const DEFAULT_AURA_CONFIG: AuraConfig = {
-    size: 5,
+    size: units(5),
     style: {
         type: "Bubble",
         color: { x: 1, y: 1, z: 1 },

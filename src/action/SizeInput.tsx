@@ -1,7 +1,7 @@
-import type { FormControlProps} from "@mui/material";
+import type { FormControlProps } from "@mui/material";
 import { InputAdornment } from "@mui/material";
 import TextField from "@mui/material/TextField";
-import { Control } from "owlbear-utils";
+import { Control, units, type Units } from "owlbear-utils";
 import { useState } from "react";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 
@@ -10,8 +10,8 @@ export function SizeInput({
     onChange,
     ...props
 }: {
-    value: number;
-    onChange: (size: number) => void;
+    value: Units;
+    onChange: (size: Units) => void;
 } & Omit<FormControlProps, "onChange">) {
     const grid = usePlayerStorage((state) => state.grid);
     const [oldValue, setOldValue] = useState(value);
@@ -44,8 +44,12 @@ export function SizeInput({
                 onChange={(e) => {
                     setDisplayValue(e.currentTarget.value);
                     const size = parseFloat(e.currentTarget.value);
-                    if (Number.isSafeInteger(size) && size > 0) {
-                        onChange(size);
+                    if (
+                        Number.isFinite(size) &&
+                        !Number.isNaN(size) &&
+                        size >= 0
+                    ) {
+                        onChange(units(size));
                     }
                 }}
             />

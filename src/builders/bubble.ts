@@ -1,4 +1,4 @@
-import type { GridParsed } from "owlbear-utils";
+import type { Cells, GridParsed, Pixels } from "owlbear-utils";
 import type { AuraShape } from "../types/AuraShape";
 import {
     createAxonometricTransform,
@@ -8,13 +8,13 @@ import bubble from "./shaders/bubble.frag";
 
 export function getBubbleSksl(
     grid: GridParsed,
-    numUnits: number,
-    absoluteItemSize: number,
+    radius: Cells,
+    absoluteItemSize: Pixels,
     shape: AuraShape,
 ) {
     return [
         createAxonometricTransform(grid.type),
-        createSignedDistanceFunction(grid, numUnits, absoluteItemSize, shape),
+        createSignedDistanceFunction(grid, radius, absoluteItemSize, shape),
         bubble,
     ].join("\n");
 }

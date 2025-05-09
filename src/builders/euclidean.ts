@@ -1,6 +1,7 @@
 import type { Vector2 } from "@owlbear-rodeo/sdk";
 import { buildShape } from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
+import { cellsToPixels, type Cells, type Pixels } from "owlbear-utils";
 import type { Circle } from "../types/Circle";
 
 /**
@@ -13,11 +14,11 @@ import type { Circle } from "../types/Circle";
 export function buildEuclideanAura(
     grid: GridParsed,
     position: Vector2,
-    numUnits: number,
-    absoluteItemSize: number,
+    radius: Cells,
+    absoluteItemSize: Pixels,
     scale: Vector2,
 ): Circle {
-    const diameter = numUnits * grid.dpi * 2 + absoluteItemSize;
+    const diameter = cellsToPixels(radius, grid) * 2 + absoluteItemSize;
     return buildShape()
         .width(diameter * scale.x)
         .height(diameter * scale.y)
