@@ -15,7 +15,7 @@ import OBR from "@owlbear-rodeo/sdk";
 import objectHash from "object-hash";
 import { getId, getName, getOrInsert } from "owlbear-utils";
 import { useMemo } from "react";
-import { MESSAGE_CHANNEL, METADATA_KEY } from "../constants";
+import { CHANNEL_MESSAGE, METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import type { AuraConfig } from "../types/AuraConfig";
 import type { AuraEntry } from "../types/metadata/SourceMetadata";
@@ -261,7 +261,7 @@ export function EditTab() {
                     <PasteButton
                         onPaste={(message) =>
                             OBR.broadcast.sendMessage(
-                                MESSAGE_CHANNEL,
+                                CHANNEL_MESSAGE,
                                 {
                                     ...message,
                                     sources: lastNonemptySelection,

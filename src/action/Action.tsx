@@ -5,7 +5,7 @@ import { Box, Tab, Tabs } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
 import { useActionResizer, useUndoRedoHandler } from "owlbear-utils";
 import { useEffect, useRef, useState } from "react";
-import { TAB_CHANNEL } from "../constants";
+import { CHANNEL_TAB } from "../constants";
 import { AuraDefaultsTab } from "./AuraDefaultsTab";
 import { EditTab } from "./EditTab";
 import { SettingsTab } from "./SettingsTab";
@@ -31,11 +31,13 @@ function TabContent({
 export function Action() {
     const [currentTab, setCurrentTab] = useState(0);
 
-    useEffect(() => OBR.broadcast.onMessage(TAB_CHANNEL, ({ data }) => {
+    useEffect(() =>
+        OBR.broadcast.onMessage(CHANNEL_TAB, ({ data }) => {
             if (typeof data === "number") {
                 setCurrentTab(data);
             }
-        }));
+        }),
+    );
 
     const tabContainer: React.RefObject<HTMLElement | null> = useRef(null);
     useActionResizer(BASE_HEIGHT, MAX_HEIGHT, tabContainer);

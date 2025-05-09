@@ -1,8 +1,18 @@
 const PLUGIN_ID = "com.desain.emanation";
+
+// Metadata
 export const METADATA_KEY = `${PLUGIN_ID}/metadata`;
-export const CONTEXTMENU_CREATE_ID = `${PLUGIN_ID}/contextmenu-create`;
-export const CONTEXTMENU_EDIT_ID = `${PLUGIN_ID}/contextmenu-edit`;
-export const VECTOR2_COMPARE_EPSILON = 0.01;
-export const MESSAGE_CHANNEL = `${PLUGIN_ID}/message`;
-export const TAB_CHANNEL = `${PLUGIN_ID}/action-set-tab`;
+
+// Context Menu
+export const ID_CONTEXTMENU_CREATE = `${PLUGIN_ID}/contextmenu-create`;
+export const ID_CONTEXTMENU_EDIT = `${PLUGIN_ID}/contextmenu-edit`;
+
+// Broadcasts
+export const CHANNEL_MESSAGE = `${PLUGIN_ID}/message`;
+export const CHANNEL_TAB = `${PLUGIN_ID}/action-set-tab`;
+
+// Store
 export const PLAYER_SETTINGS_STORE_NAME = `${PLUGIN_ID}/playerSettings`;
+
+// Misc
+export const VECTOR2_COMPARE_EPSILON = 0.01;

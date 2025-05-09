@@ -1,6 +1,8 @@
 import type { FormControlProps } from "@mui/material";
 import { Control } from "owlbear-utils";
 import { useEffect, useState } from "react";
+import type { HexColor } from "../utils/colorUtils";
+import { assumeHexColor } from "../utils/colorUtils";
 
 const UPDATE_DELAY_MS = 100;
 
@@ -9,8 +11,8 @@ export function ColorInput({
     onChange,
     ...props
 }: {
-    value: string;
-    onChange: (value: string) => void;
+    value: HexColor;
+    onChange: (value: HexColor) => void;
 } & Omit<FormControlProps, "onChange">) {
     const [oldValue, setOldValue] = useState(value);
     const [displayValue, setDisplayValue] = useState(value);
@@ -42,7 +44,7 @@ export function ColorInput({
                     type="color"
                     value={displayValue}
                     onInput={(e) => {
-                        setDisplayValue(e.currentTarget.value);
+                        setDisplayValue(assumeHexColor(e.currentTarget.value));
                     }}
                 />
             </label>

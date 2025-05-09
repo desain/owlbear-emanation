@@ -3,10 +3,10 @@ import add from "../../assets/add.svg";
 import edit from "../../assets/edit.svg";
 
 import {
-    CONTEXTMENU_CREATE_ID,
-    CONTEXTMENU_EDIT_ID,
+    CHANNEL_TAB,
+    ID_CONTEXTMENU_CREATE,
+    ID_CONTEXTMENU_EDIT,
     METADATA_KEY,
-    TAB_CHANNEL,
 } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import type { CandidateSource } from "../types/CandidateSource";
@@ -34,7 +34,7 @@ export async function startWatchingContextMenuEnabled(): Promise<VoidFunction> {
  */
 async function createContextMenu() {
     const createAuraItemCreated = OBR.contextMenu.create({
-        id: CONTEXTMENU_CREATE_ID,
+        id: ID_CONTEXTMENU_CREATE,
         shortcut: "E", // Emanation
         icons: [
             {
@@ -62,10 +62,11 @@ async function createContextMenu() {
                 },
             },
         ],
-        onClick: async (context) => createAurasWithDefaults(context.items as CandidateSource[]),
+        onClick: async (context) =>
+            createAurasWithDefaults(context.items as CandidateSource[]),
     });
     const editAuraItemCreated = OBR.contextMenu.create({
-        id: CONTEXTMENU_EDIT_ID,
+        id: ID_CONTEXTMENU_EDIT,
         shortcut: "E", // Edit Emanation
         icons: [
             {
@@ -107,7 +108,7 @@ async function createContextMenu() {
         ],
         onClick: async () => {
             if (await OBR.action.isOpen()) {
-                await OBR.broadcast.sendMessage(TAB_CHANNEL, 0, {
+                await OBR.broadcast.sendMessage(CHANNEL_TAB, 0, {
                     destination: "LOCAL",
                 });
             } else {
@@ -120,7 +121,7 @@ async function createContextMenu() {
 
 async function removeContextMenu() {
     return Promise.all([
-        OBR.contextMenu.remove(CONTEXTMENU_CREATE_ID),
-        OBR.contextMenu.remove(CONTEXTMENU_EDIT_ID),
+        OBR.contextMenu.remove(ID_CONTEXTMENU_CREATE),
+        OBR.contextMenu.remove(ID_CONTEXTMENU_EDIT),
     ]);
 }
