@@ -272,17 +272,14 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     // );
                     if (state) {
                         // work around missing keys in migrated preset
-                        if (
-                            state.presets.length > 0 &&
-                            !state.presets[0].config.size
-                        ) {
+                        if (state.presets[0] && !state.presets[0].config.size) {
                             state.setPresetSize(
                                 state.presets[0].id,
                                 DEFAULT_AURA_CONFIG.size,
                             );
                         }
                         if (
-                            state.presets.length > 0 &&
+                            state.presets[0] &&
                             !state.presets[0].config.style
                         ) {
                             state.setPresetStyle(
@@ -293,8 +290,8 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         if (!state.hasSensibleValues) {
                             // console.log("Not sensible, fetching defaults");
                             void fetchDefaults().then(({ color, size }) => {
-                                if (state.presets.length > 0) {
-                                    const defaultPreset = state.presets[0];
+                                const defaultPreset = state.presets[0];
+                                if (defaultPreset) {
                                     const newStyle = {
                                         ...defaultPreset.config.style,
                                     };

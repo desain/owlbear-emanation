@@ -1,6 +1,7 @@
 import type { Layer } from "@owlbear-rodeo/sdk";
 import type { Units } from "owlbear-utils";
 import { isDeepEqual, isLayer, isObject, units } from "owlbear-utils";
+import { WHITE_RGB } from "../utils/colorUtils";
 import type { AuraStyle } from "./AuraStyle";
 import { getBlendMode, isAuraStyle, isPostProcessStyle } from "./AuraStyle";
 
@@ -43,7 +44,7 @@ export const DEFAULT_AURA_CONFIG: AuraConfig = {
     size: units(5),
     style: {
         type: "Bubble",
-        color: { x: 1, y: 1, z: 1 },
+        color: WHITE_RGB,
         opacity: 1,
     },
 };
