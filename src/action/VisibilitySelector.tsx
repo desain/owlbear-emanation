@@ -1,3 +1,6 @@
+import DisabledVisible from "@mui/icons-material/DisabledVisible";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import type { FormControlProps } from "@mui/material";
 import { MenuItem, Select } from "@mui/material";
 import { Control } from "owlbear-utils";
@@ -35,9 +38,33 @@ export function VisibilitySelector({
                     );
                 }}
             >
-                <MenuItem value={EVERYONE}>Visible to Everyone</MenuItem>
-                <MenuItem value={playerId}>Visible to Only Me</MenuItem>
-                <MenuItem value={NOBODY}>Invisible</MenuItem>
+                <MenuItem value={EVERYONE}>
+                    <Visibility
+                        style={{
+                            marginRight: 8,
+                            verticalAlign: "middle",
+                        }}
+                    />
+                    Visible to Everyone
+                </MenuItem>
+                <MenuItem value={playerId}>
+                    <DisabledVisible
+                        style={{
+                            marginRight: 8,
+                            verticalAlign: "middle",
+                        }}
+                    />
+                    Visible to Only Me
+                </MenuItem>
+                <MenuItem value={NOBODY}>
+                    <VisibilityOff
+                        style={{
+                            marginRight: 8,
+                            verticalAlign: "middle",
+                        }}
+                    />
+                    Invisible
+                </MenuItem>
                 {currentlyVisibleToOther && (
                     <MenuItem disabled value={value}>
                         <em>Visible to Another Player</em>
