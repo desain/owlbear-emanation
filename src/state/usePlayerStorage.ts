@@ -20,6 +20,8 @@ import {
     DEFAULT_SCENE_METADATA,
     extractSceneMetadataOrDefault,
 } from "../types/metadata/SceneMetadata";
+import type { HexColor } from "../utils/colorUtils";
+import { assumeHexColor } from "../utils/colorUtils";
 
 const SET_SENSIBLE = Symbol("SetSensible");
 
@@ -40,14 +42,14 @@ const ObrSceneReady = new Promise<void>((resolve) => {
     });
 });
 
-async function fetchDefaults(): Promise<{ color: string; size: Units }> {
+async function fetchDefaults(): Promise<{ color: HexColor; size: Units }> {
     await ObrSceneReady;
     const [color, scale] = await Promise.all([
         OBR.player.getColor(),
         OBR.scene.grid.getScale(),
     ]);
     return {
-        color,
+        color: assumeHexColor(color),
         size: units(scale.parsed.multiplier),
     };
 }

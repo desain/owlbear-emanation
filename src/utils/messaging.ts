@@ -18,6 +18,7 @@ import {
     isAuraStyleType,
 } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
+import type { HexColor } from "./colorUtils";
 import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
 import { removeAllAuras } from "./removeAuras";
@@ -42,7 +43,7 @@ export interface CreateAurasMessage {
     /**
      * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
-    color?: string;
+    color?: HexColor;
     /**
      * Number from 0 (fully transparent) to 1 (fully opaque). If not provided, the current player's default opacity will be used.
      */

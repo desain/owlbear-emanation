@@ -6,7 +6,7 @@ import ReactDOM from "react-dom/client";
 import "../../assets/style.css";
 import { version } from "../../package.json";
 import AuraFixer from "../AuraFixer";
-import { MESSAGE_CHANNEL } from "../constants";
+import { CHANNEL_MESSAGE } from "../constants";
 import { startSyncing } from "../state/startSyncing";
 import { handleMessage } from "../utils/messaging";
 import { Action } from "./Action";
@@ -17,7 +17,7 @@ let uninstall: VoidFunction = () => {
 };
 
 function installBroadcastListener() {
-    return OBR.broadcast.onMessage(MESSAGE_CHANNEL, ({ data }) =>
+    return OBR.broadcast.onMessage(CHANNEL_MESSAGE, ({ data }) =>
         handleMessage(data),
     );
 }

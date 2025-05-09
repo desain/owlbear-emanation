@@ -4,7 +4,6 @@ import type {
     Image,
     ShapeStyle,
 } from "@owlbear-rodeo/sdk";
-import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import {
     isCurveStyle,
     isObject,
@@ -12,7 +11,14 @@ import {
     isVector2,
     isVector3,
 } from "owlbear-utils";
-import { hexToRgb, isHexColor, rgbToHex } from "../utils/colorUtils";
+import type { HexColor, RgbColor } from "../utils/colorUtils";
+import {
+    assumeHexColor,
+    hexToRgb,
+    PINK_RGB,
+    rgbToHex,
+    WHITE_HEX,
+} from "../utils/colorUtils";
 
 export interface SimpleStyle {
     type: "Simple";
@@ -30,7 +36,7 @@ export function isSimpleStyle(style: unknown): style is SimpleStyle {
 
 export interface ColorOpacityShaderStyle {
     type: "Bubble" | "Glow" | "Range" | "Solid";
-    color: Vector3;
+    color: RgbColor;
     opacity: number;
 }
 function isColorOpacityShaderStyleType(
@@ -179,16 +185,12 @@ export function createStyle({
     sksl,
 }: {
     styleType: AuraStyleType;
-    color: string;
+    color: HexColor;
     opacity: number;
     blendMode?: BlendMode;
     imageBuildParams?: ImageBuildParams;
     sksl?: string;
 }): AuraStyle {
-    if (!isHexColor(color)) {
-        throw new Error(`Color '${color}' must be a hex color`);
-    }
-
     switch (styleType) {
         case "Simple":
             return {
@@ -208,7 +210,7 @@ export function createStyle({
         case "Solid":
             return {
                 type: styleType,
-                color: hexToRgb(color) ?? { x: 1, y: 0, z: 1 },
+                color: hexToRgb(color) ?? PINK_RGB,
                 opacity,
                 blendMode,
             };
@@ -248,7 +250,7 @@ export function createStyle({
     }
 }
 
-export function getColor(style: AuraStyle): string {
+export function getColor(style: AuraStyle): HexColor {
     switch (style.type) {
         case "Bubble":
         case "Glow":
@@ -256,12 +258,12 @@ export function getColor(style: AuraStyle): string {
         case "Solid":
             return rgbToHex(style.color);
         case "Simple":
-            return style.itemStyle.fillColor;
+            return assumeHexColor(style.itemStyle.fillColor);
         case "Spirits":
         case "Image":
         case "Custom":
         case "Distort":
-            return "#FFFFFF";
+            return WHITE_HEX;
     }
 }
 
@@ -272,9 +274,9 @@ export function getBlendMode(style: AuraStyle): BlendMode {
     return "SRC_OVER";
 }
 
-export function setColor(style: AuraStyle, color: string) {
+export function setColor(style: AuraStyle, color: HexColor) {
     if ("color" in style) {
-        style.color = hexToRgb(color) ?? { x: 1, y: 0, z: 1 };
+        style.color = hexToRgb(color) ?? PINK_RGB;
     } else if ("itemStyle" in style) {
         style.itemStyle.fillColor = color;
         style.itemStyle.strokeColor = color;

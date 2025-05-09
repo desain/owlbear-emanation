@@ -1,10 +1,10 @@
 import type { Curve, Effect, Image, Item, Uniform } from "@owlbear-rodeo/sdk";
 import { isCurve, isEffect, isImage } from "@owlbear-rodeo/sdk";
-import type { Vector3 } from "@owlbear-rodeo/sdk/lib/types/Vector3";
 import { assertItem, unitsToCells } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
+import type { RgbColor } from "../utils/colorUtils";
 import type { AuraConfig } from "./AuraConfig";
 import type { CandidateSource } from "./CandidateSource";
 import { getSourceSizePx } from "./CandidateSource";
@@ -90,7 +90,7 @@ export function updateDrawingParams(
 
 interface ColorUniform extends Uniform {
     name: "color";
-    value: Vector3;
+    value: RgbColor;
 }
 
 interface OpacityUniform extends Uniform {
@@ -106,7 +106,7 @@ function isOpacityUniform(uniform: Uniform): uniform is OpacityUniform {
     return uniform.name === "opacity";
 }
 
-function setColorUniform(aura: Effect, color: Vector3) {
+function setColorUniform(aura: Effect, color: RgbColor) {
     const colorUniform = aura.uniforms.find(isColorUniform);
     if (colorUniform) {
         colorUniform.value = color;
