@@ -1,4 +1,4 @@
-uniform shader scene;
+// uniform shader scene;
 
 const float TIME_FACTOR = 0.2;
 const float WARP_FACTOR = 0.2;
@@ -18,7 +18,13 @@ vec4 main(in vec2 fragCoordPx) {
     float d = length(centerRelativeCoordPx);
     float pct = clamp(d / radiusPx, 0.0, 1.0);
 
-    vec2 viewCoordPx = (vec3(fragCoordPx, 1.0) * modelView).xy;
-    viewCoordPx += normalize(centerRelativeCoordPx) * scaleOffset(pct);
+    // why multiply from the left here?
+    // according to https://en.wikibooks.org/wiki/GLSL_Programming/Vector_and_Matrix_Operations
+    // multiplying v * M (from the left) is equivalent to transpose(M) * v
+    // OBR matrices are row-major, whereas GLSL/SKSL matrics are column-major
+    // so we want to transpose the matrix before multiplying
+    vec2 worldCoordPx = (vec3(fragCoordPx, 1.0) * model).xy;
+    worldCoordPx += normalize(centerRelativeCoordPx) * scaleOffset(pct);
+    vec2 viewCoordPx = (vec3(worldCoordPx, 1.0) * view).xy;
     return scene.eval(viewCoordPx);
 }

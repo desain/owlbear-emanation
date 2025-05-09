@@ -10,7 +10,11 @@ import {
 } from "owlbear-utils";
 import { getPoints } from "../builders/points";
 import type { AuraShape } from "../types/AuraShape";
-import type { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
+import {
+    isPostProcessStyle,
+    type ColorOpacityShaderStyle,
+    type EffectStyle,
+} from "../types/AuraStyle";
 import {
     INVERSE_TRANSFORM_DIMETRIC,
     INVERSE_TRANSFORM_ISOMETRIC,
@@ -119,9 +123,10 @@ export function getUniforms(
 
 export function declareUniforms(style: EffectStyle) {
     let uniforms = `
-        uniform vec2 size;
-        uniform mat3 view;
         uniform float time;
+        uniform vec2 size;
+        uniform mat3 model;
+        uniform mat3 view;
         uniform mat3 modelView;
 
         uniform float dpi;
@@ -132,6 +137,11 @@ export function declareUniforms(style: EffectStyle) {
         uniforms += `
             uniform vec3 color;
             uniform float opacity;
+        `;
+    }
+    if (isPostProcessStyle(style.type)) {
+        uniforms += `
+            uniform shader scene;
         `;
     }
     return uniforms;
