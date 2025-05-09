@@ -1,3 +1,5 @@
+import OpacityIcon from "@mui/icons-material/Opacity";
+import StormIcon from "@mui/icons-material/Storm";
 import { Stack } from "@mui/material";
 import { produce } from "immer";
 import type { AuraConfig } from "../types/AuraConfig";
@@ -6,8 +8,10 @@ import {
     getBlendMode,
     getColor,
     getOpacity,
+    getWarpFactor,
     isColorOpacityShaderStyle,
     isCustomEffectStyle,
+    isDistortStyle,
     isEffectStyle,
     isImageStyle,
     isPostProcessStyle,
@@ -21,8 +25,8 @@ import { ColorInput } from "./ColorInput";
 import { CustomShaderInput } from "./CustomShaderInput";
 import { ImageSelector } from "./ImageSelector";
 import { LayerSelector } from "./LayerSelector";
-import { OpacitySlider } from "./OpacitySlider";
 import { SizeInput } from "./SizeInput";
+import { SliderControl } from "./SliderControl";
 import { StyleSelector } from "./StyleSelector";
 import { VisibilitySelector } from "./VisibilitySelector";
 
@@ -66,8 +70,9 @@ export function AuraConfigEditor({
                             )
                         }
                     />
-                    <OpacitySlider
-                        sx={{ flexGrow: 1 }}
+                    <SliderControl
+                        label="Opacity"
+                        icon={<OpacityIcon color="disabled" />}
                         value={getOpacity(config.style)}
                         onChange={(opacity) =>
                             setStyle(
@@ -105,6 +110,24 @@ export function AuraConfigEditor({
                         )
                     }
                 />
+            )}
+            {isDistortStyle(config.style) && (
+                <Stack direction="row">
+                    <SliderControl
+                        label="Warp Factor"
+                        icon={<StormIcon color="disabled" />}
+                        value={getWarpFactor(config.style)}
+                        onChange={(warpFactor) => {
+                            setStyle(
+                                produce(config.style, (style) => {
+                                    if (isDistortStyle(style)) {
+                                        style.warpFactor = warpFactor;
+                                    }
+                                }),
+                            );
+                        }}
+                    />
+                </Stack>
             )}
             <details>
                 <summary>Advanced Options</summary>

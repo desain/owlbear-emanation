@@ -6,6 +6,7 @@ import { METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import type { RgbColor } from "../utils/colorUtils";
 import type { AuraConfig } from "./AuraConfig";
+import { getWarpFactor, isPostProcessStyle } from "./AuraStyle";
 import type { CandidateSource } from "./CandidateSource";
 import { getSourceSizePx } from "./CandidateSource";
 import type { Circle } from "./Circle";
@@ -42,7 +43,7 @@ export function updateDrawingParams(
     aura: Aura,
     config: AuraConfig,
 ) {
-    if (config.layer) {
+    if (config.layer && !isPostProcessStyle(config.style.type)) {
         aura.layer = config.layer;
     }
     switch (config.style.type) {
@@ -64,8 +65,11 @@ export function updateDrawingParams(
             aura.style.strokeWidth = config.style.itemStyle.strokeWidth;
             break;
         case "Spirits":
-        case "Distort":
             break; // nothing to set
+        case "Distort":
+            assertItem(aura, isEffect);
+            setNumberUniform(aura, "warpFactor", getWarpFactor(config.style));
+            break;
         case "Image": {
             assertItem(aura, isImage);
             aura.image = config.style.image;
@@ -117,5 +121,18 @@ function setOpacityUniform(aura: Effect, opacity: number) {
     const opacityUniform = aura.uniforms.find(isOpacityUniform);
     if (opacityUniform) {
         opacityUniform.value = opacity;
+    }
+}
+
+function setNumberUniform(
+    aura: Effect,
+    uniformName: string,
+    uniformValue: number,
+) {
+    const uniform = aura.uniforms.find(
+        (uniform) => uniform.name === uniformName,
+    );
+    if (uniform) {
+        uniform.value = uniformValue;
     }
 }

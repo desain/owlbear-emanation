@@ -1,29 +1,29 @@
-import OpacityIcon from "@mui/icons-material/Opacity";
 import Box from "@mui/material/Box";
-import type { FormControlProps } from "@mui/material/FormControl";
 import Slider from "@mui/material/Slider";
 import { Control } from "owlbear-utils";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export function OpacitySlider({
+interface SliderControlProps {
+    value: number;
+    onChange: (value: number) => void;
+    label: string;
+    icon?: React.ReactNode;
+}
+
+export const SliderControl: React.FC<SliderControlProps> = ({
     value,
     onChange,
-    ...props
-}: {
-    value: number;
-    onChange: (opacity: number) => void;
-} & Omit<FormControlProps, "onChange">) {
-    const [oldValue, setOldValue] = useState(value);
-    // TODO we want to update the component's state when the incoming value changes
+    label,
+    icon,
+}) => {
     const [displayValue, setDisplayValue] = useState(value);
 
-    if (value !== oldValue) {
-        setOldValue(value);
+    useEffect(() => {
         setDisplayValue(value);
-    }
+    }, [value]);
 
     return (
-        <Control {...props} label="Opacity">
+        <Control sx={{ flexGrow: 1 }} label={label}>
             <Box
                 sx={{
                     display: "flex",
@@ -40,8 +40,8 @@ export function OpacitySlider({
                     valueLabelDisplay="auto"
                     valueLabelFormat={(n) => `${n * 100}%`}
                     value={displayValue}
-                    onChange={(_, opacity) => {
-                        setDisplayValue(opacity);
+                    onChange={(_, value) => {
+                        setDisplayValue(value);
                     }} // really onInput
                     onChangeCommitted={() => {
                         // don't use the new value parameter here since it has wrong values
@@ -49,8 +49,8 @@ export function OpacitySlider({
                         onChange(displayValue);
                     }}
                 />
-                <OpacityIcon color="disabled" />
+                {icon}
             </Box>
         </Control>
     );
-}
+};

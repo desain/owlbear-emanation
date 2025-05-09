@@ -3,7 +3,12 @@ import type { Units } from "owlbear-utils";
 import { isDeepEqual, isLayer, isObject, units } from "owlbear-utils";
 import { WHITE_RGB } from "../utils/colorUtils";
 import type { AuraStyle } from "./AuraStyle";
-import { getBlendMode, isAuraStyle, isPostProcessStyle } from "./AuraStyle";
+import {
+    getBlendMode,
+    isAuraStyle,
+    isEffectStyle,
+    isPostProcessStyle,
+} from "./AuraStyle";
 
 /**
  * Data that defines how an aura should be displayed.
@@ -21,7 +26,8 @@ export interface AuraConfig {
     visibleTo?: string | null;
     /**
      * Which Owlbear Rodeo layer the aura will be on. If not set, the 'DRAWING' layer
-     * will be used.
+     * will be used. If the style requires the 'POST_PROCESS' layer, the value here
+     * will be ignored.
      */
     layer?: Layer;
 }
@@ -49,6 +55,11 @@ export const DEFAULT_AURA_CONFIG: AuraConfig = {
     },
 };
 
+/**
+ * @returns Layer from the config if it's defined, or 'DRAWING' as default.
+ *          If the config style is a style that requires the 'POST_PROCESS'
+ *          layer, will return post process instead of what's in the config.
+ */
 export function getLayer(config: AuraConfig): Layer {
     return isPostProcessStyle(config.style.type)
         ? "POST_PROCESS"
@@ -78,13 +89,18 @@ export function buildParamsChanged(
     oldConfig: AuraConfig,
     newConfig: AuraConfig,
 ) {
-    // Images change size by scaling, so we can resize them without rebuilding the aura
-    const canChangeSizeWithoutRebuilding =
-        oldConfig.style.type === "Image" && newConfig.style.type === "Image";
     return (
-        (oldConfig.size !== newConfig.size &&
-            !canChangeSizeWithoutRebuilding) ||
+        // Style type changes always require rebuild
         oldConfig.style.type !== newConfig.style.type ||
+        // Images change size by scaling, so we can resize them without rebuilding the aura.
+        // But for everything else, size change means rebuild
+        (newConfig.style.type !== "Image" &&
+            oldConfig.size !== newConfig.size) ||
+        // Effects must include the scene shader in their SKSL iff they're on the post process layer,
+        // so moving to or from the post process layer requires rebuild
+        (isEffectStyle(newConfig.style) &&
+            (oldConfig.layer === "POST_PROCESS") !=
+                (newConfig.layer === "POST_PROCESS")) ||
         // Not sure why, but updating the blend mode directly on effect items doesn't work,
         // so we need to rebuild the aura if the blend mode changes.
         getBlendMode(oldConfig.style) !== getBlendMode(newConfig.style)

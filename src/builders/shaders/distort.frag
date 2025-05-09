@@ -1,7 +1,6 @@
 // uniform shader scene;
 
 const float TIME_FACTOR = 0.2;
-const float WARP_FACTOR = 0.2;
 const float TIME_WARP_FACTOR = 0.1;
 const float PI = 3.14159;
 float scaleOffset(float pct) {
@@ -9,7 +8,7 @@ float scaleOffset(float pct) {
     // sin(2*PI*pct) gives positive at 0.25, negative at 0.75
     // sin(PI*pct) zeros at 0,1
     return sin(PI * pct) * sin(2.0 * PI * pct) * dpi *
-        (WARP_FACTOR + sin(time * TIME_FACTOR) * TIME_WARP_FACTOR);
+        (warpFactor + sin(time * TIME_FACTOR) * TIME_WARP_FACTOR);
 }
 
 vec4 main(in vec2 fragCoordPx) {

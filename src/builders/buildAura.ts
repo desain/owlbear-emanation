@@ -54,6 +54,7 @@ export default function buildAura(
                   radius,
                   absoluteItemSize,
                   shape,
+                  getLayer(config)
               );
 
     aura.locked = true;
