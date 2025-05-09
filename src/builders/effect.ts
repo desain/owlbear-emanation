@@ -1,4 +1,4 @@
-import type { Effect, Vector2 } from "@owlbear-rodeo/sdk";
+import type { Effect, Layer, Vector2 } from "@owlbear-rodeo/sdk";
 import { buildEffect } from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
 import {
@@ -25,23 +25,24 @@ function getSksl(
     radius: Cells,
     absoluteItemSize: Pixels,
     shape: AuraShape,
+    layer: Layer,
 ): string {
     switch (style.type) {
         case "Spirits":
-            return declareUniforms(style) + getSpiritsSksl(grid, radius);
+            return declareUniforms(style, layer) + getSpiritsSksl(grid, radius);
         case "Bubble":
             return (
-                declareUniforms(style) +
+                declareUniforms(style, layer) +
                 getBubbleSksl(grid, radius, absoluteItemSize, shape)
             );
         case "Glow":
-            return declareUniforms(style) + glow;
+            return declareUniforms(style, layer) + glow;
         case "Range":
-            return declareUniforms(style) + getRangeSksl(grid, shape);
+            return declareUniforms(style, layer) + getRangeSksl(grid, shape);
         case "Solid":
-            return declareUniforms(style) + getSolidSksl(grid, shape);
+            return declareUniforms(style, layer) + getSolidSksl(grid, shape);
         case "Distort":
-            return declareUniforms(style) + distort;
+            return declareUniforms(style, layer) + distort;
         case "Custom":
             return style.sksl;
     }
@@ -54,8 +55,9 @@ export function buildEffectAura(
     radius: Cells,
     absoluteItemSize: Pixels,
     shape: AuraShape,
+    layer: Layer,
 ): Effect {
-    const sksl = getSksl(grid, style, radius, absoluteItemSize, shape);
+    const sksl = getSksl(grid, style, radius, absoluteItemSize, shape, layer);
     // console.log(sksl);
     // give the effect one extra grid space for overdraw
     const extent =

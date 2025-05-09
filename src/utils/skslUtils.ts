@@ -1,4 +1,10 @@
-import type { GridType, Matrix, Uniform, Vector2 } from "@owlbear-rodeo/sdk";
+import type {
+    GridType,
+    Layer,
+    Matrix,
+    Uniform,
+    Vector2,
+} from "@owlbear-rodeo/sdk";
 import {
     cellsToPixels,
     PI_6,
@@ -11,7 +17,6 @@ import {
 import { getPoints } from "../builders/points";
 import type { AuraShape } from "../types/AuraShape";
 import {
-    isPostProcessStyle,
     type ColorOpacityShaderStyle,
     type EffectStyle,
 } from "../types/AuraStyle";
@@ -118,10 +123,17 @@ export function getUniforms(
             value: style.opacity,
         });
     }
+    if (style.type === "Distort") {
+        uniforms.push({
+            name: "warpFactor",
+            value:
+                typeof style.warpFactor === "number" ? style.warpFactor : 0.2,
+        });
+    }
     return uniforms;
 }
 
-export function declareUniforms(style: EffectStyle) {
+export function declareUniforms(style: EffectStyle, layer: Layer) {
     let uniforms = `
         uniform float time;
         uniform vec2 size;
@@ -139,9 +151,19 @@ export function declareUniforms(style: EffectStyle) {
             uniform float opacity;
         `;
     }
-    if (isPostProcessStyle(style.type)) {
+    // For some reason, this declaration is required in shaders that exist
+    // on the post process layer, even if they don't use it.
+    // Meanwhile, shaders that are not on the post process layer cannot
+    // include this.
+    if (layer === "POST_PROCESS") {
         uniforms += `
             uniform shader scene;
+        `;
+    }
+
+    if (style.type === "Distort") {
+        uniforms += `
+            uniform float warpFactor;
         `;
     }
     return uniforms;

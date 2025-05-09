@@ -80,9 +80,15 @@ function isSpiritsStyle(style: unknown): style is SpiritsStyle {
 
 interface DistortStyle {
     type: "Distort";
+    warpFactor?: number; // Optional for backward compatibility
 }
-function isDistortStyle(style: unknown): style is DistortStyle {
-    return isObject(style) && "type" in style && style.type === "Distort";
+export function isDistortStyle(style: unknown): style is DistortStyle {
+    return (
+        isObject(style) &&
+        "type" in style &&
+        style.type === "Distort" &&
+        ("warpFactor" in style ? typeof style.warpFactor === "number" : true)
+    );
 }
 
 export interface CustomEffectStyle {
@@ -183,6 +189,7 @@ export function createStyle({
     blendMode,
     imageBuildParams,
     sksl,
+    warpFactor,
 }: {
     styleType: AuraStyleType;
     color: HexColor;
@@ -190,6 +197,7 @@ export function createStyle({
     blendMode?: BlendMode;
     imageBuildParams?: ImageBuildParams;
     sksl?: string;
+    warpFactor?: number;
 }): AuraStyle {
     switch (styleType) {
         case "Simple":
@@ -215,10 +223,15 @@ export function createStyle({
                 blendMode,
             };
         case "Spirits":
+            return {
+                type: styleType,
+                blendMode,
+            };
         case "Distort":
             return {
                 type: styleType,
                 blendMode,
+                warpFactor,
             };
         case "Image":
             imageBuildParams = imageBuildParams ?? {
@@ -315,6 +328,10 @@ export function getImageBuildParams(
         return style;
     }
     return undefined;
+}
+
+export function getWarpFactor(style: DistortStyle): number {
+    return style.warpFactor ?? 0.2;
 }
 
 export function setStyleType(
