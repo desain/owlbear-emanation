@@ -5,13 +5,12 @@ import type {
     Layer,
 } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
+import type { Units } from "owlbear-utils";
 import { isBlendMode, isLayer, isObject } from "owlbear-utils";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import type { AuraConfig} from "../types/AuraConfig";
+import type { AuraConfig } from "../types/AuraConfig";
 import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
-import type {
-    AuraStyle,
-    AuraStyleType} from "../types/AuraStyle";
+import type { AuraStyle, AuraStyleType } from "../types/AuraStyle";
 import {
     createStyle,
     getColor,
@@ -35,7 +34,7 @@ export interface CreateAurasMessage {
     /**
      * Aura size, e.g 5 for 5ft.
      */
-    size: number;
+    size: Units;
     /**
      * Style of aura to create. If not provided, the current player's default style will be used.
      */

@@ -1,9 +1,12 @@
 import type { GridParsed } from "owlbear-utils";
+import { type Cells } from "owlbear-utils";
 import { createAxonometricTransform } from "../utils/skslUtils";
 import spirits from "./shaders/spirits.frag";
 
-export function getSpiritsSksl(grid: GridParsed, numUnits: number) {
-    const numParticles = `const float NUM_PARTICLES = ${3 + 3 * numUnits};`;
+export function getSpiritsSksl(grid: GridParsed, radius: Cells) {
+    const numParticles = `const float NUM_PARTICLES = ${Math.floor(
+        3 + 3 * radius,
+    )};`;
     return [numParticles, createAxonometricTransform(grid.type), spirits].join(
         "\n",
     );

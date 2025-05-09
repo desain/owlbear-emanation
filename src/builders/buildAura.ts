@@ -1,11 +1,12 @@
 import type { GridParsed } from "owlbear-utils";
+import { unitsToCells } from "owlbear-utils";
 import { METADATA_KEY } from "../constants";
 import type { Aura, AuraMetadata, IsAttached } from "../types/Aura";
-import type { AuraConfig} from "../types/AuraConfig";
+import type { AuraConfig } from "../types/AuraConfig";
 import { getLayer } from "../types/AuraConfig";
 import { getAuraShape } from "../types/AuraShape";
-import type { CandidateSource} from "../types/CandidateSource";
-import { getAbsoluteItemSize } from "../types/CandidateSource";
+import type { CandidateSource } from "../types/CandidateSource";
+import { getSourceSizePx } from "../types/CandidateSource";
 import type { HasMetadata } from "../types/metadata/metadataUtils";
 import type { SceneMetadata } from "../types/metadata/SceneMetadata";
 import { buildEffectAura } from "./effect";
@@ -25,8 +26,8 @@ export default function buildAura(
     grid: GridParsed,
 ): Aura {
     const shape = getAuraShape(grid, sceneMetadata);
-    const numUnits = config.size / grid.parsedScale.multiplier;
-    const absoluteItemSize = getAbsoluteItemSize(item, grid);
+    const radius = unitsToCells(config.size, grid);
+    const absoluteItemSize = getSourceSizePx(item, grid);
 
     const aura =
         config.style.type === "Simple"
@@ -34,7 +35,7 @@ export default function buildAura(
                   grid,
                   config.style,
                   item.position,
-                  numUnits,
+                  radius,
                   absoluteItemSize,
                   shape,
               )
@@ -43,14 +44,14 @@ export default function buildAura(
                   grid,
                   config.style,
                   item.position,
-                  numUnits,
+                  radius,
                   absoluteItemSize,
               )
             : buildEffectAura(
                   grid,
                   config.style,
                   item.position,
-                  numUnits,
+                  radius,
                   absoluteItemSize,
                   shape,
               );

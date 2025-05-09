@@ -1,6 +1,13 @@
 import type { Vector2 } from "@owlbear-rodeo/sdk";
 import { Math2 } from "@owlbear-rodeo/sdk";
-import type { GridParsed } from "owlbear-utils";
+import type { CellsWhole, GridParsed } from "owlbear-utils";
+import {
+    cells,
+    floorCells,
+    pixelsToCells,
+    type Cells,
+    type Pixels,
+} from "owlbear-utils";
 import { getHexGridUtils } from "../utils/HexGridUtils";
 
 function clockwiseAroundOrigin(point: Vector2, degrees: number) {
@@ -8,16 +15,29 @@ function clockwiseAroundOrigin(point: Vector2, degrees: number) {
 }
 
 /**
+ * @returns Radius in cells
+ */
+function getAuraRadiusHexes(
+    numHexes: Cells,
+    absoluteItemSize: Pixels,
+    grid: GridParsed,
+): CellsWhole {
+    return floorCells(
+        cells(numHexes + pixelsToCells(absoluteItemSize, grid) / 2),
+    );
+}
+
+/**
  * @returns Hex aura of points in pixel space centered on origin.
  */
 export function buildHexagonGridPoints(
     grid: GridParsed,
-    numUnits: number,
-    absoluteItemSize: number,
+    radiusCells: Cells,
+    absoluteItemSize: Pixels,
 ): Vector2[] {
     const flatTop = grid.type === "HEX_HORIZONTAL";
     const utils = getHexGridUtils(grid.dpi, flatTop);
-    const radius = utils.getAuraRadius(numUnits, absoluteItemSize);
+    const radius = getAuraRadiusHexes(radiusCells, absoluteItemSize, grid);
     const rightHexOffset = { x: utils.mainAxisSpacing, y: 0 };
 
     const topLeftHexOffset = clockwiseAroundOrigin(

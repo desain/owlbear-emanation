@@ -1,5 +1,13 @@
 import type { GridType, Matrix, Uniform, Vector2 } from "@owlbear-rodeo/sdk";
-import { PI_6, SQRT_3, type GridParsed } from "owlbear-utils";
+import {
+    cellsToPixels,
+    PI_6,
+    pixelsToCells,
+    SQRT_3,
+    type Cells,
+    type GridParsed,
+    type Pixels,
+} from "owlbear-utils";
 import { getPoints } from "../builders/points";
 import type { AuraShape } from "../types/AuraShape";
 import type { ColorOpacityShaderStyle, EffectStyle } from "../types/AuraStyle";
@@ -12,18 +20,18 @@ const PARAM = "p";
 
 export function createSignedDistanceFunction(
     grid: GridParsed,
-    numUnits: number,
-    absoluteItemSize: number,
+    radius: Cells,
+    absoluteItemSize: Pixels,
     shape: AuraShape,
 ) {
     if (shape === "circle") {
-        const radius = numUnits * grid.dpi + absoluteItemSize / 2;
+        const radiusPx = cellsToPixels(radius, grid) + absoluteItemSize / 2;
         return `
             float distance(in vec2 ${PARAM}) {
-                return (${getMeasurementExpression(shape)}) - ${radius};
+                return (${getMeasurementExpression(shape)}) - ${radiusPx};
             }`;
     } else {
-        const points = getPoints(grid, numUnits, absoluteItemSize, shape);
+        const points = getPoints(grid, radius, absoluteItemSize, shape);
         return createPolygonSignedDistanceFunction(points);
     }
 }
@@ -79,8 +87,8 @@ function hasColorOpacityUniforms(
 export function getUniforms(
     grid: GridParsed,
     style: EffectStyle,
-    numUnits: number,
-    absoluteItemSize: number,
+    radius: Cells,
+    absoluteItemSize: Pixels,
 ): Uniform[] {
     const uniforms: Uniform[] = [
         {
@@ -89,11 +97,11 @@ export function getUniforms(
         },
         {
             name: "numUnits",
-            value: numUnits,
+            value: radius,
         },
         {
             name: "itemRadiusUnits",
-            value: (0.5 * absoluteItemSize) / grid.dpi,
+            value: pixelsToCells(absoluteItemSize, grid) * 0.5,
         },
     ];
     if (hasColorOpacityUniforms(style)) {

@@ -1,5 +1,11 @@
 import type { Vector2 } from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
+import {
+    cellsToPixels,
+    floorCells,
+    type Cells,
+    type Pixels,
+} from "owlbear-utils";
 
 /**
  * Build aura shape for manhattan aura in non-square mode.
@@ -11,20 +17,20 @@ import type { GridParsed } from "owlbear-utils";
  */
 export function buildManhattanPrecisePoints(
     grid: GridParsed,
-    numUnits: number,
-    absoluteItemSize: number,
+    radius: Cells,
+    absoluteItemSize: Pixels,
 ): Vector2[] {
-    const absoluteSize = numUnits * grid.dpi;
-    const halfSize = absoluteItemSize / 2;
+    const sizePx = cellsToPixels(radius, grid);
+    const halfItemSize = absoluteItemSize / 2;
     return [
-        { x: halfSize + absoluteSize, y: -halfSize }, // right top
-        { x: halfSize + absoluteSize, y: +halfSize }, // right bottom
-        { x: +halfSize, y: halfSize + absoluteSize }, // bottom right
-        { x: -halfSize, y: halfSize + absoluteSize }, // bottom left
-        { x: -halfSize - absoluteSize, y: +halfSize }, // left bottom
-        { x: -halfSize - absoluteSize, y: -halfSize }, // left top
-        { x: -halfSize, y: -halfSize - absoluteSize }, // top left
-        { x: +halfSize, y: -halfSize - absoluteSize }, // top right
+        { x: halfItemSize + sizePx, y: -halfItemSize }, // right top
+        { x: halfItemSize + sizePx, y: +halfItemSize }, // right bottom
+        { x: +halfItemSize, y: halfItemSize + sizePx }, // bottom right
+        { x: -halfItemSize, y: halfItemSize + sizePx }, // bottom left
+        { x: -halfItemSize - sizePx, y: +halfItemSize }, // left bottom
+        { x: -halfItemSize - sizePx, y: -halfItemSize }, // left top
+        { x: -halfItemSize, y: -halfItemSize - sizePx }, // top left
+        { x: +halfItemSize, y: -halfItemSize - sizePx }, // top right
     ];
 }
 
@@ -33,9 +39,9 @@ export function buildManhattanPrecisePoints(
  * @param radius Number of squares to extend out.
  * @returns List of points in the first octant in unit space, centered on the origin. Last point will have x=y.
  */
-export function buildManhattanSquareOctant(radius: number): Vector2[] {
+export function buildManhattanSquareOctant(radius: Cells): Vector2[] {
     const points: Vector2[] = [];
-    let x = radius;
+    let x = floorCells(radius);
     let y = 0;
     let moveX = true;
 
