@@ -1,11 +1,16 @@
 import type { Effect, Vector2 } from "@owlbear-rodeo/sdk";
 import { buildEffect } from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
-import { cells, cellsToPixels, type Cells, type Pixels } from "owlbear-utils";
+import {
+    cells,
+    cellsToPixels,
+    getScale,
+    type Cells,
+    type Pixels,
+} from "owlbear-utils";
 import type { AuraShape } from "../types/AuraShape";
 import type { EffectStyle } from "../types/AuraStyle";
 import { getBlendMode } from "../types/AuraStyle";
-import { getScale } from "../utils/axonometricUtils";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
 import { getBubbleSksl } from "./bubble";
 import { getRangeSksl } from "./range";
