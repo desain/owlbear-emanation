@@ -12,16 +12,14 @@ export function startSyncing(): [
     // console.log("startSyncing");
     const store = usePlayerStorage.getState();
 
-    const roleInitialized = OBR.player.getRole().then(store.setRole);
-    const playerIdInitialized = OBR.player.getId().then(store.setPlayerId);
-    const selectionInitialized = OBR.player
-        .getSelection()
-        .then(store.setSelection);
-    const unsubscribePlayer = OBR.player.onChange((player) => {
-        store.setRole(player.role);
-        store.setPlayerId(player.id);
-        void store.setSelection(player.selection);
-    });
+    const playerInitialized = Promise.all([
+        OBR.player.getId(),
+        OBR.player.getRole(),
+        OBR.player.getSelection(),
+    ]).then(([id, role, selection]) =>
+        store.handlePlayerChange({ id, role, selection }),
+    );
+    const unsubscribePlayer = OBR.player.onChange(store.handlePlayerChange);
 
     const sceneMetadataInitialized = OBR.scene
         .getMetadata()
@@ -48,14 +46,20 @@ export function startSyncing(): [
         store.setSceneReady(ready);
     });
 
+    const toolModeInitialized = sceneReadyInitialized
+        .then(() => OBR.tool.getActiveToolMode())
+        .then(store.handleModeUpdate);
+    const unsubscribeToolMode = OBR.tool.onToolModeChange(
+        store.handleModeUpdate,
+    );
+
     return [
         Promise.all([
-            roleInitialized,
-            playerIdInitialized,
-            selectionInitialized,
+            playerInitialized,
             sceneMetadataInitialized,
             gridInitialized,
             sceneReadyInitialized,
+            toolModeInitialized,
         ]).then(() => void 0),
         deferCallAll(
             unsubscribePlayer, // covers role and player metadata and selection
@@ -63,6 +67,7 @@ export function startSyncing(): [
             unsubscribeGrid,
             unsubscribeItems,
             unsubscribeSceneReady,
+            unsubscribeToolMode,
         ),
     ];
 }

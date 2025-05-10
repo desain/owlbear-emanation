@@ -1,5 +1,6 @@
-import type { Item, Metadata } from "@owlbear-rodeo/sdk";
+import type { Item, Metadata, Player } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
+import type { WritableDraft } from "immer";
 import { enableMapSet } from "immer";
 import type {
     ExtractNonFunctions,
@@ -11,7 +12,10 @@ import { units, type Units } from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
-import { PLAYER_SETTINGS_STORE_NAME } from "../constants";
+import {
+    ID_TOOL_MODE_SHIFT_AURA,
+    PLAYER_SETTINGS_STORE_NAME,
+} from "../constants";
 import type { AuraConfig } from "../types/AuraConfig";
 import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import { setColor } from "../types/AuraStyle";
@@ -61,28 +65,43 @@ export interface Preset {
 }
 
 interface LocalStorage {
-    hasSensibleValues: boolean;
-    [SET_SENSIBLE](this: void): void;
-    presets: Preset[];
-    enableContextMenu: boolean;
-    showAdvancedOptions: boolean;
-    setPresetName(this: void, id: string, name: string): void;
-    setPresetSize(this: void, id: string, size: AuraConfig["size"]): void;
-    setPresetStyle(this: void, id: string, style: AuraConfig["style"]): void;
-    setPresetVisibility(
+    readonly hasSensibleValues: boolean;
+    readonly [SET_SENSIBLE]: (this: void) => void;
+    readonly presets: Preset[];
+    readonly enableContextMenu: boolean;
+    readonly showAdvancedOptions: boolean;
+    readonly setPresetName: (this: void, id: string, name: string) => void;
+    readonly setPresetSize: (
+        this: void,
+        id: string,
+        size: AuraConfig["size"],
+    ) => void;
+    readonly setPresetStyle: (
+        this: void,
+        id: string,
+        style: AuraConfig["style"],
+    ) => void;
+    readonly setPresetVisibility: (
         this: void,
         id: string,
         visibleTo: AuraConfig["visibleTo"],
-    ): void;
-    setPresetLayer(
+    ) => void;
+    readonly setPresetLayer: (
         this: void,
         id: string,
         layer: NonNullable<AuraConfig["layer"]>,
-    ): void;
-    createPreset(this: void, name: string, config: AuraConfig): void;
-    deletePreset(this: void, id: string): void;
-    setContextMenuEnabled(this: void, enableContextMenu: boolean): void;
-    setShowAdvancedOptions(this: void, show: boolean): void;
+    ) => void;
+    readonly createPreset: (
+        this: void,
+        name: string,
+        config: AuraConfig,
+    ) => void;
+    readonly deletePreset: (this: void, id: string) => void;
+    readonly setContextMenuEnabled: (
+        this: void,
+        enableContextMenu: boolean,
+    ) => void;
+    readonly setShowAdvancedOptions: (this: void, show: boolean) => void;
 }
 function partializeLocalStorage({
     hasSensibleValues,
@@ -111,20 +130,27 @@ function getPreset(state: LocalStorage, id: string): Preset {
 }
 
 interface OwlbearStore {
-    sceneReady: boolean;
-    role: Role;
-    playerId: string;
-    sceneMetadata: SceneMetadata;
-    grid: GridParsed;
-    lastNonemptySelection: string[];
-    lastNonemptySelectionItems: Item[];
-    setSceneReady: (sceneReady: boolean) => void;
-    setRole: (role: Role) => void;
-    setPlayerId: (playerId: string) => void;
-    setSceneMetadata: (metadata: Metadata) => void;
-    setGrid: (grid: GridParams) => Promise<void>;
-    setSelection: (selection: string[] | undefined) => Promise<void>;
-    updateItems: (items: Item[]) => void;
+    readonly sceneReady: boolean;
+    readonly role: Role;
+    readonly playerId: string;
+    readonly sceneMetadata: SceneMetadata;
+    readonly grid: GridParsed;
+    readonly lastNonemptySelection: string[];
+    readonly lastNonemptySelectionItems: Item[];
+    readonly usingShiftAuraMode: boolean;
+    readonly setSceneReady: (sceneReady: boolean) => void;
+    readonly handlePlayerChange: (
+        this: void,
+        player: Pick<Player, "id" | "role" | "selection">,
+    ) => void;
+    readonly setSceneMetadata: (metadata: Metadata) => void;
+    readonly setGrid: (grid: GridParams) => Promise<void>;
+    readonly setSelection: (selection: string[] | undefined) => Promise<void>;
+    readonly updateItems: (items: Item[]) => void;
+    readonly handleModeUpdate: (
+        this: void,
+        activeToolMode: string | undefined,
+    ) => void;
 }
 
 export interface PlayerStorage extends LocalStorage, OwlbearStore {}
@@ -132,7 +158,7 @@ export interface PlayerStorage extends LocalStorage, OwlbearStore {}
 export const usePlayerStorage = create<PlayerStorage>()(
     subscribeWithSelector(
         persist(
-            immer((set) => ({
+            immer((set, get) => ({
                 // OBR sync - dummy values
                 sceneReady: false,
                 role: "PLAYER",
@@ -150,6 +176,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 },
                 lastNonemptySelection: [],
                 lastNonemptySelectionItems: [],
+                usingShiftAuraMode: false,
                 setSceneReady: (sceneReady: boolean) =>
                     set(
                         sceneReady
@@ -159,8 +186,13 @@ export const usePlayerStorage = create<PlayerStorage>()(
                                   lastNonemptySelection: [],
                               },
                     ),
-                setRole: (role: Role) => set({ role }),
-                setPlayerId: (playerId: string) => set({ playerId }),
+                handlePlayerChange: async (player) => {
+                    set({
+                        playerId: player.id,
+                        role: player.role,
+                    });
+                    await get().setSelection(player.selection);
+                },
                 setSceneMetadata: (metadata: Metadata) =>
                     set({
                         sceneMetadata: extractSceneMetadataOrDefault(metadata),
@@ -195,6 +227,11 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         return {
                             lastNonemptySelectionItems,
                         };
+                    }),
+                handleModeUpdate: (activeToolMode) =>
+                    set({
+                        usingShiftAuraMode:
+                            activeToolMode === ID_TOOL_MODE_SHIFT_AURA,
                     }),
 
                 // Local storage
@@ -331,9 +368,9 @@ export const usePlayerStorage = create<PlayerStorage>()(
                                 visibleTo: oldConfig.visibleTo,
                             },
                         };
-                        (persistedState as PlayerStorage).presets = [
-                            defaultPreset,
-                        ];
+                        (
+                            persistedState as WritableDraft<PlayerStorage>
+                        ).presets = [defaultPreset];
                         delete oldConfig.size;
                         delete oldConfig.style;
                         delete oldConfig.layer;
