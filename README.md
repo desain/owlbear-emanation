@@ -244,6 +244,7 @@ To make a production build run:
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
 -   aura-specific shape overrides in advanced settings
+-   Take color utils from utils
 
 ## License
 
