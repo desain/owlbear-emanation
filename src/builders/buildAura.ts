@@ -1,5 +1,7 @@
+import type { Vector2 } from "@owlbear-rodeo/sdk";
+import { Math2 } from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
-import { unitsToCells } from "owlbear-utils";
+import { ORIGIN, unitsToCells } from "owlbear-utils";
 import { METADATA_KEY } from "../constants";
 import type { Aura, AuraMetadata, IsAttached } from "../types/Aura";
 import type { AuraConfig } from "../types/AuraConfig";
@@ -12,6 +14,17 @@ import type { SceneMetadata } from "../types/metadata/SceneMetadata";
 import { buildEffectAura } from "./effect";
 import { buildImageAura } from "./image";
 import { buildSimpleAura } from "./simple";
+
+export function getAuraPosition(
+    itemPosition: Vector2,
+    offset?: Vector2,
+    squareOffset?: Vector2,
+) {
+    return Math2.add(
+        itemPosition,
+        Math2.add(offset ?? ORIGIN, squareOffset ?? ORIGIN),
+    );
+}
 
 /**
  * Helper to build an aura item.
@@ -35,6 +48,7 @@ export default function buildAura(
                   grid,
                   config.style,
                   item.position,
+                  config.offset,
                   radius,
                   absoluteItemSize,
                   shape,
@@ -44,6 +58,7 @@ export default function buildAura(
                   grid,
                   config.style,
                   item.position,
+                  config.offset,
                   radius,
                   absoluteItemSize,
               )
@@ -51,10 +66,11 @@ export default function buildAura(
                   grid,
                   config.style,
                   item.position,
+                  config.offset,
                   radius,
                   absoluteItemSize,
                   shape,
-                  getLayer(config)
+                  getLayer(config),
               );
 
     aura.locked = true;

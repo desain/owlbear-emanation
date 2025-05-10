@@ -13,6 +13,7 @@ import type { EffectStyle } from "../types/AuraStyle";
 import { getBlendMode } from "../types/AuraStyle";
 import { declareUniforms, getUniforms } from "../utils/skslUtils";
 import { getBubbleSksl } from "./bubble";
+import { getAuraPosition } from "./buildAura";
 import { getRangeSksl } from "./range";
 import distort from "./shaders/distort.frag";
 import glow from "./shaders/glow.frag";
@@ -52,6 +53,7 @@ export function buildEffectAura(
     grid: GridParsed,
     style: EffectStyle,
     position: Vector2,
+    offset: Vector2 | undefined,
     radius: Cells,
     absoluteItemSize: Pixels,
     shape: AuraShape,
@@ -65,6 +67,7 @@ export function buildEffectAura(
     const scale = getScale(grid.type);
     const height = extent;
     const width = (extent * scale.x) / scale.y;
+    const squareOffset = { x: -width / 2, y: -height / 2 };
     return buildEffect()
         .effectType("STANDALONE")
         .blendMode(getBlendMode(style))
@@ -72,6 +75,6 @@ export function buildEffectAura(
         .width(width)
         .sksl(sksl)
         .uniforms(getUniforms(grid, style, radius, absoluteItemSize))
-        .position({ x: position.x - width / 2, y: position.y - height / 2 })
+        .position(getAuraPosition(position, offset, squareOffset))
         .build();
 }

@@ -1,7 +1,8 @@
 import type { Curve, Effect, Image, Item, Uniform } from "@owlbear-rodeo/sdk";
 import { isCurve, isEffect, isImage } from "@owlbear-rodeo/sdk";
 import type { RgbColor } from "owlbear-utils";
-import { assertItem, unitsToCells } from "owlbear-utils";
+import { assertItem, ORIGIN, unitsToCells } from "owlbear-utils";
+import { getAuraPosition } from "../builders/buildAura";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
@@ -46,6 +47,11 @@ export function updateDrawingParams(
     if (config.layer && !isPostProcessStyle(config.style.type)) {
         aura.layer = config.layer;
     }
+    aura.position = getAuraPosition(
+        source.position,
+        config.offset,
+        isEffect(aura) ? { x: -aura.width / 2, y: -aura.height / 2 } : ORIGIN,
+    );
     switch (config.style.type) {
         case "Bubble":
         case "Glow":

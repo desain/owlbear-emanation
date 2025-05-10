@@ -6,6 +6,7 @@ import type { SimpleAuraDrawable } from "../types/Aura";
 import type { AuraShape } from "../types/AuraShape";
 import type { SimpleStyle } from "../types/AuraStyle";
 import { getAxonometricTransformMatrix } from "../utils/axonometricUtils";
+import { getAuraPosition } from "./buildAura";
 import { buildEuclideanAura } from "./euclidean";
 import { getPoints } from "./points";
 
@@ -22,6 +23,7 @@ export function buildSimpleAura(
     grid: GridParsed,
     style: SimpleStyle,
     position: Vector2,
+    offset: Vector2 | undefined,
     numUnits: Cells,
     absoluteItemSize: Pixels,
     shape: AuraShape,
@@ -31,13 +33,14 @@ export function buildSimpleAura(
         drawable = buildEuclideanAura(
             grid,
             position,
+            offset,
             numUnits,
             absoluteItemSize,
             getScale(grid.type),
         );
     } else {
         const curve = pointsToCurve(
-            position,
+            getAuraPosition(position, offset),
             getPoints(grid, numUnits, absoluteItemSize, shape),
         );
         const matrix = getAxonometricTransformMatrix(grid.type);
