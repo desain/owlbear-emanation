@@ -1,8 +1,7 @@
 import type { FormControlProps } from "@mui/material";
-import { Control } from "owlbear-utils";
+import type { HexColor } from "owlbear-utils";
+import { assumeHexColor, Control } from "owlbear-utils";
 import { useEffect, useState } from "react";
-import type { HexColor } from "../utils/colorUtils";
-import { assumeHexColor } from "../utils/colorUtils";
 
 const UPDATE_DELAY_MS = 100;
 

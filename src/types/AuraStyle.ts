@@ -4,21 +4,19 @@ import type {
     Image,
     ShapeStyle,
 } from "@owlbear-rodeo/sdk";
+import type { HexColor, RgbColor } from "owlbear-utils";
 import {
+    assumeHexColor,
+    hexToRgb,
     isCurveStyle,
     isObject,
     isShapeStyle,
     isVector2,
     isVector3,
-} from "owlbear-utils";
-import type { HexColor, RgbColor } from "../utils/colorUtils";
-import {
-    assumeHexColor,
-    hexToRgb,
     PINK_RGB,
     rgbToHex,
     WHITE_HEX,
-} from "../utils/colorUtils";
+} from "owlbear-utils";
 
 export interface SimpleStyle {
     type: "Simple";

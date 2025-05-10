@@ -6,9 +6,10 @@ import type {
     ExtractNonFunctions,
     GridParams,
     GridParsed,
+    HexColor,
     Role,
 } from "owlbear-utils";
-import { units, type Units } from "owlbear-utils";
+import { assumeHexColor, units, type Units } from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -24,8 +25,6 @@ import {
     DEFAULT_SCENE_METADATA,
     extractSceneMetadataOrDefault,
 } from "../types/metadata/SceneMetadata";
-import type { HexColor } from "../utils/colorUtils";
-import { assumeHexColor } from "../utils/colorUtils";
 
 const SET_SENSIBLE = Symbol("SetSensible");
 

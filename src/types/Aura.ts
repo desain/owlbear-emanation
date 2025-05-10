@@ -1,10 +1,10 @@
 import type { Curve, Effect, Image, Item, Uniform } from "@owlbear-rodeo/sdk";
 import { isCurve, isEffect, isImage } from "@owlbear-rodeo/sdk";
+import type { RgbColor } from "owlbear-utils";
 import { assertItem, unitsToCells } from "owlbear-utils";
 import { getImageAuraScale } from "../builders/image";
 import { METADATA_KEY } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
-import type { RgbColor } from "../utils/colorUtils";
 import type { AuraConfig } from "./AuraConfig";
 import { getWarpFactor, isPostProcessStyle } from "./AuraStyle";
 import type { CandidateSource } from "./CandidateSource";
