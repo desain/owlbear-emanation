@@ -245,6 +245,8 @@ To make a production build run:
 -   Split out style picker into a larger modal?
 -   aura-specific shape overrides in advanced settings
 -   Take color utils from utils
+-   move origin of auras
+    -   advanced options button that opens a tool. add offset (optional, default 0) to aura config. tool reattaches aura to local offset icon while active, allows dragging offset icon. on deactivate, get offset of icon and save it to aura config. actions: reset to 0, save (exits tool)
 
 ## License
 
