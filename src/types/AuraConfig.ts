@@ -1,9 +1,10 @@
-import type { Layer } from "@owlbear-rodeo/sdk";
+import type { Layer, Vector2 } from "@owlbear-rodeo/sdk";
 import type { Units } from "owlbear-utils";
 import {
     isDeepEqual,
     isLayer,
     isObject,
+    isVector2,
     units,
     WHITE_RGB,
 } from "owlbear-utils";
@@ -35,7 +36,13 @@ export interface AuraConfig {
      * will be ignored.
      */
     layer?: Layer;
+    /**
+     * Optional offset from the source object's position, in grid units.
+     * If not set, the aura is centered on the source.
+     */
+    offset?: Vector2;
 }
+
 export function isAuraConfig(config: unknown): config is AuraConfig {
     return (
         isObject(config) &&
@@ -47,7 +54,8 @@ export function isAuraConfig(config: unknown): config is AuraConfig {
             typeof config.visibleTo === "string" ||
             config.visibleTo === null) &&
         (!("layer" in config) ||
-            (typeof config.layer === "string" && isLayer(config.layer)))
+            (typeof config.layer === "string" && isLayer(config.layer))) &&
+        (!("offset" in config) || isVector2(config.offset))
     );
 }
 
@@ -82,7 +90,9 @@ export function drawingParamsChanged(
     return (
         !isDeepEqual(oldConfig.style, newConfig.style) ||
         oldConfig.size !== newConfig.size ||
-        oldConfig.layer !== newConfig.layer
+        oldConfig.layer !== newConfig.layer ||
+        oldConfig.offset?.x !== newConfig.offset?.x ||
+        oldConfig.offset?.y !== newConfig.offset?.y
     );
 }
 

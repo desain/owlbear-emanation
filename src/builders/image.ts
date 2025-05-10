@@ -9,6 +9,7 @@ import {
     type Pixels,
 } from "owlbear-utils";
 import type { ImageBuildParams, ImageStyle } from "../types/AuraStyle";
+import { getAuraPosition } from "./buildAura";
 
 export function getImageAuraScale(
     imageBuildParams: ImageBuildParams,
@@ -29,11 +30,12 @@ export function buildImageAura(
     grid: GridParsed,
     style: ImageStyle,
     position: Vector2,
+    offset: Vector2 | undefined,
     radius: Cells,
     absoluteItemSize: Pixels,
 ): Image {
     return buildImage(style.image, style.grid)
         .scale(getImageAuraScale(style, grid, radius, absoluteItemSize))
-        .position(position)
+        .position(getAuraPosition(position, offset))
         .build();
 }

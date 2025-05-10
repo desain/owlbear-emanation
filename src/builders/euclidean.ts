@@ -3,6 +3,7 @@ import { buildShape } from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
 import { cellsToPixels, type Cells, type Pixels } from "owlbear-utils";
 import type { Circle } from "../types/Circle";
+import { getAuraPosition } from "./buildAura";
 
 /**
  * Build basic shape.
@@ -14,6 +15,7 @@ import type { Circle } from "../types/Circle";
 export function buildEuclideanAura(
     grid: GridParsed,
     position: Vector2,
+    offset: Vector2 | undefined,
     radius: Cells,
     absoluteItemSize: Pixels,
     scale: Vector2,
@@ -22,7 +24,7 @@ export function buildEuclideanAura(
     return buildShape()
         .width(diameter * scale.x)
         .height(diameter * scale.y)
-        .position(position)
+        .position(getAuraPosition(position, offset))
         .shapeType("CIRCLE")
         .build() as Circle; // typescript doesn't know about builders
 }
