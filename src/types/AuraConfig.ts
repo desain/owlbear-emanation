@@ -1,7 +1,12 @@
 import type { Layer } from "@owlbear-rodeo/sdk";
 import type { Units } from "owlbear-utils";
-import { isDeepEqual, isLayer, isObject, units } from "owlbear-utils";
-import { WHITE_RGB } from "../utils/colorUtils";
+import {
+    isDeepEqual,
+    isLayer,
+    isObject,
+    units,
+    WHITE_RGB,
+} from "owlbear-utils";
 import type { AuraStyle } from "./AuraStyle";
 import {
     getBlendMode,

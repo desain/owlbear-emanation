@@ -5,8 +5,8 @@ import type {
     Layer,
 } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
-import type { Units } from "owlbear-utils";
-import { isBlendMode, isLayer, isObject } from "owlbear-utils";
+import type { HexColor, Units } from "owlbear-utils";
+import { isBlendMode, isHexColor, isLayer, isObject } from "owlbear-utils";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import type { AuraConfig } from "../types/AuraConfig";
 import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
@@ -18,8 +18,6 @@ import {
     isAuraStyleType,
 } from "../types/AuraStyle";
 import { isCandidateSource } from "../types/CandidateSource";
-import type { HexColor } from "./colorUtils";
-import { isHexColor } from "./colorUtils";
 import { createAuras } from "./createAuras";
 import { removeAllAuras } from "./removeAuras";
 
