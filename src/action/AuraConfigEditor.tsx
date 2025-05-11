@@ -25,6 +25,7 @@ import { ColorInput } from "./ColorInput";
 import { CustomShaderInput } from "./CustomShaderInput";
 import { ImageSelector } from "./ImageSelector";
 import { LayerSelector } from "./LayerSelector";
+import { OverrideShapeSelector } from "./OverrideShapeSelector";
 import { SizeInput } from "./SizeInput";
 import { SliderControl } from "./SliderControl";
 import { StyleSelector } from "./StyleSelector";
@@ -36,12 +37,14 @@ export function AuraConfigEditor({
     setSize,
     setVisibility,
     setLayer,
+    setShapeOverride,
 }: {
     config: AuraConfig;
     setStyle: (style: AuraConfig["style"]) => void;
     setSize: (size: AuraConfig["size"]) => void;
     setVisibility: (visibleTo: AuraConfig["visibleTo"]) => void;
     setLayer: (layer: NonNullable<AuraConfig["layer"]>) => void;
+    setShapeOverride: (shapeOverride: AuraConfig["shapeOverride"]) => void;
 }) {
     const hasColorOpacityControls =
         isSimpleStyle(config.style) || isColorOpacityShaderStyle(config.style);
@@ -158,6 +161,11 @@ export function AuraConfigEditor({
                             }
                         />
                     )}
+                    <OverrideShapeSelector
+                        fullWidth
+                        value={config.shapeOverride}
+                        onChange={setShapeOverride}
+                    />
                 </Stack>
             </details>
         </>

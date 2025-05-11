@@ -90,6 +90,11 @@ interface LocalStorage {
         id: string,
         layer: NonNullable<AuraConfig["layer"]>,
     ) => void;
+    readonly setPresetShapeOverride: (
+        this: void,
+        id: string,
+        shapeOverride: AuraConfig["shapeOverride"],
+    ) => void;
     readonly createPreset: (
         this: void,
         name: string,
@@ -277,6 +282,14 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     set((state) => {
                         const preset = getPreset(state, id);
                         preset.config.layer = layer;
+                    }),
+                setPresetShapeOverride: (
+                    id: string,
+                    shapeOverride: AuraConfig["shapeOverride"],
+                ) =>
+                    set((state) => {
+                        const preset = getPreset(state, id);
+                        preset.config.shapeOverride = shapeOverride;
                     }),
                 createPreset: (name: string, config: AuraConfig) =>
                     set((state) => {

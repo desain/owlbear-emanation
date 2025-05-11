@@ -8,6 +8,8 @@ import {
     units,
     WHITE_RGB,
 } from "owlbear-utils";
+import type { AuraShape } from "./AuraShape";
+import { isAuraShape } from "./AuraShape";
 import type { AuraStyle } from "./AuraStyle";
 import {
     getBlendMode,
@@ -41,6 +43,10 @@ export interface AuraConfig {
      * If not set, the aura is centered on the source.
      */
     offset?: Vector2;
+    /**
+     * Override for this aura's shape. Overrides the value in scene metadata.
+     */
+    shapeOverride?: AuraShape;
 }
 
 export function isAuraConfig(config: unknown): config is AuraConfig {
@@ -59,7 +65,10 @@ export function isAuraConfig(config: unknown): config is AuraConfig {
             (typeof config.layer === "string" && isLayer(config.layer))) &&
         (!("offset" in config) ||
             config.offset === undefined ||
-            isVector2(config.offset))
+            isVector2(config.offset)) &&
+        (!("shapeOverride" in config) ||
+            config.shapeOverride === undefined ||
+            isAuraShape(config.shapeOverride))
     );
 }
 
@@ -111,6 +120,8 @@ export function buildParamsChanged(
     return (
         // Style type changes always require rebuild
         oldConfig.style.type !== newConfig.style.type ||
+        // Shape changes always require rebuild
+        oldConfig.shapeOverride !== newConfig.shapeOverride ||
         // Images change size by scaling, so we can resize them without rebuilding the aura.
         // But for everything else, size change means rebuild
         (newConfig.style.type !== "Image" &&

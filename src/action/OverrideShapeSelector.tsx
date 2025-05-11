@@ -1,8 +1,10 @@
-import type { FormControlProps} from "@mui/material";
+import Square from "@mui/icons-material/CheckBoxOutlineBlank";
+import Circle from "@mui/icons-material/RadioButtonUnchecked";
+import type { FormControlProps } from "@mui/material";
 import { MenuItem, Select } from "@mui/material";
 import { Control } from "owlbear-utils";
 import type { FC } from "react";
-import type { AuraShape} from "../types/AuraShape";
+import type { AuraShape } from "../types/AuraShape";
 import { isAuraShape } from "../types/AuraShape";
 
 interface OverrideShapeSelectorProps {
@@ -25,8 +27,20 @@ export const OverrideShapeSelector: FC<
             <MenuItem value="none">
                 <em>No Override</em>
             </MenuItem>
-            <MenuItem value="circle">Circle</MenuItem>
-            <MenuItem value="square">Square</MenuItem>
+            <MenuItem value="circle">
+                <Circle
+                    fontSize="small"
+                    sx={{ verticalAlign: "text-bottom", mr: 1 }}
+                />
+                Circle
+            </MenuItem>
+            <MenuItem value="square">
+                <Square
+                    fontSize="small"
+                    sx={{ verticalAlign: "text-bottom", mr: 1 }}
+                />
+                Square
+            </MenuItem>
         </Select>
     </Control>
 );

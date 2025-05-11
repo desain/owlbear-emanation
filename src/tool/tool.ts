@@ -11,7 +11,7 @@ export async function activateTool() {
             icons: [
                 {
                     icon: edit,
-                    label: "Edit Auras (double click to reset)",
+                    label: "Edit Auras (double click aura icons to reset)",
                 },
             ],
             defaultMetadata: {},
