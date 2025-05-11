@@ -154,7 +154,9 @@ export function isEffectStyle(style: unknown): style is EffectStyle {
             isSpiritsStyle(style) ||
             isDistortStyle(style) ||
             isCustomEffectStyle(style)) &&
-        (!("blendMode" in style) || typeof style.blendMode === "string")
+        (!("blendMode" in style) ||
+            style.blendMode === undefined ||
+            typeof style.blendMode === "string")
     );
 }
 export type EffectStyleType = EffectStyle["type"];

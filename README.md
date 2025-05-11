@@ -219,7 +219,7 @@ After checkout, run `pnpm install`.
 
 This project is a Typescript app.
 
-The `action.html` page is rendered in the 'renderAction.tsx' file, which calls OBR APIs to set up the context menu and installs handlers to manage auras.
+Some icons from https://game-icons.net/.
 
 ## Building
 
@@ -244,8 +244,6 @@ To make a production build run:
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
 -   aura-specific shape overrides in advanced settings
--   move origin of auras
-    -   advanced options button that opens a tool. add offset (optional, default 0) to aura config. tool reattaches aura to local offset icon while active, allows dragging offset icon. on deactivate, get offset of icon and save it to aura config. actions: reset to 0, save (exits tool)
 
 ## License
 

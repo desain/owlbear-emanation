@@ -2,6 +2,9 @@ const PLUGIN_ID = "com.desain.emanation";
 
 // Metadata
 export const METADATA_KEY = `${PLUGIN_ID}/metadata`;
+export const METADATA_KEY_IS_AURA = `${PLUGIN_ID}/isAura`;
+export const METADATA_KEY_IS_CONTROL = `${PLUGIN_ID}/isControl`;
+export const METADATA_KEY_SCOPED_ID = `${PLUGIN_ID}/scopedId`;
 
 // Context Menu
 export const ID_CONTEXTMENU_CREATE = `${PLUGIN_ID}/contextMenuCreate`;
@@ -18,4 +21,6 @@ export const PLAYER_SETTINGS_STORE_NAME = `${PLUGIN_ID}/playerSettings`;
 export const VECTOR2_COMPARE_EPSILON = 0.01;
 
 // Tool
-export const ID_TOOL_MODE_SHIFT_AURA = `${PLUGIN_ID}/toolModeShitAura`;
+export const ID_TOOL = `${PLUGIN_ID}/toolEditAuras`;
+export const ID_TOOL_MODE_SHIFT_AURA = `${PLUGIN_ID}/toolModeShiftAura`;
+export const iD_TOOL_MODE_RESET_AURA = `${PLUGIN_ID}/toolModeResetAura`;

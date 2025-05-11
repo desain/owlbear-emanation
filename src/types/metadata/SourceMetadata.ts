@@ -1,7 +1,7 @@
 import type { Item } from "@owlbear-rodeo/sdk";
 import { isObject } from "owlbear-utils";
 import { METADATA_KEY } from "../../constants";
-import type { AuraConfig} from "../AuraConfig";
+import type { AuraConfig } from "../AuraConfig";
 import { isAuraConfig } from "../AuraConfig";
 import type { Source } from "../Source";
 

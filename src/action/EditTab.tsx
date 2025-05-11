@@ -27,6 +27,7 @@ import { CopyButton } from "./CopyButton";
 import { NewAuraButton } from "./NewAuraButton";
 import { PasteButton } from "./PasteButton";
 import { SceneReadyGate } from "./SceneReadyGate";
+import { ShiftButton } from "./ShiftButton";
 
 /**
  * Info needed to render a source.
@@ -132,13 +133,14 @@ function AuraControls({
 
 function deduplicationKey({ entry: config }: { entry: AuraConfig }): string {
     // don't just pass the object because it might have extra keys
-    const configCopy: AuraConfig = {
+    const configTrimNoOffset: AuraConfig = {
         style: config.style,
         size: config.size,
         visibleTo: config.visibleTo,
         layer: config.layer,
+        // Exclue offset so we can edit multiple auras of the same type at different offsets
     };
-    return objectHash(configCopy);
+    return objectHash(configTrimNoOffset);
 }
 
 interface AnnotatedAura extends Pick<Item, "name" | "id"> {
@@ -223,7 +225,6 @@ export function EditTab() {
     const playerSettingsSensible = usePlayerStorage(
         (store) => store.hasSensibleValues,
     );
-
     const lastNonemptySelection = usePlayerStorage(
         (store) => store.lastNonemptySelection,
     );
@@ -242,9 +243,15 @@ export function EditTab() {
 
     return (
         <>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                {header}
-            </Typography>
+            <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ mb: 2 }}
+            >
+                <Typography variant="h6">{header}</Typography>
+                <ShiftButton />
+            </Stack>
             <SceneReadyGate>
                 <ExtantAuras targetedItems={targetedItems} />
                 <Stack

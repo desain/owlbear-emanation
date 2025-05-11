@@ -1,26 +1,25 @@
-import type { Curve, Effect, Image, Item, Uniform } from "@owlbear-rodeo/sdk";
+import type {
+    Curve,
+    Effect,
+    Image,
+    Item,
+    Uniform,
+    Vector2,
+} from "@owlbear-rodeo/sdk";
 import { isCurve, isEffect, isImage } from "@owlbear-rodeo/sdk";
-import type { RgbColor } from "owlbear-utils";
+import type { HasParameterizedMetadata, RgbColor } from "owlbear-utils";
 import { assertItem, ORIGIN, unitsToCells } from "owlbear-utils";
 import { getAuraPosition } from "../builders/buildAura";
 import { getImageAuraScale } from "../builders/image";
-import { METADATA_KEY } from "../constants";
+import { METADATA_KEY_IS_AURA, METADATA_KEY_SCOPED_ID } from "../constants";
 import { usePlayerStorage } from "../state/usePlayerStorage";
+import type { IsAttached } from "../utils/itemUtils";
 import type { AuraConfig } from "./AuraConfig";
 import { getWarpFactor, isPostProcessStyle } from "./AuraStyle";
 import type { CandidateSource } from "./CandidateSource";
 import { getSourceSizePx } from "./CandidateSource";
 import type { Circle } from "./Circle";
 import { isCircle } from "./Circle";
-import type { HasMetadata } from "./metadata/metadataUtils";
-
-export interface IsAttached {
-    attachedTo: string;
-}
-
-export interface AuraMetadata {
-    isAura: true;
-}
 
 export type SimpleAuraDrawable = Circle | Curve;
 export function isDrawable(item: Item): item is SimpleAuraDrawable {
@@ -29,14 +28,24 @@ export function isDrawable(item: Item): item is SimpleAuraDrawable {
 
 export type Aura = (SimpleAuraDrawable | Effect | Image) &
     IsAttached &
-    HasMetadata<AuraMetadata>;
+    HasParameterizedMetadata<typeof METADATA_KEY_IS_AURA, true> &
+    HasParameterizedMetadata<typeof METADATA_KEY_SCOPED_ID, string>;
 export function isAura(item: Item): item is Aura {
     return (
         (isEffect(item) || isCurve(item) || isCircle(item) || isImage(item)) &&
         item.attachedTo !== undefined &&
-        METADATA_KEY in item.metadata &&
-        typeof item.metadata[METADATA_KEY] === "object"
+        METADATA_KEY_IS_AURA in item.metadata &&
+        item.metadata[METADATA_KEY_IS_AURA] === true &&
+        METADATA_KEY_SCOPED_ID in item.metadata &&
+        typeof item.metadata[METADATA_KEY_SCOPED_ID] === "string"
     );
+}
+
+export function getAuraSquareOffset(aura: Aura): Vector2 {
+    if (isEffect(aura)) {
+        return { x: -aura.width / 2, y: -aura.height / 2 };
+    }
+    return ORIGIN;
 }
 
 export function updateDrawingParams(
@@ -50,7 +59,7 @@ export function updateDrawingParams(
     aura.position = getAuraPosition(
         source.position,
         config.offset,
-        isEffect(aura) ? { x: -aura.width / 2, y: -aura.height / 2 } : ORIGIN,
+        getAuraSquareOffset(aura),
     );
     switch (config.style.type) {
         case "Bubble":
@@ -96,6 +105,16 @@ export function updateDrawingParams(
             aura.sksl = config.style.sksl;
             break;
     }
+}
+
+export function getAuraCenter(aura: Aura): Vector2 {
+    if (isEffect(aura)) {
+        return {
+            x: aura.position.x + aura.width / 2,
+            y: aura.position.y + aura.height / 2,
+        };
+    }
+    return aura.position;
 }
 
 interface ColorUniform extends Uniform {

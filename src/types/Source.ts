@@ -1,16 +1,13 @@
 import type { Item } from "@owlbear-rodeo/sdk";
 import { isImage } from "@owlbear-rodeo/sdk";
 
+import type { WritableDraft } from "immer";
 import { METADATA_KEY } from "../constants";
-import type { CandidateSource} from "./CandidateSource";
+import type { CandidateSource } from "./CandidateSource";
 import { isCandidateSource } from "./CandidateSource";
 import type { HasMetadata } from "./metadata/metadataUtils";
-import type {
-    AuraEntry,
-    SourceMetadata} from "./metadata/SourceMetadata";
-import {
-    isSourceMetadata
-} from "./metadata/SourceMetadata";
+import type { AuraEntry, SourceMetadata } from "./metadata/SourceMetadata";
+import { isSourceMetadata } from "./metadata/SourceMetadata";
 import type { Specifier } from "./Specifier";
 import { forEachSpecifier } from "./Specifier";
 
@@ -38,7 +35,7 @@ export function getEntry(
 
 export async function updateEntries(
     specifiers: Specifier[],
-    updater: (aura: AuraEntry) => void,
+    updater: (aura: WritableDraft<AuraEntry>) => void,
 ) {
     return await forEachSpecifier(specifiers, (source, sourceScopedId) => {
         const entry = getEntry(source, sourceScopedId);

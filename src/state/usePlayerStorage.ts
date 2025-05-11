@@ -136,7 +136,7 @@ interface OwlbearStore {
     readonly grid: GridParsed;
     readonly lastNonemptySelection: string[];
     readonly lastNonemptySelectionItems: Item[];
-    readonly usingShiftAuraMode: boolean;
+    readonly usingShiftMode: boolean;
     readonly setSceneReady: (sceneReady: boolean) => void;
     readonly handlePlayerChange: (
         this: void,
@@ -146,7 +146,7 @@ interface OwlbearStore {
     readonly setGrid: (grid: GridParams) => Promise<void>;
     readonly setSelection: (selection: string[] | undefined) => Promise<void>;
     readonly updateItems: (items: Item[]) => void;
-    readonly handleModeUpdate: (
+    readonly handleToolModeUpdate: (
         this: void,
         activeToolMode: string | undefined,
     ) => void;
@@ -175,7 +175,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 },
                 lastNonemptySelection: [],
                 lastNonemptySelectionItems: [],
-                usingShiftAuraMode: false,
+                usingShiftMode: false,
                 setSceneReady: (sceneReady: boolean) =>
                     set(
                         sceneReady
@@ -227,9 +227,9 @@ export const usePlayerStorage = create<PlayerStorage>()(
                             lastNonemptySelectionItems,
                         };
                     }),
-                handleModeUpdate: (activeToolMode) =>
+                handleToolModeUpdate: (activeToolMode) =>
                     set({
-                        usingShiftAuraMode:
+                        usingShiftMode:
                             activeToolMode === ID_TOOL_MODE_SHIFT_AURA,
                     }),
 
