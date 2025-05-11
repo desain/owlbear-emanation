@@ -48,9 +48,9 @@ export function startSyncing(): [
 
     const toolModeInitialized = sceneReadyInitialized
         .then(() => OBR.tool.getActiveToolMode())
-        .then(store.handleModeUpdate);
+        .then(store.handleToolModeUpdate);
     const unsubscribeToolMode = OBR.tool.onToolModeChange(
-        store.handleModeUpdate,
+        store.handleToolModeUpdate,
     );
 
     return [

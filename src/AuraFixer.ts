@@ -3,7 +3,7 @@ import OBR from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
 import { assertItem, deferCallAll, getOrInsert, hasId } from "owlbear-utils";
-import buildAura from "./builders/buildAura";
+import { buildAura } from "./builders/buildAura";
 import { METADATA_KEY } from "./constants";
 import { usePlayerStorage } from "./state/usePlayerStorage";
 import type { Aura } from "./types/Aura";

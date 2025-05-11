@@ -1,19 +1,7 @@
-import type { Item} from "@owlbear-rodeo/sdk";
+import type { Item } from "@owlbear-rodeo/sdk";
 import { Math2 } from "@owlbear-rodeo/sdk";
-import { hasId } from "owlbear-utils";
 import { VECTOR2_COMPARE_EPSILON } from "../constants";
-import type { Aura } from "../types/Aura";
-import type { CandidateSource} from "../types/CandidateSource";
-import { isCandidateSource } from "../types/CandidateSource";
 import { isCircle } from "../types/Circle";
-
-export function getSource(aura: Aura, networkItems: Item[]): CandidateSource {
-    const source = networkItems.find(hasId(aura.attachedTo));
-    if (!source || !isCandidateSource(source)) {
-        throw new Error(`Aura ${aura.id} is not attached`);
-    }
-    return source;
-}
 
 export function didChangeScale(oldItem: Item, newItem: Item) {
     return (
@@ -23,4 +11,7 @@ export function didChangeScale(oldItem: Item, newItem: Item) {
             (oldItem.width !== newItem.width ||
                 oldItem.height !== newItem.height))
     );
+}
+export interface IsAttached {
+    attachedTo: string;
 }

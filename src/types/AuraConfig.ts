@@ -51,11 +51,15 @@ export function isAuraConfig(config: unknown): config is AuraConfig {
         "size" in config &&
         typeof config.size === "number" &&
         (!("visibleTo" in config) ||
+            config.visibleTo === undefined ||
             typeof config.visibleTo === "string" ||
             config.visibleTo === null) &&
         (!("layer" in config) ||
+            config.layer === undefined ||
             (typeof config.layer === "string" && isLayer(config.layer))) &&
-        (!("offset" in config) || isVector2(config.offset))
+        (!("offset" in config) ||
+            config.offset === undefined ||
+            isVector2(config.offset))
     );
 }
 

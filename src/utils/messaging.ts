@@ -90,27 +90,37 @@ export function isCreateAuraMessage(
         Number.isInteger(message.size) &&
         message.size > 0 &&
         (!("style" in message) ||
+            message.style === undefined ||
             (typeof message.style === "string" &&
                 isAuraStyleType(message.style))) &&
         (!("color" in message) ||
+            message.color === undefined ||
             (typeof message.color === "string" && isHexColor(message.color))) &&
         (!("opacity" in message) ||
+            message.opacity === undefined ||
             (typeof message.opacity === "number" &&
                 message.opacity >= 0 &&
                 message.opacity <= 1)) &&
-        (!("visibleTo" in message) || typeof message.visibleTo === "string") &&
+        (!("visibleTo" in message) ||
+            message.visibleTo === undefined ||
+            typeof message.visibleTo === "string") &&
         (!("layer" in message) ||
+            message.layer === undefined ||
             (typeof message.layer === "string" && isLayer(message.layer))) &&
         (!("blendMode" in message) ||
+            message.blendMode === undefined ||
             (typeof message.blendMode === "string" &&
                 isBlendMode(message.blendMode))) &&
         (!("imageBuildParams" in message) ||
+            message.imageBuildParams === undefined ||
             (isObject(message.imageBuildParams) &&
                 "image" in message.imageBuildParams &&
                 isObject(message.imageBuildParams.image) &&
                 "grid" in message.imageBuildParams &&
                 isObject(message.imageBuildParams.grid))) &&
-        (!("sksl" in message) || typeof message.sksl === "string")
+        (!("sksl" in message) ||
+            message.sksl === undefined ||
+            typeof message.sksl === "string")
     );
 }
 
