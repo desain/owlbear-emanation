@@ -2,6 +2,7 @@ import type { GridType } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
 import type { GridParsed } from "owlbear-utils";
 import { isHexGrid } from "owlbear-utils";
+import type { AuraConfig } from "./AuraConfig";
 import type { SceneMetadata } from "./metadata/SceneMetadata";
 
 export type AuraShape =
@@ -14,7 +15,7 @@ export type AuraShape =
     | "hex"
     | "hex_hexes";
 
-export function isAuraShape(s: string) {
+export function isAuraShape(s: unknown): s is AuraShape {
     return (
         s === "circle" ||
         s === "square" ||
@@ -36,10 +37,13 @@ function isSquareType(gridType: GridType) {
 }
 
 export function getAuraShape(
-    grid: GridParsed,
+    config: AuraConfig,
     sceneMetadata: SceneMetadata,
+    grid: GridParsed,
 ): AuraShape {
-    if (sceneMetadata.shapeOverride !== undefined) {
+    if (config.shapeOverride) {
+        return config.shapeOverride;
+    } else if (sceneMetadata.shapeOverride) {
         return sceneMetadata.shapeOverride;
     }
 

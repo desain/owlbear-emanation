@@ -37,7 +37,7 @@ export function buildAura(
     sceneMetadata: SceneMetadata,
     grid: GridParsed,
 ): Aura {
-    const shape = getAuraShape(grid, sceneMetadata);
+    const shape = getAuraShape(entry, sceneMetadata, grid);
     const radius = unitsToCells(entry.size, grid);
     const absoluteItemSize = getSourceSizePx(item, grid);
 

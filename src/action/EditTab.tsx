@@ -116,6 +116,11 @@ function AuraControls({
                             entry.layer = layer;
                         })
                     }
+                    setShapeOverride={(shapeOverride) =>
+                        updateEntries(auras, (entry) => {
+                            entry.shapeOverride = shapeOverride;
+                        })
+                    }
                 />
             </CardContent>
             <CardActions>

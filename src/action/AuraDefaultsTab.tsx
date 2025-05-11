@@ -11,7 +11,7 @@ import {
     Typography,
 } from "@mui/material";
 import { Control } from "owlbear-utils";
-import type { Preset} from "../state/usePlayerStorage";
+import type { Preset } from "../state/usePlayerStorage";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
 import { toConfig } from "../utils/messaging";
@@ -33,6 +33,9 @@ function PresetEditor({
         (store) => store.setPresetVisibility,
     );
     const setPresetLayer = usePlayerStorage((store) => store.setPresetLayer);
+    const setPresetShapeOverride = usePlayerStorage(
+        (store) => store.setPresetShapeOverride,
+    );
     const deletePreset = usePlayerStorage((store) => store.deletePreset);
 
     return (
@@ -69,6 +72,9 @@ function PresetEditor({
                         setPresetVisibility(id, visibility)
                     }
                     setLayer={(layer) => setPresetLayer(id, layer)}
+                    setShapeOverride={(shapeOverride) =>
+                        setPresetShapeOverride(id, shapeOverride)
+                    }
                 />
             </CardContent>
             <CardActions>

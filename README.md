@@ -26,7 +26,7 @@ The extension can be installed from https://owlbear-emanation.pages.dev/manifest
 
 Select one or more character tokens, then right click and click the 'Add Aura' item that appears on the context menu. You can also press 'E' (for Emanation - A for Aura was taken :P) while the context menu is open to add one quickly.
 
-The aura will be centered on the source's origin point (the center of the controls you edit the item). This means that if the image's center is offset from the origin, the aura will not appear in the center of the image. This is intentional, to allow things like torches (with the origin at the head) to have glow auras emanate from the the head of the torch rather than the middle of the body.
+The aura will be centered on the source's origin point (the center of the controls when you edit the item). This means that if the image's center is offset from the origin, the aura will not appear in the center of the image. You can adjust the aura positioning using the 'Reposition Auras' feature below.
 
 ### Editing aura parameters
 
@@ -55,7 +55,9 @@ Menu options:
 Options under 'Advanced Options':
 
 -   **Visibility**: Lets you control which players can see the aura.
+-   **Layer**: Which layer the aura is drawn on. Some aura types require the POST_PROCESS layer, and cannot be changed.
 -   **Blend Mode**: For shader-based auras, sets the graphical [blend mode](https://en.wikipedia.org/wiki/Blend_modes) for the shader. Ideas: 'PLUS' with the 'Glow' aura is good for simulating lights, and with a pure white 'Range' aura, 'DIFFERENCE' creates an area of negative color, and 'SATURATION' creates an aura that makes the world inside it grayscale.
+-   **Shape Override**: Set the shape of an aura manually, rather than auras taking their shapes from the grid settings. This setting overrides any scene-global aura shape setting.
 
 #### Editing multiple auras at once
 
@@ -74,6 +76,17 @@ When you drag to resize a token, the aura will change size after you let go.
 https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
+
+### Repositioning auras
+
+You can reposition auras relative to their source token using the reposition tool:
+
+-   Click the Reposition Auras button at the top right of the 'Edit Auras' tab to activate reposition mode.
+-   While the tool is active, draggable icons will appear over each aura. Drag an icon to move the corresponding aura's center relative to its source token.
+-   Double-click an icon to reset the aura to its original (centered) position.
+-   Click the reposition button again to exit reposition mode.
+
+This is useful for effects like torches, where you want the aura to emanate from a specific part of the token (e.g., the head of a torch) rather than the center.
 
 ### Managing Presets
 
@@ -138,6 +151,18 @@ A rangefinder which steps from white to the aura color at each discrete grid uni
 ![Spirits](https://github.com/user-attachments/assets/88667f53-2a44-46a2-81b4-5dd4dd9326ed)
 
 A fancy one just for fun! Displays animated trails that circle your character while changing color.
+
+#### Solid
+
+TODO PICTURE
+
+A utility aura - just draws a flat single color shape. Can be used for interesting effects if combined with blend modes (e.g use the COLOR blend mode to set everything in a circle behind the aura to a certain hue).
+
+#### Distort
+
+TODO PICTURE
+
+Bends space around it. Simulate black holes or reality-warping effects. Use the slider in the controls to scale the warping factor.
 
 ## Calling this extension from other extensions
 
@@ -243,7 +268,6 @@ To make a production build run:
 -   More effects!
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
--   aura-specific shape overrides in advanced settings
 
 ## License
 
