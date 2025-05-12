@@ -366,3 +366,19 @@ export function isPostProcessStyle(styleType: AuraStyleType): boolean {
             return false;
     }
 }
+
+export function supportsOverrideShape(styleType: AuraStyleType): boolean {
+    switch (styleType) {
+        case "Bubble":
+        case "Simple":
+        case "Solid":
+        case "Range":
+            return true;
+        case "Custom":
+        case "Distort":
+        case "Glow":
+        case "Image":
+        case "Spirits":
+            return false;
+    }
+}

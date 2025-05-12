@@ -19,6 +19,7 @@ import {
     setColor,
     setOpacity,
     setStyleType,
+    supportsOverrideShape,
 } from "../types/AuraStyle";
 import { BlendModeSelector } from "./BlendModeSelector";
 import { ColorInput } from "./ColorInput";
@@ -161,11 +162,13 @@ export function AuraConfigEditor({
                             }
                         />
                     )}
-                    <OverrideShapeSelector
-                        fullWidth
-                        value={config.shapeOverride}
-                        onChange={setShapeOverride}
-                    />
+                    {supportsOverrideShape(config.style.type) && (
+                        <OverrideShapeSelector
+                            fullWidth
+                            value={config.shapeOverride}
+                            onChange={setShapeOverride}
+                        />
+                    )}
                 </Stack>
             </details>
         </>
