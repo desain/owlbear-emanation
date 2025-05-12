@@ -175,6 +175,8 @@ A utility aura - just draws a flat single color shape. Can be used for interesti
 
 ![Distort](https://github.com/user-attachments/assets/e7db6fdd-0e87-488c-abbf-37f73723ce6c)
 
+Bends space around it. Simulate black holes or reality-warping effects. Use the slider in the controls to scale the warping factor.
+
 ## Support
 
 If you need support for this extension you can message me in the [Owlbear Rodeo Discord](https://discord.com/invite/u5RYMkV98s) @Nick or open an issue on [GitHub](https://github.com/desain/owlbear-emanation/issues).
