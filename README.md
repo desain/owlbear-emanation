@@ -2,7 +2,7 @@
 
 This extension allows you to add auras to any character in a variety of styles.
 
-![Interface](https://github.com/user-attachments/assets/b5825f4a-1846-476f-849e-4e7d31efab78)
+![Hero image](https://github.com/user-attachments/assets/685f5be5-b248-456b-87ab-153e9764a074)
 
 ## Installing
 
@@ -34,7 +34,7 @@ The aura will be centered on the source's origin point (the center of the contro
 
 When any selected token has at least one aura, you will see the 'Edit Auras' menu option (with the same 'E' shortcut), which lets you manage auras for those characters through the 'Aura Settings' action in the top left.
 
-![Edit Tab](https://github.com/user-attachments/assets/0f2094c7-66c3-45cf-ad74-9650a568b8e6)
+![Edit Tab](https://github.com/user-attachments/assets/0278c551-2886-433f-9400-e1f27c54e84a)
 
 You can also open the action in the 'Edit' tab and then select tokens to add or edit auras.
 
@@ -48,7 +48,7 @@ Menu options:
 -   **Delete**: Remove this aura from the character.
 -   **Copy to Clipboard**: Copy this aura's settings to your OS clipboard.
 -   **New**: Add another aura to the characters using the top preset from the 'Defaults' tab. If multiple characters are selected, this button will add a new aura to all of them.
--   **New (arrow)**: Add another aura to the characters using the selected preset from the menu.
+-   **New (arrow)**: Add another aura to the characters using a preset from the menu.
 -   **Paste**: Allows you to add a previously-copied aura to a token.
 -   **Delete All**: Remove all auras from the selected characters.
 
@@ -63,7 +63,7 @@ Options under 'Advanced Options':
 
 If you select multiple tokens which all share an aura, you can edit that aura on all the tokens at once. You will see a list of which tokens you are editing above the aura settings.
 
-![Multi edit](https://github.com/user-attachments/assets/7b25bcf7-d4a1-4912-a47a-73b3d791f66c)
+![Multi Edit](https://github.com/user-attachments/assets/9f49c5c4-fe6a-43da-b278-a74686760996)
 
 ### Resizing tokens
 
@@ -90,7 +90,7 @@ This is useful for effects like torches, where you want the aura to emanate from
 
 ### Managing Presets
 
-![Defaults Menu](https://github.com/user-attachments/assets/91d102ea-3f10-4399-bb32-5b34fb41d644)
+![Presets](https://github.com/user-attachments/assets/2403a197-e964-4362-bb75-08ae054add69)
 
 To create presets for new auras, open the Aura Settings action menu in the top left and go to the 'Defaults' tab. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser data).
 
@@ -101,14 +101,21 @@ Controls:
 -   **Delete**: Delete a preset. You must always have at least one preset, so you can't delete the last one.
 -   **Paste**: Paste a previously copied set of aura settings as a preset.
 
-### Changing global settings
+### Changing settings
 
-The GM can also access scene-global settings under the Aura Settings action menu in the 'GM Settings' tab.
+![Settings](https://github.com/user-attachments/assets/cd03f631-e349-4903-8cfe-65d8f4fc7fc5)
+
+In the 'Settings' tab, there are a couple settings to configure the extension:
+
+- **Enable Context Menu**: Whether to show the 'Add Aura' and 'Edit Aura' items mentioned above. Turn this off to declutter your context menu - you can still edit auras in the action popover.
+- **Show advanced options**: Whether to show some advanced menu items in certain menus like the aura style menu, the layer selection menu, and the blend mode menu.
+
+#### Scene Settings
+
+The GM can also access scene-global settings under the Aura Settings action menu in the 'Settings' tab.
 
 -   **Shape to grid**: When enabled, causes auras in the current scene to try to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 -   **Override Shape**: When set, causes auras to take on the specified shape, rather than conforming to a shape that traces out the points a certain distance away from the source based on the grid's current measurement settings.
-
-![Settings Tab](https://github.com/user-attachments/assets/186ca429-72f3-4aa1-a45f-9a0119401441)
 
 ### Aura Styles
 
@@ -154,13 +161,13 @@ A fancy one just for fun! Displays animated trails that circle your character wh
 
 #### Solid
 
-TODO PICTURE
+![Solid](https://github.com/user-attachments/assets/edd40b87-319b-40ea-840f-cee1da7766e4)
 
 A utility aura - just draws a flat single color shape. Can be used for interesting effects if combined with blend modes (e.g use the COLOR blend mode to set everything in a circle behind the aura to a certain hue).
 
 #### Distort
 
-TODO PICTURE
+![Distort](https://github.com/user-attachments/assets/e7db6fdd-0e87-488c-abbf-37f73723ce6c)
 
 Bends space around it. Simulate black holes or reality-warping effects. Use the slider in the controls to scale the warping factor.
 
