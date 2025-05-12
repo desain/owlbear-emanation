@@ -268,7 +268,7 @@ To make a production build run:
 -   More effects!
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
--   only show override shape on auras that support it
+-   permission audit
 
 ## License
 
