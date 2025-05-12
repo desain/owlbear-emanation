@@ -53,6 +53,13 @@ export function startSyncing(): [
         store.handleToolModeUpdate,
     );
 
+    const permissionsInitialized = OBR.room
+        .getPermissions()
+        .then(store.handlePermissionsChange);
+    const unsubscribePermissions = OBR.room.onPermissionsChange(
+        store.handlePermissionsChange,
+    );
+
     return [
         Promise.all([
             playerInitialized,
@@ -60,6 +67,7 @@ export function startSyncing(): [
             gridInitialized,
             sceneReadyInitialized,
             toolModeInitialized,
+            permissionsInitialized,
         ]).then(() => void 0),
         deferCallAll(
             unsubscribePlayer, // covers role and player metadata and selection
@@ -68,6 +76,7 @@ export function startSyncing(): [
             unsubscribeItems,
             unsubscribeSceneReady,
             unsubscribeToolMode,
+            unsubscribePermissions,
         ),
     ];
 }

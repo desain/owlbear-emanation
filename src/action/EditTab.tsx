@@ -230,11 +230,8 @@ export function EditTab() {
     const playerSettingsSensible = usePlayerStorage(
         (store) => store.hasSensibleValues,
     );
-    const lastNonemptySelection = usePlayerStorage(
-        (store) => store.lastNonemptySelection,
-    );
     const targetedItems = usePlayerStorage(
-        (store) => store.lastNonemptySelectionItems,
+        (store) => store.lastNonemptySelectionUpdatableItems,
     );
 
     const noSelection = targetedItems.length === 0;
@@ -276,7 +273,7 @@ export function EditTab() {
                                 CHANNEL_MESSAGE,
                                 {
                                     ...message,
-                                    sources: lastNonemptySelection,
+                                    sources: targetedItems.map(getId),
                                 },
                                 {
                                     destination: "LOCAL",
