@@ -74,28 +74,6 @@ async function createContextMenu() {
                 label: "Edit Auras",
                 filter: {
                     every: [
-                        { key: "type", value: "IMAGE" },
-                        { key: "layer", value: "CHARACTER" },
-                    ],
-                    some: [
-                        {
-                            key: ["metadata", METADATA_KEY],
-                            operator: "!=",
-                            value: undefined,
-                        },
-                    ],
-                    permissions: ["UPDATE"],
-                },
-            },
-            {
-                icon: edit,
-                label: "Edit Auras",
-                filter: {
-                    every: [
-                        { key: "type", value: "SHAPE" },
-                        { key: "shapeType", value: "CIRCLE" },
-                    ],
-                    some: [
                         {
                             key: ["metadata", METADATA_KEY],
                             operator: "!=",

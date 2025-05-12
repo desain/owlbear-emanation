@@ -1,4 +1,4 @@
-import type { Item, Metadata, Player } from "@owlbear-rodeo/sdk";
+import type { Item, Metadata, Permission, Player } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
 import type { WritableDraft } from "immer";
 import { enableMapSet } from "immer";
@@ -140,21 +140,33 @@ interface OwlbearStore {
     readonly sceneMetadata: SceneMetadata;
     readonly grid: GridParsed;
     readonly lastNonemptySelection: string[];
-    readonly lastNonemptySelectionItems: Item[];
+    /**
+     * Subset of the selection that's updatable.
+     */
+    readonly lastNonemptySelectionUpdatableItems: Item[];
     readonly usingShiftMode: boolean;
-    readonly setSceneReady: (sceneReady: boolean) => void;
+    readonly playerPermissions: Set<Permission>;
+    readonly setSceneReady: (this: void, sceneReady: boolean) => void;
     readonly handlePlayerChange: (
         this: void,
         player: Pick<Player, "id" | "role" | "selection">,
     ) => void;
-    readonly setSceneMetadata: (metadata: Metadata) => void;
-    readonly setGrid: (grid: GridParams) => Promise<void>;
-    readonly setSelection: (selection: string[] | undefined) => Promise<void>;
-    readonly updateItems: (items: Item[]) => void;
+    readonly setSceneMetadata: (this: void, metadata: Metadata) => void;
+    readonly setGrid: (this: void, grid: GridParams) => Promise<void>;
+    readonly setSelection: (
+        this: void,
+        selection: string[] | undefined,
+    ) => Promise<void>;
+    readonly updateItems: (this: void, items: Item[]) => void;
     readonly handleToolModeUpdate: (
         this: void,
         activeToolMode: string | undefined,
     ) => void;
+    readonly handlePermissionsChange: (
+        this: void,
+        permissions: readonly Permission[],
+    ) => void;
+    readonly isUpdatable: (this: void, item: Item) => boolean;
 }
 
 export interface PlayerStorage extends LocalStorage, OwlbearStore {}
@@ -179,8 +191,9 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     },
                 },
                 lastNonemptySelection: [],
-                lastNonemptySelectionItems: [],
+                lastNonemptySelectionUpdatableItems: [],
                 usingShiftMode: false,
+                playerPermissions: new Set(),
                 setSceneReady: (sceneReady: boolean) =>
                     set(
                         sceneReady
@@ -188,6 +201,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                             : {
                                   sceneReady,
                                   lastNonemptySelection: [],
+                                  lastNonemptySelectionUpdatableItems: [],
                               },
                     ),
                 handlePlayerChange: async (player) => {
@@ -215,21 +229,26 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 },
                 setSelection: async (selection: string[] | undefined) => {
                     if (selection && selection.length > 0) {
+                        const isUpdatable = get().isUpdatable;
+                        const items = await OBR.scene.items.getItems(selection);
                         return set({
                             lastNonemptySelection: selection,
-                            lastNonemptySelectionItems:
-                                await OBR.scene.items.getItems(selection),
+                            lastNonemptySelectionUpdatableItems:
+                                items.filter(isUpdatable),
                         });
                     }
                 },
                 updateItems: (items: Item[]) =>
                     set((state) => {
-                        const lastNonemptySelectionItems = items.filter(
-                            (item) =>
-                                state.lastNonemptySelection.includes(item.id),
-                        );
+                        const lastNonemptySelectionUpdatableItems =
+                            items.filter(
+                                (item) =>
+                                    state.lastNonemptySelection.includes(
+                                        item.id,
+                                    ) && state.isUpdatable(item),
+                            );
                         return {
-                            lastNonemptySelectionItems,
+                            lastNonemptySelectionUpdatableItems,
                         };
                     }),
                 handleToolModeUpdate: (activeToolMode) =>
@@ -237,6 +256,67 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         usingShiftMode:
                             activeToolMode === ID_TOOL_MODE_SHIFT_AURA,
                     }),
+                handlePermissionsChange: (permissions) =>
+                    set({ playerPermissions: new Set(permissions) }),
+                isUpdatable: (item) => {
+                    const state = get();
+                    if (state.role === "GM") {
+                        return true;
+                    } else {
+                        switch (item.layer) {
+                            case "ATTACHMENT":
+                                return state.playerPermissions.has(
+                                    "ATTACHMENT_UPDATE",
+                                );
+                            case "CHARACTER":
+                                return state.playerPermissions.has(
+                                    "CHARACTER_UPDATE",
+                                );
+                            case "DRAWING":
+                                return state.playerPermissions.has(
+                                    "DRAWING_UPDATE",
+                                );
+                            case "FOG":
+                                return state.playerPermissions.has(
+                                    "FOG_UPDATE",
+                                );
+                            case "MAP":
+                                return state.playerPermissions.has(
+                                    "MAP_UPDATE",
+                                );
+                            case "MOUNT":
+                                return state.playerPermissions.has(
+                                    "MOUNT_UPDATE",
+                                );
+                            case "NOTE":
+                                return state.playerPermissions.has(
+                                    "NOTE_UPDATE",
+                                );
+                            case "POINTER":
+                                return state.playerPermissions.has(
+                                    "POINTER_UPDATE",
+                                );
+                            case "PROP":
+                                return state.playerPermissions.has(
+                                    "PROP_UPDATE",
+                                );
+                            case "RULER":
+                                return state.playerPermissions.has(
+                                    "RULER_UPDATE",
+                                );
+                            case "TEXT":
+                                return state.playerPermissions.has(
+                                    "TEXT_UPDATE",
+                                );
+                            case "CONTROL":
+                            case "GRID":
+                            case "POPOVER":
+                            case "POST_PROCESS":
+                            default:
+                                return false;
+                        }
+                    }
+                },
 
                 // Local storage
                 hasSensibleValues: false,
