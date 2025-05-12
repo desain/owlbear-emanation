@@ -275,6 +275,8 @@ To make a production build run:
 -   More effects!
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
+-   Fix drag cancel in reposition tool
+-   Holding shift in reposition locks axis?
 
 ## License
 
