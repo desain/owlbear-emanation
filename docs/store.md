@@ -2,7 +2,7 @@
 title: Auras and Emanations
 description: Add and manage measurement-aware auras in several styles with any character.
 author: desain
-image: https://github.com/user-attachments/assets/1231da26-2939-4877-a023-3444ed2018b7
+image: https://github.com/user-attachments/assets/685f5be5-b248-456b-87ab-153e9764a074
 icon: https://owlbear-emanation.pages.dev/logo.png
 learn-more: https://github.com/desain/owlbear-emanation
 tags:
@@ -16,20 +16,13 @@ manifest: https://owlbear-emanation.pages.dev/manifest.json
 
 This extension allows you to add auras to any character in a variety of styles.
 
-![Interface](https://github.com/user-attachments/assets/b5825f4a-1846-476f-849e-4e7d31efab78)
-
-## Installing
-
-The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.
-
-(Eventually on a [store page](https://extensions.owlbear.rodeo/owlbear-emanation) maybe, though not yet)
-
 ## Features
 
 -   Create auras from shapes, shader effects, or images.
 -   Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chebyshev / Chessboard D&D 5e distance, auras will be square)
 -   Auras will automatically resize after tokens are scaled, so that their boundary is the correct distance away.
 -   Manage any number of auras with any color, opacity, or style.
+-   Create aura presets for commonly used effects.
 
 ## How to use
 
@@ -39,7 +32,7 @@ The extension can be installed from https://owlbear-emanation.pages.dev/manifest
 
 Select one or more character tokens, then right click and click the 'Add Aura' item that appears on the context menu. You can also press 'E' (for Emanation - A for Aura was taken :P) while the context menu is open to add one quickly.
 
-The aura will be centered on the source's origin point (the center of the controls you edit the item). This means that if the image's center is offset from the origin, the aura will not appear in the center of the image. This is intentional, to allow things like torches (with the origin at the head) to have glow auras emanate from the the head of the torch rather than the middle of the body.
+The aura will be centered on the source's origin point (the center of the controls when you edit the item). This means that if the image's center is offset from the origin, the aura will not appear in the center of the image. You can adjust the aura positioning using the 'Reposition Auras' feature below.
 
 ### Editing aura parameters
 
@@ -47,7 +40,7 @@ The aura will be centered on the source's origin point (the center of the contro
 
 When any selected token has at least one aura, you will see the 'Edit Auras' menu option (with the same 'E' shortcut), which lets you manage auras for those characters through the 'Aura Settings' action in the top left.
 
-![Edit Tab](https://github.com/user-attachments/assets/0f2094c7-66c3-45cf-ad74-9650a568b8e6)
+![Edit Tab](https://github.com/user-attachments/assets/0278c551-2886-433f-9400-e1f27c54e84a)
 
 You can also open the action in the 'Edit' tab and then select tokens to add or edit auras.
 
@@ -60,20 +53,23 @@ Menu options:
 -   **Image**: For image auras, selects which image asset to use as the aura.
 -   **Delete**: Remove this aura from the character.
 -   **Copy to Clipboard**: Copy this aura's settings to your OS clipboard.
--   **New**: Add another aura to the characters using the aura settings from the 'Defaults' tab. If multiple characters are selected, this button will add a new aura to all of them.
+-   **New**: Add another aura to the characters using the top preset from the 'Defaults' tab. If multiple characters are selected, this button will add a new aura to all of them.
+-   **New (arrow)**: Add another aura to the characters using a preset from the menu.
 -   **Paste**: Allows you to add a previously-copied aura to a token.
 -   **Delete All**: Remove all auras from the selected characters.
 
 Options under 'Advanced Options':
 
 -   **Visibility**: Lets you control which players can see the aura.
+-   **Layer**: Which layer the aura is drawn on. Some aura types require the POST_PROCESS layer, and cannot be changed.
 -   **Blend Mode**: For shader-based auras, sets the graphical [blend mode](https://en.wikipedia.org/wiki/Blend_modes) for the shader. Ideas: 'PLUS' with the 'Glow' aura is good for simulating lights, and with a pure white 'Range' aura, 'DIFFERENCE' creates an area of negative color, and 'SATURATION' creates an aura that makes the world inside it grayscale.
+-   **Shape Override**: Set the shape of an aura manually, rather than auras taking their shapes from the grid settings. This setting overrides any scene-global aura shape setting.
 
 #### Editing multiple auras at once
 
 If you select multiple tokens which all share an aura, you can edit that aura on all the tokens at once. You will see a list of which tokens you are editing above the aura settings.
 
-![Multi edit](https://github.com/user-attachments/assets/7b25bcf7-d4a1-4912-a47a-73b3d791f66c)
+![Multi Edit](https://github.com/user-attachments/assets/9f49c5c4-fe6a-43da-b278-a74686760996)
 
 ### Resizing tokens
 
@@ -87,20 +83,45 @@ https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
 
-### Changing defaults
+### Repositioning auras
 
-![Defaults Menu](https://github.com/user-attachments/assets/91d102ea-3f10-4399-bb32-5b34fb41d644)
+You can reposition auras relative to their source token using the reposition tool:
 
-To change the default settings for newly created auras, open the Aura Settings action menu in the top left and go to the 'Defaults' tab. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser data).
+-   Click the Reposition Auras button at the top right of the 'Edit Auras' tab to activate reposition mode.
+-   While the tool is active, draggable icons will appear over each aura. Drag an icon to move the corresponding aura's center relative to its source token.
+-   Double-click an icon to reset the aura to its original (centered) position.
+-   Click the reposition button again to exit reposition mode.
 
-### Changing global settings
+This is useful for effects like torches, where you want the aura to emanate from a specific part of the token (e.g., the head of a torch) rather than the center.
 
-The GM can also access scene-global settings under the Aura Settings action menu in the 'GM Settings' tab.
+### Managing Presets
+
+![Presets](https://github.com/user-attachments/assets/2403a197-e964-4362-bb75-08ae054add69)
+
+To create presets for new auras, open the Aura Settings action menu in the top left and go to the 'Defaults' tab. These settings are saved to your browser's local storage, so they persist across game sessions (unless you clear your browser data).
+
+Controls:
+
+-   **Preset Name**: Give your preset an informative name. These names show up under the 'New' button dropdown in the Edit tab.
+-   **New**: Create a new preset.
+-   **Delete**: Delete a preset. You must always have at least one preset, so you can't delete the last one.
+-   **Paste**: Paste a previously copied set of aura settings as a preset.
+
+### Changing settings
+
+![Settings](https://github.com/user-attachments/assets/cd03f631-e349-4903-8cfe-65d8f4fc7fc5)
+
+In the 'Settings' tab, there are a couple settings to configure the extension:
+
+- **Enable Context Menu**: Whether to show the 'Add Aura' and 'Edit Aura' items mentioned above. Turn this off to declutter your context menu - you can still edit auras in the action popover.
+- **Show advanced options**: Whether to show some advanced menu items in certain menus like the aura style menu, the layer selection menu, and the blend mode menu.
+
+#### Scene Settings
+
+The GM can also access scene-global settings under the Aura Settings action menu in the 'Settings' tab.
 
 -   **Shape to grid**: When enabled, causes auras in the current scene to try to trace out the outline of grid squares within range. When disabled, auras trace the exact set of points within range of the source, even when that cuts through the middle of grid squares.
 -   **Override Shape**: When set, causes auras to take on the specified shape, rather than conforming to a shape that traces out the points a certain distance away from the source based on the grid's current measurement settings.
-
-![Settings Tab](https://github.com/user-attachments/assets/186ca429-72f3-4aa1-a45f-9a0119401441)
 
 ### Aura Styles
 
@@ -144,73 +165,15 @@ A rangefinder which steps from white to the aura color at each discrete grid uni
 
 A fancy one just for fun! Displays animated trails that circle your character while changing color.
 
-## Calling this extension from other extensions
+#### Solid
 
-If you're another extension developer, you can automate managing auras with this API. Create an object `message` of one of these types:
+![Solid](https://github.com/user-attachments/assets/edd40b87-319b-40ea-840f-cee1da7766e4)
 
-```typescript
-interface CreateAurasMessage {
-    type: "CREATE_AURAS";
-    /**
-     *  Item IDs for character images that will receive auras.
-     */
-    sources: string[];
-    /**
-     * Aura size, e.g 5 for 5ft.
-     */
-    size: number;
-    /**
-     * Style of aura to create. If not provided, the current player's default style will be used.
-     */
-    style?: "Simple" | "Image" | "Bubble" | "Glow" | "Range" | "Spirits";
-    /**
-     * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
-     */
-    color?: string;
-    /**
-     * Number from 0 (fully transparent) to 1 (fully opaque). If not provided, the current player's default opacity will be used.
-     */
-    opacity?: number;
-    /**
-     * ID of player this aura will be visible to. If not provided, the aura will be visible to eveyrone.
-     * If set to null, the aura will not be visible.
-     */
-    visibleTo?: string | null;
-    /**
-     * Which Owlbear Rodeo layer the aura will be on. If not provided, the 'DRAWING' layer
-     * will be used.
-     */
-    layer?: Layer;
-    /**
-     * Blend mode for effect-based auras. Only used if the `style` parameter is an effect type. If not provided,
-     * the default SRC_OVER value will be used.
-     */
-    blendMode?: BlendMode;
-    /**
-     * Details for image-based auras. Must be provided if and only if the `style` parameter is "Image".
-     */
-    imageBuildParams?: {
-        image: ImageContent;
-        grid: ImageGrid;
-    };
-}
+A utility aura - just draws a flat single color shape. Can be used for interesting effects if combined with blend modes (e.g use the COLOR blend mode to set everything in a circle behind the aura to a certain hue).
 
-interface RemoveAurasMessage {
-    type: "REMOVE_AURAS";
-    /**
-     *  Item IDs for character images that will have all auras removed.
-     */
-    sources: string[];
-}
-```
+#### Distort
 
-Then send a local broadcast with the message:
-
-```typescript
-await OBR.broadcast.sendMessage("com.desain.emanation/message", message, {
-    destination: "LOCAL",
-});
-```
+![Distort](https://github.com/user-attachments/assets/e7db6fdd-0e87-488c-abbf-37f73723ce6c)
 
 ## Support
 
