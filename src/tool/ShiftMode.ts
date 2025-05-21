@@ -1,4 +1,5 @@
 import type {
+    Item,
     ToolContext,
     ToolEvent,
     ToolMode,
@@ -122,19 +123,22 @@ export class ShiftMode implements ToolMode {
     };
 
     readonly onToolDragMove = (_context: ToolContext, event: ToolEvent) => {
-        void this.#handleDragMove(event);
+        void this.#handleDragMove(event.target, event.pointerPosition);
     };
 
-    readonly #handleDragMove = async (event: ToolEvent) => {
-        if (event.target && isShiftControl(event.target) && this.#dragState) {
+    readonly #handleDragMove = async (
+        target: Item | undefined,
+        position: Vector2,
+    ) => {
+        if (target && isShiftControl(target) && this.#dragState) {
             const { squareOffset } = this.#dragState;
             await OBR.scene.local.updateItems(
-                [event.target.id, this.#dragState.auraId],
+                [target.id, this.#dragState.auraId],
                 ([control, aura]) => {
                     if (control && aura) {
-                        control.position = event.pointerPosition;
+                        control.position = position;
                         aura.position = getAuraPosition(
-                            event.pointerPosition,
+                            position,
                             ORIGIN,
                             squareOffset,
                         );
@@ -144,11 +148,24 @@ export class ShiftMode implements ToolMode {
         }
     };
 
+    readonly onToolDragCancel = async (
+        _context: ToolContext,
+        event: ToolEvent,
+    ) => {
+        if (this.#dragState) {
+            await this.#handleDragMove(
+                event.target,
+                this.#dragState.originalPosition,
+            );
+            this.#dragState = null;
+        }
+    };
+
     readonly onToolDragEnd = async (
         _context: ToolContext,
         event: ToolEvent,
     ) => {
-        await this.#handleDragMove(event);
+        await this.#handleDragMove(event.target, event.pointerPosition);
         if (this.#dragState && event.target && isShiftControl(event.target)) {
             const [source] = await OBR.scene.items.getItems([
                 event.target.attachedTo,
