@@ -1,5 +1,6 @@
 import type {
     Item,
+    KeyEvent,
     ToolContext,
     ToolEvent,
     ToolMode,
@@ -21,6 +22,18 @@ import {
     shiftControlToSpecifier,
 } from "./ShiftControl";
 import { deactivateTool } from "./tool";
+
+/**
+ * Snaps the offset between the position and original position to the closest axis.
+ */
+function snapToAxis(position: Vector2, originalPosition: Vector2): Vector2 {
+    const delta = Math2.subtract(position, originalPosition);
+    if (Math.abs(delta.x) >= Math.abs(delta.y)) {
+        return { x: position.x, y: originalPosition.y };
+    } else {
+        return { x: originalPosition.x, y: position.y };
+    }
+}
 
 export class ShiftMode implements ToolMode {
     readonly id = ID_TOOL_MODE_SHIFT_AURA;
@@ -66,10 +79,23 @@ export class ShiftMode implements ToolMode {
         squareOffset: Vector2;
         originalPosition: Vector2;
     } = null;
+    #shiftKeyDown = false;
 
     readonly onActivate = async () => {
         this.#dragState = null;
         await this.#shiftControlManager.install();
+    };
+
+    readonly onKeyDown = (_context: ToolContext, event: KeyEvent) => {
+        if (event.key === "Shift") {
+            this.#shiftKeyDown = true;
+        }
+    };
+
+    readonly onKeyUp = (_context: ToolContext, event: KeyEvent) => {
+        if (event.key === "Shift") {
+            this.#shiftKeyDown = false;
+        }
     };
 
     readonly onToolDoubleClick = (_context: ToolContext, event: ToolEvent) => {
@@ -132,13 +158,16 @@ export class ShiftMode implements ToolMode {
     ) => {
         if (target && isShiftControl(target) && this.#dragState) {
             const { squareOffset } = this.#dragState;
+            const newPosition = this.#shiftKeyDown
+                ? snapToAxis(position, this.#dragState.originalPosition)
+                : position;
             await OBR.scene.local.updateItems(
                 [target.id, this.#dragState.auraId],
                 ([control, aura]) => {
                     if (control && aura) {
-                        control.position = position;
+                        control.position = newPosition;
                         aura.position = getAuraPosition(
-                            position,
+                            newPosition,
                             ORIGIN,
                             squareOffset,
                         );
