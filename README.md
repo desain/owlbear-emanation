@@ -277,6 +277,7 @@ To make a production build run:
 - Split out style picker into a larger modal?
 - Visibility to specific players
 -         "noImplicitOverride": true,
+- Use imagebuildparams from utils
 
 ## License
 
