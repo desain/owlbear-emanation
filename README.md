@@ -276,6 +276,7 @@ To make a production build run:
   - Localized weather effects - snow, rain
 - Split out style picker into a larger modal?
 - Visibility to specific players
+-         "noImplicitOverride": true,
 
 ## License
 
