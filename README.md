@@ -107,8 +107,8 @@ Controls:
 
 In the 'Settings' tab, there are a couple settings to configure the extension:
 
-- **Enable Context Menu**: Whether to show the 'Add Aura' and 'Edit Aura' items mentioned above. Turn this off to declutter your context menu - you can still edit auras in the action popover.
-- **Show advanced options**: Whether to show some advanced menu items in certain menus like the aura style menu, the layer selection menu, and the blend mode menu.
+-   **Enable Context Menu**: Whether to show the 'Add Aura' and 'Edit Aura' items mentioned above. Turn this off to declutter your context menu - you can still edit auras in the action popover.
+-   **Show advanced options**: Whether to show some advanced menu items in certain menus like the aura style menu, the layer selection menu, and the blend mode menu.
 
 #### Scene Settings
 
@@ -271,13 +271,11 @@ To make a production build run:
 
 ## To do
 
-- Optimize item update handler
-- More effects!
-  - Localized weather effects - snow, rain
-- Split out style picker into a larger modal?
-- Visibility to specific players
--         "noImplicitOverride": true,
-- Use imagebuildparams from utils
+-   Optimize item update handler
+-   More effects!
+    -   Localized weather effects - snow, rain
+-   Split out style picker into a larger modal?
+-   Visibility to specific players
 
 ## License
 

@@ -1,17 +1,12 @@
-import type {
-    BlendMode,
-    CurveStyle,
-    Image,
-    ShapeStyle,
-} from "@owlbear-rodeo/sdk";
-import type { HexColor, RgbColor } from "owlbear-utils";
+import type { BlendMode, CurveStyle, ShapeStyle } from "@owlbear-rodeo/sdk";
+import type { HexColor, ImageBuildParams, RgbColor } from "owlbear-utils";
 import {
     assumeHexColor,
     hexToRgb,
     isCurveStyle,
+    isImageBuildParams,
     isObject,
     isShapeStyle,
-    isVector2,
     isVector3,
     PINK_RGB,
     rgbToHex,
@@ -102,32 +97,6 @@ export function isCustomEffectStyle(
         style.type === "Custom" &&
         "sksl" in style &&
         typeof style.sksl === "string"
-    );
-}
-
-/**
- * All the data needed to build an image (excluding the size, which is determined by the aura size).
- */
-export type ImageBuildParams = Pick<Image, "image" | "grid">;
-function isImageBuildParams(params: unknown): params is ImageBuildParams {
-    return (
-        isObject(params) &&
-        "image" in params &&
-        isObject(params.image) &&
-        "url" in params.image &&
-        typeof params.image.url === "string" &&
-        "mime" in params.image &&
-        typeof params.image.mime === "string" &&
-        "width" in params.image &&
-        typeof params.image.width === "number" &&
-        "height" in params.image &&
-        typeof params.image.height === "number" &&
-        "grid" in params &&
-        isObject(params.grid) &&
-        "dpi" in params.grid &&
-        typeof params.grid.dpi === "number" &&
-        "offset" in params.grid &&
-        isVector2(params.grid.offset)
     );
 }
 

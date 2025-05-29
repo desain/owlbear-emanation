@@ -17,6 +17,7 @@
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
         "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
         "erasableSyntaxOnly": true
     },
     "include": ["vite.config.ts"]
