@@ -21,6 +21,10 @@
 
     /* browsers don't accept styling this element very well, so just hide it and style the label */
     &>input[type=color] {
-        display: none;
+        opacity: 0;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
     }
 }
