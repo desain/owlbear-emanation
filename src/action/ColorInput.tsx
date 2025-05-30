@@ -5,21 +5,21 @@ import { useEffect, useState } from "react";
 
 const UPDATE_DELAY_MS = 100;
 
-export function ColorInput({
-    value,
-    onChange,
-    ...props
-}: {
+interface ColorInputBaseProps {
     value: HexColor;
     onChange: (value: HexColor) => void;
-} & Omit<FormControlProps, "onChange">) {
-    const [oldValue, setOldValue] = useState(value);
+}
+
+export const ColorInputBase: React.FC<ColorInputBaseProps> = ({
+    value,
+    onChange,
+}) => {
+    // value to display - updates as fast as the user moves their cursor
     const [displayValue, setDisplayValue] = useState(value);
 
-    if (value !== oldValue) {
-        setOldValue(value);
+    useEffect(() => {
         setDisplayValue(value);
-    }
+    }, [value]);
 
     // Ughhhhhh
     // React breaks the dom 'onchange' event, which is the behavior I want.
@@ -37,16 +37,26 @@ export function ColorInput({
     }, [value, displayValue, onChange]);
 
     return (
+        <label className="color-label" style={{ background: displayValue }}>
+            <input
+                type="color"
+                value={displayValue}
+                onInput={(e) => {
+                    setDisplayValue(assumeHexColor(e.currentTarget.value));
+                }}
+            />
+        </label>
+    );
+};
+
+export function ColorInput({
+    value,
+    onChange,
+    ...props
+}: ColorInputBaseProps & Omit<FormControlProps, "onChange">) {
+    return (
         <Control {...props} sx={{ alignItems: "center" }} label="Color">
-            <label className="color-label" style={{ background: displayValue }}>
-                <input
-                    type="color"
-                    value={displayValue}
-                    onInput={(e) => {
-                        setDisplayValue(assumeHexColor(e.currentTarget.value));
-                    }}
-                />
-            </label>
+            <ColorInputBase value={value} onChange={onChange} />
         </Control>
     );
 }
