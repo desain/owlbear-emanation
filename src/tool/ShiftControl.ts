@@ -61,8 +61,8 @@ export function createShiftControl(aura: Aura): ShiftControl {
     const imageContent = {
         url: window.location.origin + moveBg,
         mime: "image/svg+xml",
-        width: 150,
-        height: 150,
+        width: 512,
+        height: 512,
     } satisfies ImageContent;
     const imageGrid = {
         dpi: size,
