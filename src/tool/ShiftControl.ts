@@ -57,12 +57,12 @@ function auraToSpecifier(aura: Aura): Specifier {
 
 export function createShiftControl(aura: Aura): ShiftControl {
     const specifier = auraToSpecifier(aura);
-    const size = 150;
+    const size = 512;
     const imageContent = {
         url: window.location.origin + moveBg,
         mime: "image/svg+xml",
-        width: 512,
-        height: 512,
+        width: size,
+        height: size,
     } satisfies ImageContent;
     const imageGrid = {
         dpi: size,
