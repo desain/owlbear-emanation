@@ -179,7 +179,7 @@ If you're another extension developer, you can automate managing auras with this
 interface CreateAurasMessage {
     type: "CREATE_AURAS";
     /**
-     *  Item IDs for character images that will receive auras.
+     *  Item IDs for character images that will receive the aura.
      */
     sources: string[];
     /**
@@ -189,7 +189,7 @@ interface CreateAurasMessage {
     /**
      * Style of aura to create. If not provided, the current player's default style will be used.
      */
-    style?: "Simple" | "Image" | "Bubble" | "Glow" | "Range" | "Spirits";
+    style?: "Simple" | "Image" | "Bubble" | "Glow" | "Range" | "Spirits" | "Distort" | "Solid";
     /**
      * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
@@ -199,7 +199,7 @@ interface CreateAurasMessage {
      */
     opacity?: number;
     /**
-     * ID of player this aura will be visible to. If not provided, the aura will be visible to eveyrone.
+     * ID of player this aura will be visible to. If not provided, the aura will be visible to everyone.
      * If set to null, the aura will not be visible.
      */
     visibleTo?: string | null;
@@ -275,7 +275,6 @@ To make a production build run:
 -   More effects!
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
--   Visibility to specific players
 -   Move color input to utils
 
 ## License
