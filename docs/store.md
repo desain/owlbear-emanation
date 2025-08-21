@@ -8,7 +8,6 @@ learn-more: https://github.com/desain/owlbear-emanation
 tags:
     - tool
     - combat
-    - drawing
 manifest: https://owlbear-emanation.pages.dev/manifest.json
 ---
 

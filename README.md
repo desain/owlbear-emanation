@@ -276,7 +276,7 @@ To make a production build run:
     -   Localized weather effects - snow, rain
 -   Split out style picker into a larger modal?
 -   Move color input to utils
--   override axono transform
+-   allow user to override shape to select axono transform
 
 ## License
 
