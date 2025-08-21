@@ -29,9 +29,10 @@ export function SettingsTab() {
     );
     return (
         <>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                My Settings
-            </Typography>
+            <Typography variant="h6">Personal Settings</Typography>
+            <FormHelperText sx={{ mb: 2 }}>
+                These settings only apply to you, and are saved to your browser.
+            </FormHelperText>
             <FormGroup sx={{ mb: 2 }}>
                 <FormControlLabel
                     control={
@@ -65,11 +66,14 @@ export function SettingsTab() {
             </FormGroup>
             {role === "GM" && (
                 <>
-                    <Typography variant="h6" sx={{ mb: 2 }}>
-                        Scene Settings (GM Only)
-                    </Typography>
+                    <Divider sx={{ mb: 2 }}></Divider>
+                    <Typography variant="h6">Scene Settings</Typography>
+                    <FormHelperText sx={{ mb: 2 }}>
+                        These settings apply to the whole scene, and are only
+                        visible to the GM.
+                    </FormHelperText>
                     <SceneReadyGate>
-                        <FormGroup>
+                        <FormGroup sx={{ mb: 2 }}>
                             <FormControlLabel
                                 control={
                                     <Switch
@@ -79,14 +83,13 @@ export function SettingsTab() {
                                         }
                                     />
                                 }
-                                label="Shape to grid"
+                                label="Shape auras to grid"
                             />
                             <FormHelperText>
                                 Makes aura styles which support highlighting
                                 grid cells do so.
                             </FormHelperText>
                         </FormGroup>
-                        <Divider sx={{ mt: 1, mb: 1 }} />
                         <OverrideShapeSelector
                             value={sceneMetadata.shapeOverride}
                             onChange={(shapeOverride) =>

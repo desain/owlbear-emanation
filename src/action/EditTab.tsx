@@ -237,7 +237,7 @@ export function EditTab() {
     const noSelection = targetedItems.length === 0;
     const header = noSelection
         ? "Select items to add or edit auras"
-        : "Edit Auras";
+        : "";
 
     if (!playerSettingsSensible) {
         return null;
@@ -251,7 +251,7 @@ export function EditTab() {
                 justifyContent="space-between"
                 sx={{ mb: 2 }}
             >
-                <Typography variant="h6">{header}</Typography>
+                <Typography variant="body1">{header}</Typography>
                 <ShiftButton />
             </Stack>
             <SceneReadyGate>

@@ -7,8 +7,7 @@ import {
     CardContent,
     CardHeader,
     Stack,
-    TextField,
-    Typography,
+    TextField
 } from "@mui/material";
 import { Control } from "owlbear-utils";
 import type { Preset } from "../state/usePlayerStorage";
@@ -104,9 +103,6 @@ export function AuraDefaultsTab() {
 
     return (
         <>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-                Default Settings for New Auras
-            </Typography>
             {presets.map((preset) => (
                 <PresetEditor
                     key={preset.id}
