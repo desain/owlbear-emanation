@@ -59,14 +59,24 @@ async function fetchDefaults(): Promise<{ color: HexColor; size: Units }> {
 
 export interface Preset {
     name: string;
-    id: string;
-    config: AuraConfig;
+    readonly id: string;
+    readonly config: AuraConfig;
+}
+
+export interface PresetGroup {
+    name: string;
+    readonly id: string;
+    /**
+     * IDs of presets this group contains.
+     */
+    presets: string[];
 }
 
 interface LocalStorage {
     readonly hasSensibleValues: boolean;
     readonly [SET_SENSIBLE]: (this: void) => void;
     readonly presets: Preset[];
+    readonly presetGroups: PresetGroup[];
     readonly enableContextMenu: boolean;
     readonly showAdvancedOptions: boolean;
     readonly setPresetName: (this: void, id: string, name: string) => void;
@@ -101,6 +111,19 @@ interface LocalStorage {
         config: AuraConfig,
     ) => void;
     readonly deletePreset: (this: void, id: string) => void;
+    readonly createPresetGroup: (
+        this: void,
+        name: string,
+        presets: string[],
+    ) => void;
+    readonly deletePresetGroup: (this: void, id: string) => void;
+    readonly setPresetGroupName: (this: void, id: string, name: string) => void;
+    readonly setPresetGroupPresets: (
+        this: void,
+        id: string,
+        presets: string[],
+    ) => void;
+    readonly getPresetConfigsById: (this: void, id: string) => AuraConfig[];
     readonly setContextMenuEnabled: (
         this: void,
         enableContextMenu: boolean,
@@ -110,12 +133,14 @@ interface LocalStorage {
 function partializeLocalStorage({
     hasSensibleValues,
     presets,
+    presetGroups,
     enableContextMenu,
     showAdvancedOptions,
 }: LocalStorage): ExtractNonFunctions<LocalStorage> {
     return {
         hasSensibleValues,
         presets,
+        presetGroups,
         enableContextMenu,
         showAdvancedOptions,
     };
@@ -131,6 +156,17 @@ function getPreset(state: LocalStorage, id: string): Preset {
         throw new Error(`Invalid preset ID ${id}`);
     }
     return preset;
+}
+
+/**
+ * Get preset group by ID
+ */
+function getPresetGroup(
+    state: LocalStorage,
+    id: string,
+): PresetGroup | undefined {
+    const group = state.presetGroups.find((group) => group.id === id);
+    return group;
 }
 
 interface OwlbearStore {
@@ -327,6 +363,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         config: DEFAULT_AURA_CONFIG,
                     },
                 ],
+                presetGroups: [],
                 enableContextMenu: true,
                 showAdvancedOptions: false,
                 [SET_SENSIBLE]: () => {
@@ -384,7 +421,59 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         state.presets = state.presets.filter(
                             (preset) => preset.id !== id,
                         );
+                        for (const group of state.presetGroups) {
+                            group.presets = group.presets.filter(
+                                (presetId) => presetId !== id,
+                            );
+                        }
                     }),
+                createPresetGroup: (name: string, presets: string[]) =>
+                    set((state) => {
+                        state.presetGroups.push({
+                            name,
+                            id: crypto.randomUUID(),
+                            presets,
+                        });
+                    }),
+                deletePresetGroup: (id: string) =>
+                    set((state) => {
+                        state.presetGroups = state.presetGroups.filter(
+                            (group) => group.id !== id,
+                        );
+                    }),
+                setPresetGroupName: (id: string, name: string) =>
+                    set((state) => {
+                        const group = getPresetGroup(state, id);
+                        if (group) {
+                            group.name = name;
+                        }
+                    }),
+                setPresetGroupPresets: (id: string, presets: string[]) =>
+                    set((state) => {
+                        const group = getPresetGroup(state, id);
+                        if (group) {
+                            group.presets = presets;
+                        }
+                    }),
+                getPresetConfigsById: (id: string) => {
+                    const { presets, presetGroups } = get();
+                    const preset = presets.find((p) => p.id === id)?.config;
+                    if (preset) {
+                        return [preset];
+                    }
+
+                    const group = presetGroups.find((g) => g.id === id);
+                    if (group) {
+                        return group.presets
+                            .map(
+                                (presetId) =>
+                                    presets.find((p) => p.id === presetId)
+                                        ?.config,
+                            )
+                            .filter((c) => !!c);
+                    }
+                    return [];
+                },
                 setContextMenuEnabled: (enableContextMenu) =>
                     set({ enableContextMenu }),
                 setShowAdvancedOptions: (showAdvancedOptions) =>

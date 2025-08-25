@@ -1,15 +1,24 @@
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import {
     Button,
+    ButtonGroup,
     Card,
     CardActions,
     CardContent,
     CardHeader,
+    ClickAwayListener,
+    Grow,
+    MenuItem,
+    MenuList,
+    Paper,
+    Popper,
     Stack,
-    TextField
+    TextField,
 } from "@mui/material";
 import { Control } from "owlbear-utils";
+import { useRef, useState } from "react";
 import type { Preset } from "../state/usePlayerStorage";
 import { usePlayerStorage } from "../state/usePlayerStorage";
 import { DEFAULT_AURA_CONFIG } from "../types/AuraConfig";
@@ -17,6 +26,7 @@ import { toConfig } from "../utils/messaging";
 import { AuraConfigEditor } from "./AuraConfigEditor";
 import { CopyButton } from "./CopyButton";
 import { PasteButton } from "./PasteButton";
+import { PresetGroupEditor } from "./PresetGroupEditor";
 
 function PresetEditor({
     preset: { name, id, config },
@@ -96,6 +106,20 @@ export function AuraDefaultsTab() {
     );
     const presets = usePlayerStorage((store) => store.presets);
     const createPreset = usePlayerStorage((store) => store.createPreset);
+    const presetGroups = usePlayerStorage((store) => store.presetGroups);
+    const createPresetGroup = usePlayerStorage(
+        (store) => store.createPresetGroup,
+    );
+    const [open, setOpen] = useState(false);
+    const anchorRef = useRef<HTMLDivElement>(null);
+
+    const handleClose = (event: Event) => {
+        if (anchorRef.current?.contains(event.target as HTMLElement)) {
+            return;
+        }
+
+        setOpen(false);
+    };
 
     if (!playerSettingsSensible) {
         return null;
@@ -110,6 +134,12 @@ export function AuraDefaultsTab() {
                     disableDelete={presets.length === 1}
                 />
             ))}
+            {presetGroups.map((presetGroup) => (
+                <PresetGroupEditor
+                    key={presetGroup.id}
+                    presetGroup={presetGroup}
+                />
+            ))}
             <Stack
                 direction="row"
                 spacing={1}
@@ -117,15 +147,74 @@ export function AuraDefaultsTab() {
                 flexWrap={"wrap"}
                 rowGap={1}
             >
-                <Button
-                    startIcon={<AddCircleIcon />}
+                <ButtonGroup
                     variant="outlined"
-                    onClick={() =>
-                        createPreset("New Preset", DEFAULT_AURA_CONFIG)
-                    }
+                    ref={anchorRef}
+                    aria-label="split button"
                 >
-                    New
-                </Button>
+                    <Button
+                        startIcon={<AddCircleIcon />}
+                        onClick={() =>
+                            createPreset("New Preset", DEFAULT_AURA_CONFIG)
+                        }
+                    >
+                        New
+                    </Button>
+                    <Button
+                        size="small"
+                        aria-controls={open ? "split-button-menu" : undefined}
+                        aria-expanded={open ? "true" : undefined}
+                        aria-haspopup="menu"
+                        onClick={() => {
+                            setOpen((prevOpen) => !prevOpen);
+                        }}
+                    >
+                        <ArrowDropDownIcon />
+                    </Button>
+                </ButtonGroup>
+                <Popper
+                    sx={{
+                        zIndex: 1,
+                    }}
+                    open={open}
+                    anchorEl={anchorRef.current}
+                    role={undefined}
+                    transition
+                    disablePortal
+                >
+                    {({ TransitionProps, placement }) => (
+                        <Grow
+                            {...TransitionProps}
+                            style={{
+                                transformOrigin:
+                                    placement === "bottom"
+                                        ? "center top"
+                                        : "center bottom",
+                            }}
+                        >
+                            <Paper>
+                                <ClickAwayListener onClickAway={handleClose}>
+                                    <MenuList
+                                        id="split-button-menu"
+                                        autoFocusItem
+                                    >
+                                        <MenuItem
+                                            onClick={() => {
+                                                setOpen(false);
+                                                createPresetGroup(
+                                                    "New Preset Group",
+                                                    [],
+                                                );
+                                            }}
+                                        >
+                                            New Preset Group
+                                        </MenuItem>
+                                    </MenuList>
+                                </ClickAwayListener>
+                            </Paper>
+                        </Grow>
+                    )}
+                </Popper>
                 <PasteButton
                     onPaste={(message) => {
                         createPreset("New Preset", toConfig(message));

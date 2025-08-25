@@ -4,6 +4,7 @@ import {
     Button,
     ButtonGroup,
     ClickAwayListener,
+    Divider,
     Grow,
     MenuItem,
     MenuList,
@@ -25,6 +26,10 @@ export function NewAuraButton({ disabled, targetedItems }: NewAuraButtonProps) {
     const [open, setOpen] = useState(false);
     const anchorRef = useRef<HTMLDivElement>(null);
     const presets = usePlayerStorage((store) => store.presets);
+    const presetGroups = usePlayerStorage((store) => store.presetGroups);
+    const getPresetConfigsById = usePlayerStorage(
+        (store) => store.getPresetConfigsById,
+    );
 
     const handleClose = (event: Event) => {
         if (anchorRef.current?.contains(event.target as HTMLElement)) {
@@ -96,11 +101,30 @@ export function NewAuraButton({ disabled, targetedItems }: NewAuraButtonProps) {
                                                     targetedItems.filter(
                                                         isCandidateSource,
                                                     ),
-                                                    preset.config,
+                                                    [preset.config],
                                                 );
                                             }}
                                         >
                                             {preset.name}
+                                        </MenuItem>
+                                    ))}
+                                    {presetGroups.length > 0 && <Divider />}
+                                    {presetGroups.map((group) => (
+                                        <MenuItem
+                                            key={group.id}
+                                            onClick={() => {
+                                                setOpen(false);
+                                                return createAuras(
+                                                    targetedItems.filter(
+                                                        isCandidateSource,
+                                                    ),
+                                                    getPresetConfigsById(
+                                                        group.id,
+                                                    ),
+                                                );
+                                            }}
+                                        >
+                                            {group.name}
                                         </MenuItem>
                                     ))}
                                 </MenuList>

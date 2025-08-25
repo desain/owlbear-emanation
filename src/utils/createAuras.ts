@@ -9,26 +9,27 @@ import { addEntry } from "../types/metadata/SourceMetadata";
 export function createAurasWithDefaults(items: CandidateSource[]) {
     const playerSettings = usePlayerStorage.getState();
     const config = playerSettings.presets[0]?.config;
-    return createAuras(items, config ?? DEFAULT_AURA_CONFIG);
+    return createAuras(items, [config ?? DEFAULT_AURA_CONFIG]);
 }
 
 /**
  * Create auras for given images.
  * @param items Images to create auras for.
- * @param size Size of auras, in grid units.
- * @param effectOverride Effect to use for auras. Defaults to 'Simple'.
+ * @param configs Aura configs to add for each item.
  */
 export async function createAuras(
     items: CandidateSource[],
-    config: AuraConfig,
+    configs: AuraConfig[],
 ) {
-    if (items.length === 0) {
+    if (items.length === 0 || configs.length === 0) {
         return;
     }
 
     return await OBR.scene.items.updateItems(items, (items) =>
         items.forEach((item) => {
-            addEntry(item, config);
+            for (const config of configs) {
+                addEntry(item, config);
+            }
         }),
     );
 }

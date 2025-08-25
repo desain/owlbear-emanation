@@ -22,7 +22,6 @@ import { createAuras } from "./createAuras";
 import { removeAllAuras } from "./removeAuras";
 
 const CREATE_AURAS_TYPE = "CREATE_AURAS";
-const REMOVE_AURAS_TYPE = "REMOVE_AURAS";
 
 export interface CreateAurasMessage {
     type: typeof CREATE_AURAS_TYPE;
@@ -73,6 +72,7 @@ export interface CreateAurasMessage {
      */
     sksl?: string;
 }
+
 export function isCreateAuraMessage(
     message: unknown,
 ): message is CreateAurasMessage {
@@ -151,6 +151,7 @@ function getStyle(message: CreateAurasMessage): AuraStyle {
     });
 }
 
+const REMOVE_AURAS_TYPE = "REMOVE_AURAS";
 interface RemoveAurasMessage {
     type: typeof REMOVE_AURAS_TYPE;
     /**
@@ -170,13 +171,59 @@ function isRemoveAurasMessage(message: unknown): message is RemoveAurasMessage {
     );
 }
 
+const CREATE_AURAS_PRESETS_TYPE = "CREATE_AURAS_PRESETS";
+export interface CreateAurasPresetsMessage {
+    type: typeof CREATE_AURAS_PRESETS_TYPE;
+    /**
+     *  Item IDs for character images that will receive auras.
+     */
+    sources: string[];
+    /**
+     * Preset or preset group IDs to create auras from.
+     */
+    presetIds: string[];
+}
+
+function isCreateAurasPresetsMessage(
+    message: unknown,
+): message is CreateAurasPresetsMessage {
+    return (
+        isObject(message) &&
+        "type" in message &&
+        message.type === CREATE_AURAS_PRESETS_TYPE &&
+        "sources" in message &&
+        Array.isArray(message.sources) &&
+        message.sources.every(
+            (source: unknown) => typeof source === "string",
+        ) &&
+        "presetIds" in message &&
+        Array.isArray(message.presetIds) &&
+        message.presetIds.every(
+            (presetId: unknown) => typeof presetId === "string",
+        )
+    );
+}
+
 export async function handleMessage(data: unknown) {
     if (isCreateAuraMessage(data)) {
         const sources = (await OBR.scene.items.getItems(data.sources)).filter(
             isCandidateSource,
         );
         if (sources.length > 0) {
-            return await createAuras(sources, toConfig(data));
+            return await createAuras(sources, [toConfig(data)]);
+        } else {
+            console.warn("[Auras] No images found for sources", data.sources);
+        }
+    } else if (isCreateAurasPresetsMessage(data)) {
+        const sources = (await OBR.scene.items.getItems(data.sources)).filter(
+            isCandidateSource,
+        );
+        const state = usePlayerStorage.getState();
+        const configs = data.presetIds
+            .map((presetId) => state.getPresetConfigsById(presetId))
+            .flat();
+        if (sources.length > 0) {
+            return await createAuras(sources, configs);
         } else {
             console.warn("[Auras] No images found for sources", data.sources);
         }

@@ -6,9 +6,7 @@ This extension allows you to add auras to any character in a variety of styles.
 
 ## Installing
 
-The extension can be installed from https://owlbear-emanation.pages.dev/manifest.json.
-
-(Eventually on a [store page](https://extensions.owlbear.rodeo/owlbear-emanation) maybe, though not yet)
+This extension can be installed from the [Owlbear Rodeo store](https://extensions.owlbear.rodeo/auras-and-emanations).
 
 ## Features
 
@@ -189,7 +187,15 @@ interface CreateAurasMessage {
     /**
      * Style of aura to create. If not provided, the current player's default style will be used.
      */
-    style?: "Simple" | "Image" | "Bubble" | "Glow" | "Range" | "Spirits" | "Distort" | "Solid";
+    style?:
+        | "Simple"
+        | "Image"
+        | "Bubble"
+        | "Glow"
+        | "Range"
+        | "Spirits"
+        | "Distort"
+        | "Solid";
     /**
      * Hex code, e.g "#d00dad". If not provided, the current player's default color will be used.
      */
