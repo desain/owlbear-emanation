@@ -65,13 +65,13 @@ If you select multiple tokens which all share an aura, you can edit that aura on
 
 ### Resizing tokens
 
-https://github.com/user-attachments/assets/71ca78dc-01bd-4de4-b110-9d3072eba336
+![resize](https://github.com/user-attachments/assets/04b7ebbd-ba29-432b-a654-ebb24ead0ab8)
 
 When you drag to resize a token, the aura will change size after you let go.
 
 ### Changing grid types
 
-https://github.com/user-attachments/assets/bb7423a3-380e-4f74-baf2-605403ddbc5a
+![grids](https://github.com/user-attachments/assets/8a81c129-0a12-4806-872f-56b5960485ae)
 
 When you change the grid type or measurement type, auras will reshape to be appropriate for the new settings.
 
@@ -98,6 +98,13 @@ Controls:
 -   **New**: Create a new preset.
 -   **Delete**: Delete a preset. You must always have at least one preset, so you can't delete the last one.
 -   **Paste**: Paste a previously copied set of aura settings as a preset.
+
+You can also create preset groups, which combine multiple presets into one. To create a preset group, click the arrow next to 'New' in the Defaults tab and click "Create Preset Group".
+
+Editing preset groups:
+
+-   **Preset Group Name**: Give your preset group a name.
+-   **Presets**: Here you can choose which presets belong to this preset group. Presets can belong to multiple groups, but you can't put a group inside another group.
 
 ### Changing settings
 
@@ -234,6 +241,18 @@ interface RemoveAurasMessage {
      *  Item IDs for character images that will have all auras removed.
      */
     sources: string[];
+}
+
+export interface CreateAurasPresetsMessage {
+    type: "CREATE_AURAS_PRESETS";
+    /**
+     *  Item IDs for character images that will receive auras.
+     */
+    sources: string[];
+    /**
+     * Preset or preset group names to create auras from.
+     */
+    presets: string[];
 }
 ```
 

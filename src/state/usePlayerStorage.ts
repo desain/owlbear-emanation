@@ -123,7 +123,10 @@ interface LocalStorage {
         id: string,
         presets: string[],
     ) => void;
-    readonly getPresetConfigsById: (this: void, id: string) => AuraConfig[];
+    readonly getPresetConfigsByIdOrName: (
+        this: void,
+        id: string,
+    ) => AuraConfig[];
     readonly setContextMenuEnabled: (
         this: void,
         enableContextMenu: boolean,
@@ -455,14 +458,18 @@ export const usePlayerStorage = create<PlayerStorage>()(
                             group.presets = presets;
                         }
                     }),
-                getPresetConfigsById: (id: string) => {
+                getPresetConfigsByIdOrName: (idOrName: string) => {
                     const { presets, presetGroups } = get();
-                    const preset = presets.find((p) => p.id === id)?.config;
+                    const preset = presets.find(
+                        (p) => p.id === idOrName || p.name === idOrName,
+                    )?.config;
                     if (preset) {
                         return [preset];
                     }
 
-                    const group = presetGroups.find((g) => g.id === id);
+                    const group = presetGroups.find(
+                        (g) => g.id === idOrName || g.name === idOrName,
+                    );
                     if (group) {
                         return group.presets
                             .map(

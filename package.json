@@ -6,7 +6,8 @@
     "license": "GPL-3.0",
     "scripts": {
         "dev": "vite",
-        "build": "{ test \"$CF_PAGES\" '!=' 1 || test \"$SKIP_DEPENDENCY_INSTALL\" = 1; } || { echo 'SKIP_DEPENDENCY_INSTALL=1 must be set on Cloudflare Pages'; exit 1; } && tsc --build && vite build",
+        "build": "pnpm docs:build && { test \"$CF_PAGES\" '!=' 1 || test \"$SKIP_DEPENDENCY_INSTALL\" = 1; } || { echo 'SKIP_DEPENDENCY_INSTALL=1 must be set on Cloudflare Pages'; exit 1; } && tsc --build && vite build",
+        "docs:build": "node scripts/build-docs.js",
         "preview": "vite preview",
         "lint": "eslint ."
     },

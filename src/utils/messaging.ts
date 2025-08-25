@@ -179,9 +179,9 @@ export interface CreateAurasPresetsMessage {
      */
     sources: string[];
     /**
-     * Preset or preset group IDs to create auras from.
+     * Preset or preset group names to create auras from.
      */
-    presetIds: string[];
+    presets: string[];
 }
 
 function isCreateAurasPresetsMessage(
@@ -219,8 +219,8 @@ export async function handleMessage(data: unknown) {
             isCandidateSource,
         );
         const state = usePlayerStorage.getState();
-        const configs = data.presetIds
-            .map((presetId) => state.getPresetConfigsById(presetId))
+        const configs = data.presets
+            .map((presetId) => state.getPresetConfigsByIdOrName(presetId))
             .flat();
         if (sources.length > 0) {
             return await createAuras(sources, configs);

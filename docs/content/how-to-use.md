@@ -1,29 +1,4 @@
----
-title: Auras and Emanations
-description: Add and manage measurement-aware auras in several styles with any character.
-author: desain
-image: https://github.com/user-attachments/assets/685f5be5-b248-456b-87ab-153e9764a074
-icon: https://owlbear-emanation.pages.dev/logo.png
-learn-more: https://github.com/desain/owlbear-emanation
-tags:
-    - tool
-    - combat
-manifest: https://owlbear-emanation.pages.dev/manifest.json
----
-
-# Auras and Emanations
-
-This extension allows you to add auras to any character in a variety of styles.
-
-## Features
-
--   ✨ Create auras from shapes, shader effects, or images.
--   🟩 Auras will display the correct shape for the current grid type and grid measurement type. (e.g when using Chebyshev / Chessboard D&D 5e distance, auras will be square)
--   ↔️ Auras will automatically resize after tokens are scaled, so that their boundary is the correct distance away.
--   🎨 Manage any number of auras with any color, opacity, or style.
--   🛠️ Create aura presets for commonly used effects.
-
-## How to use
+# How to use
 
 ### Adding an aura
 

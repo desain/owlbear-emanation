@@ -28,7 +28,7 @@ export function NewAuraButton({ disabled, targetedItems }: NewAuraButtonProps) {
     const presets = usePlayerStorage((store) => store.presets);
     const presetGroups = usePlayerStorage((store) => store.presetGroups);
     const getPresetConfigsById = usePlayerStorage(
-        (store) => store.getPresetConfigsById,
+        (store) => store.getPresetConfigsByIdOrName,
     );
 
     const handleClose = (event: Event) => {
