@@ -134,7 +134,7 @@ export function AuraDefaultsTab() {
                     disableDelete={presets.length === 1}
                 />
             ))}
-            {presetGroups.map((presetGroup) => (
+            {presetGroups?.map((presetGroup) => (
                 <PresetGroupEditor
                     key={presetGroup.id}
                     presetGroup={presetGroup}

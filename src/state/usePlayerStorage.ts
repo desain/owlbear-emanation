@@ -76,7 +76,7 @@ interface LocalStorage {
     readonly hasSensibleValues: boolean;
     readonly [SET_SENSIBLE]: (this: void) => void;
     readonly presets: Preset[];
-    readonly presetGroups: PresetGroup[];
+    readonly presetGroups?: PresetGroup[];
     readonly enableContextMenu: boolean;
     readonly showAdvancedOptions: boolean;
     readonly setPresetName: (this: void, id: string, name: string) => void;
@@ -168,7 +168,7 @@ function getPresetGroup(
     state: LocalStorage,
     id: string,
 ): PresetGroup | undefined {
-    const group = state.presetGroups.find((group) => group.id === id);
+    const group = state.presetGroups?.find((group) => group.id === id);
     return group;
 }
 
@@ -424,7 +424,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         state.presets = state.presets.filter(
                             (preset) => preset.id !== id,
                         );
-                        for (const group of state.presetGroups) {
+                        for (const group of state.presetGroups ?? []) {
                             group.presets = group.presets.filter(
                                 (presetId) => presetId !== id,
                             );
@@ -432,7 +432,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     }),
                 createPresetGroup: (name: string, presets: string[]) =>
                     set((state) => {
-                        state.presetGroups.push({
+                        (state.presetGroups ??= []).push({
                             name,
                             id: crypto.randomUUID(),
                             presets,
@@ -440,7 +440,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     }),
                 deletePresetGroup: (id: string) =>
                     set((state) => {
-                        state.presetGroups = state.presetGroups.filter(
+                        state.presetGroups = state.presetGroups?.filter(
                             (group) => group.id !== id,
                         );
                     }),
@@ -467,7 +467,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         return [preset];
                     }
 
-                    const group = presetGroups.find(
+                    const group = presetGroups?.find(
                         (g) => g.id === idOrName || g.name === idOrName,
                     );
                     if (group) {

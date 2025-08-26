@@ -108,8 +108,9 @@ export function NewAuraButton({ disabled, targetedItems }: NewAuraButtonProps) {
                                             {preset.name}
                                         </MenuItem>
                                     ))}
-                                    {presetGroups.length > 0 && <Divider />}
-                                    {presetGroups.map((group) => (
+                                    {presetGroups &&
+                                        presetGroups.length > 0 && <Divider />}
+                                    {presetGroups?.map((group) => (
                                         <MenuItem
                                             key={group.id}
                                             onClick={() => {
