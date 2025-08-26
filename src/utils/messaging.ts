@@ -196,9 +196,9 @@ function isCreateAurasPresetsMessage(
         message.sources.every(
             (source: unknown) => typeof source === "string",
         ) &&
-        "presetIds" in message &&
-        Array.isArray(message.presetIds) &&
-        message.presetIds.every(
+        "presets" in message &&
+        Array.isArray(message.presets) &&
+        message.presets.every(
             (presetId: unknown) => typeof presetId === "string",
         )
     );
