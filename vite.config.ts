@@ -1,3 +1,5 @@
+/// <reference types="vitest" />
+
 // import basicSsl from "@vitejs/plugin-basic-ssl";
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
@@ -20,5 +22,20 @@ export default defineConfig({
                 action: resolve(__dirname, "/action.html"),
             },
         },
+    },
+    test: {
+        environment: "jsdom",
+        includeSource: ["src/**/*.{js,ts}"],
+        setupFiles: ["./test/vitest.setup.ts"],
+        // For some reason, this package breaks with Vitest unless
+        // it's inlined. I've spent too long trying to fix it and run
+        // into dependency and configuration hell, so even though this
+        // is probably the wrong solution, it works, so it stays :/
+        deps: {
+            inline: ["owlbear-utils"],
+        },
+    },
+    define: {
+        "import.meta.vitest": "undefined",
     },
 });

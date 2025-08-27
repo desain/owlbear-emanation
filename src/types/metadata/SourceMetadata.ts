@@ -1,5 +1,5 @@
-import type { Item } from "@owlbear-rodeo/sdk";
-import { isObject } from "owlbear-utils";
+import { type Item, type Shape } from "@owlbear-rodeo/sdk";
+import { isObject, ORIGIN, units, WHITE_HEX } from "owlbear-utils";
 import { METADATA_KEY } from "../../constants";
 import type { AuraConfig } from "../AuraConfig";
 import { isAuraConfig } from "../AuraConfig";
@@ -55,8 +55,10 @@ export function addEntry(item: Item, config: AuraConfig) {
         style: config.style,
         visibleTo: config.visibleTo,
         layer: config.layer,
+        // no offset
+        shapeOverride: config.shapeOverride,
         sourceScopedId: crypto.randomUUID(),
-    };
+    } satisfies AuraEntry;
     metadata.auras.push(entry);
     item.metadata[METADATA_KEY] = metadata;
 }
@@ -65,4 +67,63 @@ export function removeEntry(source: Source, sourceScopedId: string) {
     source.metadata[METADATA_KEY].auras = source.metadata[
         METADATA_KEY
     ].auras.filter((entry) => entry.sourceScopedId !== sourceScopedId);
+}
+
+if (import.meta.vitest) {
+    const { describe, it, expect } = import.meta.vitest;
+
+    describe(addEntry, () => {
+        it("Copies over config values except offset", () => {
+            const config = {
+                size: units(5),
+                style: {
+                    type: "Spirits",
+                },
+                layer: "DRAWING",
+                offset: { x: 1, y: 1 },
+                shapeOverride: "square",
+                visibleTo: null,
+            } satisfies AuraConfig;
+            const item = {
+                createdUserId: "",
+                height: 5,
+                id: "",
+                lastModified: "",
+                lastModifiedUserId: "",
+                layer: "DRAWING",
+                locked: false,
+                metadata: {},
+                name: "",
+                position: ORIGIN,
+                rotation: 0,
+                scale: { x: 1, y: 1 },
+                shapeType: "CIRCLE",
+                style: {
+                    fillColor: WHITE_HEX,
+                    fillOpacity: 1,
+                    strokeColor: WHITE_HEX,
+                    strokeOpacity: 1,
+                    strokeDash: [],
+                    strokeWidth: 10,
+                },
+                type: "SHAPE",
+                visible: true,
+                width: 5,
+                zIndex: 0,
+            } satisfies Shape;
+
+            addEntry(item, config);
+
+            const actualConfig = (item as unknown as Source).metadata[
+                METADATA_KEY
+            ].auras[0];
+            expect(actualConfig?.size).toBe(config.size);
+            expect(actualConfig?.style).toEqual(config.style);
+            expect(actualConfig?.visibleTo).toBe(config.visibleTo);
+            expect(actualConfig?.layer).toBe(config.layer);
+            expect(actualConfig?.shapeOverride).toBe(config.shapeOverride);
+            expect(actualConfig?.offset?.x).toBeUndefined();
+            expect(actualConfig?.offset?.y).toBeUndefined();
+        });
+    });
 }

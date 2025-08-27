@@ -20,7 +20,9 @@
         "noImplicitReturns": true,
         "noUncheckedIndexedAccess": true,
         "noImplicitOverride": true,
-        "erasableSyntaxOnly": true
+        "erasableSyntaxOnly": true,
+        /*Vitest*/
+        "types": ["vitest/importMeta"]
     },
-    "include": ["src"]
+    "include": ["src", "test"]
 }
