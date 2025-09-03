@@ -80,7 +80,9 @@ export function isDistortStyle(style: unknown): style is DistortStyle {
         isObject(style) &&
         "type" in style &&
         style.type === "Distort" &&
-        ("warpFactor" in style ? typeof style.warpFactor === "number" : true)
+        (!("warpFactor" in style) ||
+            style.warpFactor === undefined ||
+            typeof style.warpFactor === "number")
     );
 }
 
