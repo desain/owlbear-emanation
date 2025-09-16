@@ -296,6 +296,7 @@ To make a production build run:
 
 ## To do
 
+-   Ring aura (like solid?)
 -   Optimize item update handler
 -   More effects!
     -   Localized weather effects - snow, rain
