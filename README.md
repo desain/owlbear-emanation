@@ -296,6 +296,7 @@ To make a production build run:
 
 ## To do
 
+-   Set z indices
 -   Ring aura (like solid?)
 -   Optimize item update handler
 -   More effects!
