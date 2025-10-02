@@ -257,7 +257,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 setGrid: async (grid: GridParams) => {
                     const parsedScale = (await OBR.scene.grid.getScale())
                         .parsed;
-                    return set({
+                    set({
                         grid: {
                             dpi: grid.dpi,
                             measurement: grid.measurement,
@@ -270,7 +270,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                     if (selection && selection.length > 0) {
                         const isUpdatable = get().isUpdatable;
                         const items = await OBR.scene.items.getItems(selection);
-                        return set({
+                        set({
                             lastNonemptySelection: selection,
                             lastNonemptySelectionUpdatableItems:
                                 items.filter(isUpdatable),
