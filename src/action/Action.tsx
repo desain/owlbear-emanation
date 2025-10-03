@@ -4,7 +4,7 @@ import TuneIcon from "@mui/icons-material/Tune";
 import { Box, Tab, Tabs } from "@mui/material";
 import OBR from "@owlbear-rodeo/sdk";
 import { useActionResizer, useUndoRedoHandler } from "owlbear-utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { CHANNEL_TAB } from "../constants";
 import { AuraDefaultsTab } from "./AuraDefaultsTab";
 import { EditTab } from "./EditTab";
@@ -39,8 +39,7 @@ export function Action() {
         }),
     );
 
-    const tabContainer: React.RefObject<HTMLElement | null> = useRef(null);
-    useActionResizer(BASE_HEIGHT, MAX_HEIGHT, tabContainer);
+    const tabContainer = useActionResizer(BASE_HEIGHT, MAX_HEIGHT);
 
     useUndoRedoHandler();
 

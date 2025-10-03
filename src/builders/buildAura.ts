@@ -28,14 +28,14 @@ export function getAuraPosition(
 /**
  * Helper to build an aura item.
  * @param item the source item that the aura radiates from.
- * @param style the aura style drawing params.
- * @param size the size of the aura in grid units. E.g size=10ft on a 5-foot grid creates a 2-square aura.
+ * @param auraIndex the index of the aura in the item's aura list. Used to calculate z index.
  */
 export function buildAura(
     item: CandidateSource,
     entry: AuraEntry,
     sceneMetadata: SceneMetadata,
     grid: GridParsed,
+    auraIndex: number,
 ): Aura {
     const shape = getAuraShape(entry, sceneMetadata, grid);
     const radius = unitsToCells(entry.size, grid);
@@ -75,6 +75,7 @@ export function buildAura(
     aura.locked = true;
     aura.name = `Aura ${item.name} ${entry.size}`;
     aura.layer = getLayer(entry);
+    aura.zIndex = item.zIndex + 1 + auraIndex;
     aura.disableHit = true;
     aura.visible = item.visible;
     aura.attachedTo = item.id;

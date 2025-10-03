@@ -143,6 +143,7 @@ function deduplicationKey({ entry: config }: { entry: AuraConfig }): string {
         size: config.size,
         visibleTo: config.visibleTo,
         layer: config.layer,
+        shapeOverride: config.shapeOverride,
         // Exclue offset so we can edit multiple auras of the same type at different offsets
     };
     return objectHash(configTrimNoOffset);
@@ -235,9 +236,7 @@ export function EditTab() {
     );
 
     const noSelection = targetedItems.length === 0;
-    const header = noSelection
-        ? "Select items to add or edit auras"
-        : "";
+    const header = noSelection ? "Select items to add or edit auras" : "";
 
     if (!playerSettingsSensible) {
         return null;

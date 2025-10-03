@@ -24,13 +24,15 @@ export function isSource(item: Item): item is Source {
 export function getEntry(
     source: Item | undefined,
     sourceScopedId: string,
-): AuraEntry | undefined {
+): [index: number, entry: AuraEntry | undefined] {
     if (source === undefined || !isSource(source)) {
-        return undefined;
+        return [-1, undefined];
     }
-    return source.metadata[METADATA_KEY].auras.find(
+    const auras = source.metadata[METADATA_KEY].auras;
+    const index = auras.findIndex(
         (aura) => aura.sourceScopedId === sourceScopedId,
     );
+    return [index, auras[index]];
 }
 
 export async function updateEntries(
@@ -38,7 +40,7 @@ export async function updateEntries(
     updater: (aura: WritableDraft<AuraEntry>) => void,
 ) {
     return await forEachSpecifier(specifiers, (source, sourceScopedId) => {
-        const entry = getEntry(source, sourceScopedId);
+        const [, entry] = getEntry(source, sourceScopedId);
         if (entry) {
             updater(entry);
         }

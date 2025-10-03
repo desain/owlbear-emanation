@@ -2,6 +2,21 @@ import OBR from "@owlbear-rodeo/sdk";
 import { deferCallAll } from "owlbear-utils";
 import { usePlayerStorage } from "./usePlayerStorage";
 
+const sceneReady = new Promise<void>((resolve) => {
+    OBR.onReady(async () => {
+        if (await OBR.scene.isReady()) {
+            resolve();
+        } else {
+            const unsub = OBR.scene.onReadyChange((ready) => {
+                if (ready) {
+                    unsub();
+                    resolve();
+                }
+            });
+        }
+    });
+});
+
 /**
  * @returns [Promise that resolves once store has initialized, function to stop syncing]
  */
@@ -10,55 +25,68 @@ export function startSyncing(): [
     unsubscribe: VoidFunction,
 ] {
     // console.log("startSyncing");
-    const store = usePlayerStorage.getState();
+    const {
+        handlePlayerChange,
+        setSceneMetadata,
+        setGrid,
+        updateItems,
+        setSceneReady,
+        handleToolModeUpdate,
+        handlePermissionsChange,
+        handleThemeChange,
+    } = usePlayerStorage.getState();
 
     const playerInitialized = Promise.all([
         OBR.player.getId(),
         OBR.player.getRole(),
         OBR.player.getSelection(),
     ]).then(([id, role, selection]) =>
-        store.handlePlayerChange({ id, role, selection }),
+        handlePlayerChange({ id, role, selection }),
     );
-    const unsubscribePlayer = OBR.player.onChange(store.handlePlayerChange);
+    const unsubscribePlayer = OBR.player.onChange(handlePlayerChange);
 
-    const sceneMetadataInitialized = OBR.scene
-        .getMetadata()
-        .then(store.setSceneMetadata);
-    const unsubscribeSceneMetadata = OBR.scene.onMetadataChange(
-        store.setSceneMetadata,
-    );
+    const sceneMetadataInitialized = sceneReady
+        .then(() => OBR.scene.getMetadata())
+        .then(setSceneMetadata);
+    const unsubscribeSceneMetadata =
+        OBR.scene.onMetadataChange(setSceneMetadata);
 
-    const gridInitialized = Promise.all([
-        OBR.scene.grid.getDpi(),
-        OBR.scene.grid.getMeasurement(),
-        OBR.scene.grid.getType(),
-    ]).then(([dpi, measurement, type]) =>
-        store.setGrid({ dpi, measurement, type }),
-    );
-    const unsubscribeGrid = OBR.scene.grid.onChange(store.setGrid);
+    const gridInitialized = sceneReady
+        .then(() =>
+            Promise.all([
+                OBR.scene.grid.getDpi(),
+                OBR.scene.grid.getMeasurement(),
+                OBR.scene.grid.getType(),
+            ]),
+        )
+        .then(([dpi, measurement, type]) =>
+            setGrid({ dpi, measurement, type }),
+        );
+    const unsubscribeGrid = OBR.scene.grid.onChange(setGrid);
 
     const unsubscribeItems = OBR.scene.items.onChange((items) =>
-        store.updateItems(items),
+        updateItems(items),
     );
 
-    const sceneReadyInitialized = OBR.scene.isReady().then(store.setSceneReady);
+    const sceneReadyInitialized = OBR.scene.isReady().then(setSceneReady);
     const unsubscribeSceneReady = OBR.scene.onReadyChange((ready) => {
-        store.setSceneReady(ready);
+        setSceneReady(ready);
     });
 
-    const toolModeInitialized = sceneReadyInitialized
+    const toolModeInitialized = sceneReady
         .then(() => OBR.tool.getActiveToolMode())
-        .then(store.handleToolModeUpdate);
-    const unsubscribeToolMode = OBR.tool.onToolModeChange(
-        store.handleToolModeUpdate,
-    );
+        .then(handleToolModeUpdate);
+    const unsubscribeToolMode = OBR.tool.onToolModeChange(handleToolModeUpdate);
 
     const permissionsInitialized = OBR.room
         .getPermissions()
-        .then(store.handlePermissionsChange);
+        .then(handlePermissionsChange);
     const unsubscribePermissions = OBR.room.onPermissionsChange(
-        store.handlePermissionsChange,
+        handlePermissionsChange,
     );
+
+    const themeInitialized = OBR.theme.getTheme().then(handleThemeChange);
+    const unsubscribeTheme = OBR.theme.onChange(handleThemeChange);
 
     return [
         Promise.all([
@@ -68,6 +96,7 @@ export function startSyncing(): [
             sceneReadyInitialized,
             toolModeInitialized,
             permissionsInitialized,
+            themeInitialized,
         ]).then(() => void 0),
         deferCallAll(
             unsubscribePlayer, // covers role and player metadata and selection
@@ -77,6 +106,7 @@ export function startSyncing(): [
             unsubscribeSceneReady,
             unsubscribeToolMode,
             unsubscribePermissions,
+            unsubscribeTheme,
         ),
     ];
 }

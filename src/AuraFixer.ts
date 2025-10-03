@@ -2,7 +2,13 @@ import type { Item } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
-import { assertItem, deferCallAll, getOrInsert, hasId } from "owlbear-utils";
+import {
+    assertItem,
+    deferCallAll,
+    getOrInsert,
+    hasId,
+    withIndices,
+} from "owlbear-utils";
 import { buildAura } from "./builders/buildAura";
 import { METADATA_KEY } from "./constants";
 import { usePlayerStorage } from "./state/usePlayerStorage";
@@ -142,12 +148,17 @@ export default class AuraFixer {
             }));
             sourceAndAuras.auras.set(entry.sourceScopedId, auraId);
         };
-        const createAura = (source: Source, entry: AuraEntry) => {
+        const createAura = (
+            source: Source,
+            entry: AuraEntry,
+            auraIndex: number,
+        ) => {
             const aura = buildAura(
                 source,
                 entry,
                 store.sceneMetadata,
                 store.grid,
+                auraIndex,
             );
             toAdd.push(aura);
             saveAuraId(source, entry, aura.id);
@@ -156,8 +167,10 @@ export default class AuraFixer {
         // Create auras that don't exist yet
         for (const source of networkItems) {
             if (isSource(source)) {
-                for (const newAuraEntry of this.#getNewAuras(source)) {
-                    createAura(source, newAuraEntry);
+                const indexBase = source.metadata[METADATA_KEY].auras.length;
+                const newAuras = this.#getNewAuras(source);
+                for (const [newAuraEntry, auraIndex] of withIndices(newAuras)) {
+                    createAura(source, newAuraEntry, indexBase + auraIndex);
                 }
             }
         }
@@ -192,8 +205,12 @@ export default class AuraFixer {
 
             // check for deleted or updated auras
             for (const [scopedId, localItemId] of oldAuras) {
-                const oldEntry = getEntry(oldSource, scopedId)!; // never null if this is kept in sync
-                const newEntry = getEntry(newSource, scopedId);
+                const [, oldEntry] = getEntry(oldSource, scopedId); // oldEntry is never undefined if this is kept in sync
+                if (!oldEntry) {
+                    console.warn("Old entry should always exist");
+                    continue;
+                }
+                const [newEntryIndex, newEntry] = getEntry(newSource, scopedId);
                 if (
                     newEntry === undefined ||
                     !this.#isAuraVisibleToCurrentPlayer(newEntry)
@@ -207,7 +224,7 @@ export default class AuraFixer {
                 ) {
                     // aura needs to be rebuilt
                     toDelete.push(localItemId);
-                    createAura(newSource, newEntry);
+                    createAura(newSource, newEntry, newEntryIndex);
                 } else if (drawingParamsChanged(oldEntry, newEntry)) {
                     toUpdate.push(localItemId);
                     getOrInsert(updaters, localItemId, () => []).push(

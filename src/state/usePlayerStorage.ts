@@ -1,4 +1,10 @@
-import type { Item, Metadata, Permission, Player } from "@owlbear-rodeo/sdk";
+import type {
+    Item,
+    Metadata,
+    Permission,
+    Player,
+    Theme,
+} from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
 import type { WritableDraft } from "immer";
 import { enableMapSet } from "immer";
@@ -9,7 +15,13 @@ import type {
     HexColor,
     Role,
 } from "owlbear-utils";
-import { assumeHexColor, units, type Units } from "owlbear-utils";
+import {
+    assumeHexColor,
+    DEFAULT_GRID,
+    DEFAULT_THEME,
+    units,
+    type Units,
+} from "owlbear-utils";
 import { create } from "zustand";
 import { persist, subscribeWithSelector } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
@@ -178,6 +190,7 @@ interface OwlbearStore {
     readonly playerId: string;
     readonly sceneMetadata: SceneMetadata;
     readonly grid: GridParsed;
+    readonly theme: Theme;
     readonly lastNonemptySelection: string[];
     /**
      * Subset of the selection that's updatable.
@@ -192,6 +205,7 @@ interface OwlbearStore {
     ) => void;
     readonly setSceneMetadata: (this: void, metadata: Metadata) => void;
     readonly setGrid: (this: void, grid: GridParams) => Promise<void>;
+    readonly handleThemeChange: (this: void, theme: Theme) => void;
     readonly setSelection: (
         this: void,
         selection: string[] | undefined,
@@ -219,16 +233,8 @@ export const usePlayerStorage = create<PlayerStorage>()(
                 role: "PLAYER",
                 playerId: "NONE",
                 sceneMetadata: DEFAULT_SCENE_METADATA,
-                grid: {
-                    dpi: -1,
-                    measurement: "CHEBYSHEV",
-                    type: "SQUARE",
-                    parsedScale: {
-                        digits: 1,
-                        unit: "ft",
-                        multiplier: 5,
-                    },
-                },
+                grid: DEFAULT_GRID,
+                theme: DEFAULT_THEME,
                 lastNonemptySelection: [],
                 lastNonemptySelectionUpdatableItems: [],
                 usingShiftMode: false,
@@ -239,6 +245,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                             ? { sceneReady }
                             : {
                                   sceneReady,
+                                  usingShiftMode: false,
                                   lastNonemptySelection: [],
                                   lastNonemptySelectionUpdatableItems: [],
                               },
@@ -266,6 +273,7 @@ export const usePlayerStorage = create<PlayerStorage>()(
                         },
                     });
                 },
+                handleThemeChange: (theme: Theme) => set({ theme }),
                 setSelection: async (selection: string[] | undefined) => {
                     if (selection && selection.length > 0) {
                         const isUpdatable = get().isUpdatable;
