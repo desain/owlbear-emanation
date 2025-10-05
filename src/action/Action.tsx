@@ -44,7 +44,7 @@ export function Action() {
     useUndoRedoHandler();
 
     return (
-        <>
+        <Box ref={tabContainer}>
             <Tabs
                 value={currentTab}
                 variant="fullWidth"
@@ -56,7 +56,7 @@ export function Action() {
                 <Tab icon={<SettingsIcon />} label="Settings" />
             </Tabs>
 
-            <Box ref={tabContainer} sx={{ pb: 2 }}>
+            <Box sx={{ pb: 2 }}>
                 <TabContent currentIndex={currentTab} index={0}>
                     <EditTab />
                 </TabContent>
@@ -67,6 +67,6 @@ export function Action() {
                     <SettingsTab />
                 </TabContent>
             </Box>
-        </>
+        </Box>
     );
 }

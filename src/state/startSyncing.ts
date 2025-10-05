@@ -1,21 +1,6 @@
 import OBR from "@owlbear-rodeo/sdk";
-import { deferCallAll } from "owlbear-utils";
+import { deferCallAll, sceneReadyPromise } from "owlbear-utils";
 import { usePlayerStorage } from "./usePlayerStorage";
-
-const sceneReady = new Promise<void>((resolve) => {
-    OBR.onReady(async () => {
-        if (await OBR.scene.isReady()) {
-            resolve();
-        } else {
-            const unsub = OBR.scene.onReadyChange((ready) => {
-                if (ready) {
-                    unsub();
-                    resolve();
-                }
-            });
-        }
-    });
-});
 
 /**
  * @returns [Promise that resolves once store has initialized, function to stop syncing]
@@ -45,6 +30,7 @@ export function startSyncing(): [
     );
     const unsubscribePlayer = OBR.player.onChange(handlePlayerChange);
 
+    const sceneReady = sceneReadyPromise();
     const sceneMetadataInitialized = sceneReady
         .then(() => OBR.scene.getMetadata())
         .then(setSceneMetadata);

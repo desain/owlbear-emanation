@@ -7,6 +7,7 @@ import {
     deferCallAll,
     getOrInsert,
     hasId,
+    sceneReadyPromise,
     withIndices,
 } from "owlbear-utils";
 import { buildAura } from "./builders/buildAura";
@@ -68,7 +69,7 @@ export default class AuraFixer {
     > => {
         const [playerId, currentLatestItems] = await Promise.all([
             OBR.player.getId(),
-            OBR.scene.items.getItems(),
+            sceneReadyPromise().then(() => OBR.scene.items.getItems()),
         ]);
         const fixer = new AuraFixer(playerId);
         const lockify = createLock();
