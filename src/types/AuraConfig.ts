@@ -28,7 +28,10 @@ export interface AuraConfig {
      */
     size: Units;
     /**
-     * Player IDs that can see this aura. If not set, the aura is visible to all players.
+     * Player IDs that can see this aura.
+     * If this string starts with a '!', the rest of the string will be interpreted as a player ID that
+     * should NOT see the aura.
+     * If not set, the aura is visible to all players.
      * If null, the aura is visible to no one.
      */
     visibleTo?: string | null;

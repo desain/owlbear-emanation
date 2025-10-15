@@ -296,7 +296,6 @@ To make a production build run:
 
 ## To do
 
--   Visible to players
 -   Ring aura (like solid?)
 -   Optimize item update handler
 -   More effects!

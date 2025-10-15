@@ -19,9 +19,10 @@ export function VisibilitySelector({
     value,
     ...props
 }: VisibilitySelectorProps & Omit<FormControlProps, "onChange">) {
-    const playerId = usePlayerStorage((store) => store.playerId);
+    const playerId = usePlayerStorage((s) => s.playerId);
     const textValue = value ?? (value === undefined ? EVERYONE : NOBODY);
-    const currentlyVisibleToOther = value && value !== playerId;
+    const visibilityControlledByOther =
+        value && value !== playerId && value !== "!" + playerId;
     return (
         <Control {...props} label="Visibility">
             <Select
@@ -56,6 +57,15 @@ export function VisibilitySelector({
                     />
                     Visible to Only Me
                 </MenuItem>
+                <MenuItem value={"!" + playerId}>
+                    <DisabledVisible
+                        style={{
+                            marginRight: 8,
+                            verticalAlign: "middle",
+                        }}
+                    />
+                    Visible to Everyone Except Me
+                </MenuItem>
                 <MenuItem value={NOBODY}>
                     <VisibilityOff
                         style={{
@@ -65,9 +75,9 @@ export function VisibilitySelector({
                     />
                     Invisible
                 </MenuItem>
-                {currentlyVisibleToOther && (
+                {visibilityControlledByOther && (
                     <MenuItem disabled value={value}>
-                        <em>Visible to Another Player</em>
+                        <em>Visibility Controlled by Another Player</em>
                     </MenuItem>
                 )}
             </Select>

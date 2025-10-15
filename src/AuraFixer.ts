@@ -1,4 +1,4 @@
-import type { Item } from "@owlbear-rodeo/sdk";
+import type { Item, Player } from "@owlbear-rodeo/sdk";
 import OBR from "@owlbear-rodeo/sdk";
 
 import AwaitLock from "await-lock";
@@ -57,7 +57,7 @@ function createLock() {
  * TODO: Use the Reconciler/Reactor/Actor/Patcher design pattern from official OBR plugins?
  */
 export default class AuraFixer {
-    readonly #currentPlayerId: string;
+    readonly #currentPlayer: Pick<Player, "id">;
     #sources: Sources = new Map();
 
     /**
@@ -67,11 +67,11 @@ export default class AuraFixer {
     static install = async (): Promise<
         [fixer: AuraFixer, unsubscribe: VoidFunction]
     > => {
-        const [playerId, currentLatestItems] = await Promise.all([
+        const [id, currentLatestItems] = await Promise.all([
             OBR.player.getId(),
             sceneReadyPromise().then(() => OBR.scene.items.getItems()),
         ]);
-        const fixer = new AuraFixer(playerId);
+        const fixer = new AuraFixer({ id });
         const lockify = createLock();
 
         let latestItems = currentLatestItems;
@@ -105,14 +105,16 @@ export default class AuraFixer {
         ];
     };
 
-    private constructor(currentPlayerId: string) {
-        this.#currentPlayerId = currentPlayerId;
+    private constructor(currentPlayer: Pick<Player, "id">) {
+        this.#currentPlayer = currentPlayer;
     }
 
     #isAuraVisibleToCurrentPlayer(entry: AuraConfig): boolean {
-        return (
+        return !!(
             entry.visibleTo === undefined ||
-            entry.visibleTo === this.#currentPlayerId
+            entry.visibleTo === this.#currentPlayer.id ||
+            (entry.visibleTo?.startsWith("!") &&
+                entry.visibleTo.substring(1) !== this.#currentPlayer.id)
         );
     }
 
